@@ -10700,35 +10700,41 @@
       return oldPetList.includes((name || '').trim().toLowerCase());
     }
 
-    function displayPets(data) {
-      const div = document.getElementById('results');
-      if (!data.length) {
-        div.style.display = 'none';
-        div.innerHTML = '❌ 결과 없음';
-        return;
-      }
-      div.style.display = 'block';
-      const isReborn = document.getElementById('petType').value === 'reborn';
-      
-      const limit = parseInt(document.getElementById("limitCount").value) || data.length; // limitCount 값에 따라 노출 개수 조절
-      const limitedData = data.slice(0, limit); // limit에 맞게 데이터 자르기
-      
-      let html = '';
-      limitedData.forEach(pet => {
-        const name = pet['이름'] || '';
-        const mark = isReborn ? '' : isOldPet(name) ? ' (구펫)' : ' (신펫)';
-        html += `<div class='pet-block'>
-          <strong>${name}${mark}</strong> (${pet['속성1'] || ''}${pet['속성2'] ? '/' + pet['속성2'] : ''})<br>
-          ⚔️ ${Number(pet['공격력 성장률']).toFixed(3)} |
-          🛡️ ${Number(pet['방어력 성장률']).toFixed(3)} |
-          🏃 ${Number(pet['순발력 성장률']).toFixed(3)} |
-          ❤️ ${Number(pet['체력 성장률']).toFixed(3)}<br>
-          🌟 총 성장률: ${Number(pet['총 성장률']).toFixed(3)}<br>
-          📦 획득처: ${pet['획득처'] || '정보 없음'}
-        </div>`;
-      });
-      div.innerHTML = html;
-    }
+function displayPets(data) {
+  const div = document.getElementById('results');
+  if (!data.length) {
+    div.style.display = 'none';
+    div.innerHTML = '❌ 결과 없음';
+    return;
+  }
+  div.style.display = 'block';
+  const isReborn = document.getElementById('petType').value === 'reborn';
+  
+  // limitCount 값에 따라 노출 개수 조절
+  const limit = parseInt(document.getElementById("limitCount").value) || data.length; 
+  const limitedData = data.slice(0, limit); // limit에 맞게 데이터 자르기
+  
+  let html = '';
+  limitedData.forEach(pet => {
+    const name = pet['이름'] || '';
+    
+    // 구펫 구분 수정: 환생 페트도 구펫 여부에 따라 표시
+    const mark = isOldPet(name) ? ' (구펫)' : ' (신펫)';
+    
+    html += `<div class='pet-block'>
+      <strong>${name}${mark}</strong> (${pet['속성1'] || ''}${pet['속성2'] ? '/' + pet['속성2'] : ''})<br>
+      ⚔️ ${Number(pet['공격력 성장률']).toFixed(3)} |
+      🛡️ ${Number(pet['방어력 성장률']).toFixed(3)} |
+      🏃 ${Number(pet['순발력 성장률']).toFixed(3)} |
+      ❤️ ${Number(pet['체력 성장률']).toFixed(3)}<br>
+      🌟 총 성장률: ${Number(pet['총 성장률']).toFixed(3)}<br>
+      📦 획득처: ${pet['획득처'] || '정보 없음'}
+    </div>`;
+  });
+  div.innerHTML = html;
+}
+
+
 
     function searchByName() {
       const keyword = document.getElementById('nameSearch').value.trim().toLowerCase();
