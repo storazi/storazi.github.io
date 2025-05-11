@@ -2,21 +2,86 @@
 <html lang="ko">
 <head>
   <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- 모바일 최적화 메타 태그 -->
   <title>📊 페트 정보 뷰어</title>
   <style>
-    body { font-family: sans-serif; padding: 20px; }
-    input, select, button { margin: 5px; padding: 5px; }
-    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
-    th { background-color: #f0f0f0; }
-    .pet-block { border: 1px solid #ccc; padding: 10px; margin-top: 10px; }
-    #results { display: none; }
+    /* 기본 스타일 */
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+    }
+
+    input, select, button {
+      margin: 5px;
+      padding: 10px;
+      width: 100%;  /* 모바일에서 버튼이나 입력창이 화면을 꽉 채우도록 설정 */
+      box-sizing: border-box;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 20px;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #f0f0f0;
+    }
+
+    .pet-block {
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin-top: 10px;
+    }
+
+    #results {
+      display: none;
+    }
+
+    /* 모바일 화면에서 화면 크기에 맞게 조정 */
+    @media screen and (max-width: 768px) {
+      /* 모바일에서 입력창과 버튼 크기 조정 */
+      input, select, button {
+        font-size: 14px;
+      }
+      
+      table {
+        font-size: 14px;
+      }
+
+      .pet-block {
+        font-size: 14px;
+      }
+
+      /* 화면이 작은 경우, 텍스트 크기를 자동으로 조정 */
+      h1 {
+        font-size: 1.5em;
+      }
+      
+      /* 조건 검색 입력창들을 한 줄로 정렬 */
+      #atk, #def, #spd, #hp, #total, #attr1, #attr2 {
+        width: 48%;
+        display: inline-block;
+      }
+      #attr2 {
+        margin-left: 4%;
+      }
+
+      /* 버튼 크기 조정 */
+      button {
+        font-size: 14px;
+      }
+    }
   </style>
 </head>
 <body>
   <h1>📜 페트 정보 뷰어</h1>
-  
-  <!-- 페트 타입 선택 -->
   <select id="petType">
     <option value="normal">일반 페트</option>
     <option value="reborn">환생 페트</option>
@@ -35,9 +100,7 @@
   <input id="attr1" placeholder="속성1 (예: 불)"/>
   <input id="attr2" placeholder="속성2 (예: 물)"/>
   <button id="filterBtn">조건 검색</button>
-  
-  <label for="limitCount">🧮 노출 개수 제한: </label>
-  <input id="limitCount" min="1" placeholder="예: 10" type="number"/>
+  <label for="limitCount">🧮 노출 개수 제한: </label><input id="limitCount" min="1" placeholder="예: 10" type="number"/>
 
   <h2>📊 다중 비교</h2>
   <input id="compare1" placeholder="이름1"/>
@@ -10688,136 +10751,119 @@
 ]</script>
 
 <script>
-    let normalPets = [];
-    let rebornPets = [];
-    let oldPetList = [];
+  let normalPets = [];
+  let rebornPets = [];
+  let oldPetList = [];
 
-    function getSelectedData() {
-      return document.getElementById('petType').value === 'reborn' ? rebornPets : normalPets;
-    }
-
-    function isOldPet(name) {
-      return oldPetList.includes((name || '').trim().toLowerCase());
-    }
-
-function displayPets(data) {
-  const div = document.getElementById('results');
-  if (!data.length) {
-    div.style.display = 'none';
-    div.innerHTML = '❌ 결과 없음';
-    return;
+  function getSelectedData() {
+    return document.getElementById('petType').value === 'reborn' ? rebornPets : normalPets;
   }
-  div.style.display = 'block';
-  const isReborn = document.getElementById('petType').value === 'reborn';
-  
-  // limitCount 값에 따라 노출 개수 조절
-  const limit = parseInt(document.getElementById("limitCount").value) || data.length; 
-  const limitedData = data.slice(0, limit); // limit에 맞게 데이터 자르기
-  
-  let html = '';
-  limitedData.forEach(pet => {
-    const name = pet['이름'] || '';
-    
-    // 구펫 구분 수정: 환생 페트도 구펫 여부에 따라 표시
-    const mark = isOldPet(name) ? ' (구펫)' : ' (신펫)';
-    
-    html += `<div class='pet-block'>
-      <strong>${name}${mark}</strong> (${pet['속성1'] || ''}${pet['속성2'] ? '/' + pet['속성2'] : ''})<br>
-      ⚔️ ${Number(pet['공격력 성장률']).toFixed(3)} |
-      🛡️ ${Number(pet['방어력 성장률']).toFixed(3)} |
-      🏃 ${Number(pet['순발력 성장률']).toFixed(3)} |
-      ❤️ ${Number(pet['체력 성장률']).toFixed(3)}<br>
-      🌟 총 성장률: ${Number(pet['총 성장률']).toFixed(3)}<br>
-      📦 획득처: ${pet['획득처'] || '정보 없음'}
-    </div>`;
-  });
-  div.innerHTML = html;
-}
 
+  function isOldPet(name) {
+    return oldPetList.includes((name || '').trim().toLowerCase());
+  }
 
-
-    function searchByName() {
-      const keyword = document.getElementById('nameSearch').value.trim().toLowerCase();
-      const pets = getSelectedData();
-      const filtered = pets.filter(p => p['이름'] && p['이름'].toLowerCase().includes(keyword));
-      displayPets(filtered);
+  function displayPets(data) {
+    const div = document.getElementById('results');
+    if (!data.length) {
+      div.style.display = 'none';
+      div.innerHTML = '❌ 결과 없음';
+      return;
     }
-
-    function parseRange(val, pets, key) {
-      if (!val) return null;
-      val = val.trim();
-
-      if (val.includes('±')) {
-        const [base, range] = val.split('±').map(parseFloat);
-        return [base - range, base + range];
-      }
-
-      if (val.startsWith('+') || val.startsWith('-')) {
-        const avg = pets.reduce((sum, p) => sum + parseFloat(p[key] || 0), 0) / pets.length;
-        const offset = parseFloat(val);
-        return [avg + offset - 0.1, avg + offset + 0.1];
-      }
-
-      const num = parseFloat(val);
-      if (!isNaN(num)) {
-        return [num - 0.1, num + 0.1];
-      }
-
-      return null;
-    }
-
-    function advancedSearch() {
-      const pets = getSelectedData();
-      const atkRange = parseRange(document.getElementById('atk').value, pets, '공격력 성장률');
-      const defRange = parseRange(document.getElementById('def').value, pets, '방어력 성장률');
-      const spdRange = parseRange(document.getElementById('spd').value, pets, '순발력 성장률');
-      const hpRange = parseRange(document.getElementById('hp').value, pets, '체력 성장률');
-      const totalRange = parseRange(document.getElementById('total').value, pets, '총 성장률');
-      const attr1 = document.getElementById('attr1').value.trim().toLowerCase();
-      const attr2 = document.getElementById('attr2').value.trim().toLowerCase();
-
-      let filtered = pets;
-      if (atkRange) filtered = filtered.filter(p => p['공격력 성장률'] >= atkRange[0] && p['공격력 성장률'] <= atkRange[1]);
-      if (defRange) filtered = filtered.filter(p => p['방어력 성장률'] >= defRange[0] && p['방어력 성장률'] <= defRange[1]);
-      if (spdRange) filtered = filtered.filter(p => p['순발력 성장률'] >= spdRange[0] && p['순발력 성장률'] <= spdRange[1]);
-      if (hpRange) filtered = filtered.filter(p => p['체력 성장률'] >= hpRange[0] && p['체력 성장률'] <= hpRange[1]);
-      if (totalRange) filtered = filtered.filter(p => p['총 성장률'] >= totalRange[0] && p['총 성장률'] <= totalRange[1]);
-      if (attr1) filtered = filtered.filter(p => (p['속성1'] || '').toLowerCase().includes(attr1) || (p['속성2'] || '').toLowerCase().includes(attr1));
-      if (attr2) filtered = filtered.filter(p => (p['속성1'] || '').toLowerCase().includes(attr2) || (p['속성2'] || '').toLowerCase().includes(attr2));
-
-      displayPets(filtered);
-    }
-
-    function comparePets() {
-      const pets = getSelectedData();
-      const names = [1, 2, 3, 4, 5].map(n => document.getElementById(`compare${n}`).value.trim().toLowerCase()).filter(Boolean);
-      const matched = names.map(name => pets.find(p => p['이름'] && p['이름'].toLowerCase() === name)).filter(Boolean);
-      if (matched.length < 2) return alert('비교는 최소 2개 이상 입력하세요.');
-
-      const keys = ['공격력 성장률', '방어력 성장률', '순발력 성장률', '체력 성장률', '총 성장률'];
-      let html = '<table><tr><th>항목</th>' + matched.map(p => `<th>${p['이름']}</th>`).join('') + '</tr>';
-      keys.forEach(k => {
-        html += `<tr><td>${k}</td>` + matched.map(p => `<td>${Number(p[k]).toFixed(3)}</td>`).join('') + '</tr>';
-      });
-      html += '</table>';
-      document.getElementById('results').innerHTML = html;
-      document.getElementById('results').style.display = 'block';
-    }
-
-    window.addEventListener("DOMContentLoaded", () => {
-      normalPets = JSON.parse(document.getElementById("normalPetsData").textContent);
-      rebornPets = JSON.parse(document.getElementById("rebornPetsData").textContent);
-      oldPetList = JSON.parse(document.getElementById("oldPetListData").textContent).map(n => n.이름.trim().toLowerCase());
-
-      document.getElementById("nameSearchBtn").addEventListener("click", searchByName);
-      document.getElementById("nameSearch").addEventListener("keypress", e => {
-        if (e.key === "Enter") searchByName();
-      });
-      document.getElementById("filterBtn").addEventListener("click", advancedSearch);
-      document.getElementById("compareBtn").addEventListener("click", comparePets);
-      document.getElementById("petType").addEventListener("change", () => displayPets(getSelectedData()));
+    div.style.display = 'block';
+    const isReborn = document.getElementById('petType').value === 'reborn';
+    let html = '';
+    data.forEach(pet => {
+      const name = pet['이름'] || '';
+      const mark = isReborn ? '' : isOldPet(name) ? ' (구펫)' : ' (신펫)';
+      html += `<div class='pet-block'>
+        <strong>${name}${mark}</strong> (${pet['속성1'] || ''}${pet['속성2'] ? '/' + pet['속성2'] : ''})<br>
+        ⚔️ ${Number(pet['공격력 성장률']).toFixed(3)} |
+        🛡️ ${Number(pet['방어력 성장률']).toFixed(3)} |
+        🏃 ${Number(pet['순발력 성장률']).toFixed(3)} |
+        ❤️ ${Number(pet['체력 성장률']).toFixed(3)}<br>
+        🌟 총 성장률: ${Number(pet['총 성장률']).toFixed(3)}<br>
+        📦 획득처: ${pet['획득처'] || '정보 없음'}
+      </div>`;
     });
+    div.innerHTML = html;
+  }
+
+  function searchByName() {
+    const keyword = document.getElementById('nameSearch').value.trim().toLowerCase();
+    const pets = getSelectedData();
+    const filtered = pets.filter(p => p['이름'] && p['이름'].toLowerCase().includes(keyword));
+    displayPets(filtered);
+  }
+
+  function parseRange(val, pets, key) {
+    if (!val) return null;
+    val = val.trim();
+    if (val.includes('-')) return val.split('-').map(Number);
+    if (val.includes('±')) {
+      const [base, range] = val.split('±').map(parseFloat);
+      return [base - range, base + range];
+    }
+    if (val.startsWith('+') || val.startsWith('-')) {
+      const avg = pets.reduce((sum, p) => sum + parseFloat(p[key] || 0), 0) / pets.length;
+      const offset = parseFloat(val);
+      return [avg + offset - 0.01, avg + offset + 0.01];
+    }
+    const num = parseFloat(val);
+    return [num, num];
+  }
+
+  function advancedSearch() {
+    const pets = getSelectedData();
+    const atkRange = parseRange(document.getElementById('atk').value, pets, '공격력 성장률');
+    const defRange = parseRange(document.getElementById('def').value, pets, '방어력 성장률');
+    const spdRange = parseRange(document.getElementById('spd').value, pets, '순발력 성장률');
+    const hpRange = parseRange(document.getElementById('hp').value, pets, '체력 성장률');
+    const totalRange = parseRange(document.getElementById('total').value, pets, '총 성장률');
+    const attr1 = document.getElementById('attr1').value.trim().toLowerCase();
+    const attr2 = document.getElementById('attr2').value.trim().toLowerCase();
+
+    let filtered = pets;
+    if (atkRange) filtered = filtered.filter(p => p['공격력 성장률'] >= atkRange[0] && p['공격력 성장률'] <= atkRange[1]);
+    if (defRange) filtered = filtered.filter(p => p['방어력 성장률'] >= defRange[0] && p['방어력 성장률'] <= defRange[1]);
+    if (spdRange) filtered = filtered.filter(p => p['순발력 성장률'] >= spdRange[0] && p['순발력 성장률'] <= spdRange[1]);
+    if (hpRange) filtered = filtered.filter(p => p['체력 성장률'] >= hpRange[0] && p['체력 성장률'] <= hpRange[1]);
+    if (totalRange) filtered = filtered.filter(p => p['총 성장률'] >= totalRange[0] && p['총 성장률'] <= totalRange[1]);
+    if (attr1) filtered = filtered.filter(p => (p['속성1'] || '').toLowerCase().includes(attr1) || (p['속성2'] || '').toLowerCase().includes(attr1));
+    if (attr2) filtered = filtered.filter(p => (p['속성1'] || '').toLowerCase().includes(attr2) || (p['속성2'] || '').toLowerCase().includes(attr2));
+
+    displayPets(filtered);
+  }
+
+  function comparePets() {
+    const pets = getSelectedData();
+    const names = [1, 2, 3, 4, 5].map(n => document.getElementById(`compare${n}`).value.trim().toLowerCase()).filter(Boolean);
+    const matched = names.map(name => pets.find(p => p['이름'] && p['이름'].toLowerCase() === name)).filter(Boolean);
+    if (matched.length < 2) return alert('비교는 최소 2개 이상 입력하세요.');
+
+    const keys = ['공격력 성장률', '방어력 성장률', '순발력 성장률', '체력 성장률', '총 성장률'];
+    let html = '<table><tr><th>항목</th>' + matched.map(p => `<th>${p['이름']}</th>`).join('') + '</tr>';
+    keys.forEach(k => {
+      html += `<tr><td>${k}</td>` + matched.map(p => `<td>${Number(p[k]).toFixed(3)}</td>`).join('') + '</tr>';
+    });
+    html += '</table>';
+    document.getElementById('results').innerHTML = html;
+    document.getElementById('results').style.display = 'block';
+  }
+
+  window.addEventListener("DOMContentLoaded", () => {
+    normalPets = JSON.parse(document.getElementById("normalPetsData").textContent);
+    rebornPets = JSON.parse(document.getElementById("rebornPetsData").textContent);
+    oldPetList = JSON.parse(document.getElementById("oldPetListData").textContent).map(n => n.이름.trim().toLowerCase());
+
+    document.getElementById("nameSearchBtn").addEventListener("click", searchByName);
+    document.getElementById("nameSearch").addEventListener("keypress", e => {
+      if (e.key === "Enter") searchByName();
+    });
+    document.getElementById("filterBtn").addEventListener("click", advancedSearch);
+    document.getElementById("compareBtn").addEventListener("click", comparePets);
+    document.getElementById("petType").addEventListener("change", () => displayPets(getSelectedData()));
+  });
 </script>
 </body>
 </html>
-
