@@ -10796,44 +10796,54 @@
     displayPets(filtered);
   }
 
-  function parseRange(val, pets, key) {
-    if (!val) return null;
-    val = val.trim();
-    if (val.includes('-')) return val.split('-').map(Number);
-    if (val.includes('±')) {
-      const [base, range] = val.split('±').map(parseFloat);
-      return [base - range, base + range];
-    }
-    if (val.startsWith('+') || val.startsWith('-')) {
-      const avg = pets.reduce((sum, p) => sum + parseFloat(p[key] || 0), 0) / pets.length;
-      const offset = parseFloat(val);
-      return [avg + offset - 0.01, avg + offset + 0.01];
-    }
-    const num = parseFloat(val);
-    return [num, num];
+function parseRange(val, pets, key) {
+  if (!val) return null;
+  val = val.trim();
+
+  // 범위가 '-'를 포함하는 경우, 예: '2.3-2.5'
+  if (val.includes('-')) {
+    const [min, max] = val.split('-').map(Number);
+    return [min, max];  // 범위 배열 반환
   }
 
-  function advancedSearch() {
-    const pets = getSelectedData();
-    const atkRange = parseRange(document.getElementById('atk').value, pets, '공격력 성장률');
-    const defRange = parseRange(document.getElementById('def').value, pets, '방어력 성장률');
-    const spdRange = parseRange(document.getElementById('spd').value, pets, '순발력 성장률');
-    const hpRange = parseRange(document.getElementById('hp').value, pets, '체력 성장률');
-    const totalRange = parseRange(document.getElementById('total').value, pets, '총 성장률');
-    const attr1 = document.getElementById('attr1').value.trim().toLowerCase();
-    const attr2 = document.getElementById('attr2').value.trim().toLowerCase();
-
-    let filtered = pets;
-    if (atkRange) filtered = filtered.filter(p => p['공격력 성장률'] >= atkRange[0] && p['공격력 성장률'] <= atkRange[1]);
-    if (defRange) filtered = filtered.filter(p => p['방어력 성장률'] >= defRange[0] && p['방어력 성장률'] <= defRange[1]);
-    if (spdRange) filtered = filtered.filter(p => p['순발력 성장률'] >= spdRange[0] && p['순발력 성장률'] <= spdRange[1]);
-    if (hpRange) filtered = filtered.filter(p => p['체력 성장률'] >= hpRange[0] && p['체력 성장률'] <= hpRange[1]);
-    if (totalRange) filtered = filtered.filter(p => p['총 성장률'] >= totalRange[0] && p['총 성장률'] <= totalRange[1]);
-    if (attr1) filtered = filtered.filter(p => (p['속성1'] || '').toLowerCase().includes(attr1) || (p['속성2'] || '').toLowerCase().includes(attr1));
-    if (attr2) filtered = filtered.filter(p => (p['속성1'] || '').toLowerCase().includes(attr2) || (p['속성2'] || '').toLowerCase().includes(attr2));
-
-    displayPets(filtered);
+  // '±' 범위가 포함된 경우, 예: '2.3±0.1'
+  if (val.includes('±')) {
+    const [base, range] = val.split('±').map(parseFloat);
+    return [base - range, base + range];  // 기준값을 중심으로 범위 반환
   }
+
+  // 숫자만 있을 경우, 예: '2.3'
+  const num = parseFloat(val);
+  return [num - 0.1, num + 0.1];  // ±0.1 범위로 설정
+}
+
+function advancedSearch() {
+  const pets = getSelectedData();
+  const atkRange = parseRange(document.getElementById('atk').value, pets, '공격력 성장률');
+  const defRange = parseRange(document.getElementById('def').value, pets, '방어력 성장률');
+  const spdRange = parseRange(document.getElementById('spd').value, pets, '순발력 성장률');
+  const hpRange = parseRange(document.getElementById('hp').value, pets, '체력 성장률');
+  const totalRange = parseRange(document.getElementById('total').value, pets, '총 성장률');
+  const attr1 = document.getElementById('attr1').value.trim().toLowerCase();
+  const attr2 = document.getElementById('attr2').value.trim().toLowerCase();
+
+  let filtered = pets;
+  if (atkRange) filtered = filtered.filter(p => p['공격력 성장률'] >= atkRange[0] && p['공격력 성장률'] <= atkRange[1]);
+  if (defRange) filtered = filtered.filter(p => p['방어력 성장률'] >= defRange[0] && p['방어력 성장률'] <= defRange[1]);
+  if (spdRange) filtered = filtered.filter(p => p['순발력 성장률'] >= spdRange[0] && p['순발력 성장률'] <= spdRange[1]);
+  if (hpRange) filtered = filtered.filter(p => p['체력 성장률'] >= hpRange[0] && p['체력 성장률'] <= hpRange[1]);
+  if (totalRange) filtered = filtered.filter(p => p['총 성장률'] >= totalRange[0] && p['총 성장률'] <= totalRange[1]);
+  if (attr1) filtered = filtered.filter(p => (p['속성1'] || '').toLowerCase().includes(attr1) || (p['속성2'] || '').toLowerCase().includes(attr1));
+  if (attr2) filtered = filtered.filter(p => (p['속성1'] || '').toLowerCase().includes(attr2) || (p['속성2'] || '').toLowerCase().includes(attr2));
+
+  // 노출 개수 제한 적용
+  const limit = parseInt(document.getElementById("limitCount").value) || filtered.length; // 기본적으로 전체를 노출
+  const shown = filtered.slice(0, limit);
+
+  // 결과 출력
+  displayPets(shown);
+}
+
 
   function comparePets() {
     const pets = getSelectedData();
