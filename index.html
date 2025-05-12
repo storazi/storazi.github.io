@@ -220,6 +220,102 @@ form,
   }
 }
 
+
+.form-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  max-width: 100%;
+}
+
+.form-row label {
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-weight: bold;
+}
+
+.form-row input {
+  flex: 1;
+  min-width: 0;
+}
+@media (max-width: 600px) {
+  .form-row {
+    flex-wrap: nowrap;
+    flex-direction: row !important;
+    align-items: center;
+  }
+
+  .form-row label {
+    margin-bottom: 0;
+  }
+
+  .form-row input {
+    width: auto;
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+
+@media (max-width: 600px) {
+  .form-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  max-width: 100%;
+}
+
+.form-row label {
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-weight: bold;
+}
+
+.form-row input {
+  flex: 1;
+  min-width: 0;
+}
+@media (max-width: 600px) {
+  .form-row {
+    flex-wrap: nowrap;
+    flex-direction: row !important;
+    align-items: center;
+  }
+
+  .form-row label {
+    margin-bottom: 0;
+  }
+
+  .form-row input {
+    width: auto;
+    flex: 1;
+    min-width: 0;
+  }
+}
+}
+
+
+.growth-inputs input {
+  max-width: 200px;
+  width: 100%;
+}
+
+
+.growth-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 8px;
+  max-width: 100%;
+}
+
+#limitCount {
+  max-width: 120px;
+}
+
 </style>
 </head>
 <body>
@@ -237,8 +333,12 @@ form,
 <input id="hp" placeholder="체력 성장률"/>
 <input id="total" placeholder="총 성장률"/>
 
-<label for="limitCount">🧮 노출 개수 제한: </label>
-<input id="limitCount" min="1" placeholder="예: 10" style="width: 100px; margin-left: 10px;" type="number"/>
+
+<div class="form-row">
+  <label for="limitCount">🧮 노출 개수 제한:</label>
+  <input id="limitCount" type="number" placeholder="예: 10" min="1"/>
+</div>
+
 <button id="filterBtn">조건 검색</button>
 <h2>📊 다중 비교</h2>
 <input id="compare1" placeholder="이름1"/>
