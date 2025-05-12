@@ -31,6 +31,11 @@
 }
 
     .pet-block {
+  margin: 10px 0;
+  padding: 10px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 6px;
   word-break: break-word;
   white-space: normal;
       border: 1px solid #ccc;
@@ -64,6 +69,10 @@
 
 
 #results {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: stretch;
   max-height: 70vh;
   overflow-y: auto;
 }
@@ -76,6 +85,11 @@
   }
 
   .pet-block {
+  margin: 10px 0;
+  padding: 10px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 6px;
   word-break: break-word;
   white-space: normal;
     font-size: 14px;
@@ -141,6 +155,46 @@
   overflow-y: auto;
   border-radius: 6px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+
+/* 입력 요소 공통 스타일 정리 */
+input[type="text"],
+input[type="number"],
+select,
+button {
+  padding: 6px;
+  font-size: 1em;
+  box-sizing: border-box;
+  margin: 4px 0;
+}
+
+/* 컨테이너 내부에서 너비 균일하게 설정 */
+form,
+#controls,
+#advancedSearch,
+#compareSection {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+#controls > *,
+#advancedSearch > *,
+#compareSection > * {
+  flex: 1 1 120px;
+  min-width: 100px;
+}
+
+/* 모바일 대응: 작은 화면에서는 한 줄씩 배치 */
+@media (max-width: 600px) {
+  #controls,
+  #advancedSearch,
+  #compareSection {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
 
 </style>
