@@ -2,10 +2,9 @@
 <html lang="ko">
 <head>
   <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- 모바일 최적화 메타 태그 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>📊 페트 정보 뷰어</title>
   <style>
-    /* 기본 스타일 */
     body {
       font-family: sans-serif;
       padding: 20px;
@@ -14,8 +13,25 @@
     input, select, button {
       margin: 5px;
       padding: 10px;
-      width: 100%;  /* 모바일에서 버튼이나 입력창이 화면을 꽉 채우도록 설정 */
+      width: 100%;
+      max-width: 300px;
       box-sizing: border-box;
+    }
+
+    .label-input-inline {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      max-width: 300px;
+      margin: 5px 0;
+    }
+
+    .label-input-inline label {
+      white-space: nowrap;
+    }
+
+    .label-input-inline input {
+      flex: 1;
     }
 
     table {
@@ -44,13 +60,11 @@
       display: none;
     }
 
-    /* 모바일 화면에서 화면 크기에 맞게 조정 */
     @media screen and (max-width: 768px) {
-      /* 모바일에서 입력창과 버튼 크기 조정 */
       input, select, button {
         font-size: 14px;
       }
-      
+
       table {
         font-size: 14px;
       }
@@ -59,21 +73,20 @@
         font-size: 14px;
       }
 
-      /* 화면이 작은 경우, 텍스트 크기를 자동으로 조정 */
       h1 {
         font-size: 1.5em;
       }
-      
-      /* 조건 검색 입력창들을 한 줄로 정렬 */
+
       #atk, #def, #spd, #hp, #total, #attr1, #attr2 {
         width: 48%;
         display: inline-block;
+        max-width: 48%;
       }
+
       #attr2 {
         margin-left: 4%;
       }
 
-      /* 버튼 크기 조정 */
       button {
         font-size: 14px;
       }
@@ -100,7 +113,12 @@
   <input id="attr1" placeholder="속성1 (예: 불)"/>
   <input id="attr2" placeholder="속성2 (예: 물)"/>
   <button id="filterBtn">조건 검색</button>
-  <label for="limitCount">🧮 노출 개수 제한: </label><input id="limitCount" min="1" placeholder="예: 10" type="number"/>
+
+  <!-- ✅ 노출 제한 입력 박스 정렬 개선 -->
+  <div class="label-input-inline">
+    <label for="limitCount">🧮 노출 개수 제한:</label>
+    <input id="limitCount" min="1" placeholder="예: 10" type="number"/>
+  </div>
 
   <h2>📊 다중 비교</h2>
   <input id="compare1" placeholder="이름1"/>
@@ -111,6 +129,7 @@
   <button id="compareBtn">비교</button>
 
   <div id="results">⏳ 데이터 로딩 중...</div>
+
 
 
   <script id="normalPetsData" type="application/json">[
@@ -10748,8 +10767,6 @@
   {
     "이름": "휴보"
   }
-]</script>
-
 <script>
   let normalPets = [];
   let rebornPets = [];
@@ -10796,54 +10813,54 @@
     displayPets(filtered);
   }
 
-function parseRange(val, pets, key) {
-  if (!val) return null;
-  val = val.trim();
-
-  // 범위가 '-'를 포함하는 경우, 예: '2.3-2.5'
-  if (val.includes('-')) {
-    const [min, max] = val.split('-').map(Number);
-    return [min, max];  // 범위 배열 반환
+  function parseRange(val) {
+    if (!val) return null;
+    val = val.trim();
+    if (val.includes('-')) {
+      const [min, max] = val.split('-').map(Number);
+      return [min, max];
+    }
+    if (val.includes('±')) {
+      const [base, range] = val.split('±').map(parseFloat);
+      return [base - range, base + range];
+    }
+    const num = parseFloat(val);
+    return [num - 0.1, num + 0.1];
   }
 
-  // '±' 범위가 포함된 경우, 예: '2.3±0.1'
-  if (val.includes('±')) {
-    const [base, range] = val.split('±').map(parseFloat);
-    return [base - range, base + range];  // 기준값을 중심으로 범위 반환
+  function advancedSearch() {
+    const pets = getSelectedData();
+    const atkRange = parseRange(document.getElementById('atk').value);
+    const defRange = parseRange(document.getElementById('def').value);
+    const spdRange = parseRange(document.getElementById('spd').value);
+    const hpRange = parseRange(document.getElementById('hp').value);
+    const totalRange = parseRange(document.getElementById('total').value);
+    const attr1 = document.getElementById('attr1').value.trim().toLowerCase();
+    const attr2 = document.getElementById('attr2').value.trim().toLowerCase();
+
+    let filtered = pets;
+    if (atkRange) filtered = filtered.filter(p => p['공격력 성장률'] >= atkRange[0] && p['공격력 성장률'] <= atkRange[1]);
+    if (defRange) filtered = filtered.filter(p => p['방어력 성장률'] >= defRange[0] && p['방어력 성장률'] <= defRange[1]);
+    if (spdRange) filtered = filtered.filter(p => p['순발력 성장률'] >= spdRange[0] && p['순발력 성장률'] <= spdRange[1]);
+    if (hpRange) filtered = filtered.filter(p => p['체력 성장률'] >= hpRange[0] && p['체력 성장률'] <= hpRange[1]);
+    if (totalRange) filtered = filtered.filter(p => p['총 성장률'] >= totalRange[0] && p['총 성장률'] <= totalRange[1]);
+    if (attr1) filtered = filtered.filter(p => (p['속성1'] || '').toLowerCase().includes(attr1) || (p['속성2'] || '').toLowerCase().includes(attr1));
+    if (attr2) filtered = filtered.filter(p => (p['속성1'] || '').toLowerCase().includes(attr2) || (p['속성2'] || '').toLowerCase().includes(attr2));
+
+    const sortKeys = ['공격력 성장률', '방어력 성장률', '순발력 성장률', '체력 성장률', '총 성장률'];
+    const inputIds = ['atk', 'def', 'spd', 'hp', 'total'];
+    for (let i = 0; i < inputIds.length; i++) {
+      const val = document.getElementById(inputIds[i]).value.trim();
+      if (val) {
+        const key = sortKeys[i];
+        filtered.sort((a, b) => b[key] - a[key]);
+        break;
+      }
+    }
+
+    const limit = parseInt(document.getElementById("limitCount").value) || filtered.length;
+    displayPets(filtered.slice(0, limit));
   }
-
-  // 숫자만 있을 경우, 예: '2.3'
-  const num = parseFloat(val);
-  return [num - 0.1, num + 0.1];  // ±0.1 범위로 설정
-}
-
-function advancedSearch() {
-  const pets = getSelectedData();
-  const atkRange = parseRange(document.getElementById('atk').value, pets, '공격력 성장률');
-  const defRange = parseRange(document.getElementById('def').value, pets, '방어력 성장률');
-  const spdRange = parseRange(document.getElementById('spd').value, pets, '순발력 성장률');
-  const hpRange = parseRange(document.getElementById('hp').value, pets, '체력 성장률');
-  const totalRange = parseRange(document.getElementById('total').value, pets, '총 성장률');
-  const attr1 = document.getElementById('attr1').value.trim().toLowerCase();
-  const attr2 = document.getElementById('attr2').value.trim().toLowerCase();
-
-  let filtered = pets;
-  if (atkRange) filtered = filtered.filter(p => p['공격력 성장률'] >= atkRange[0] && p['공격력 성장률'] <= atkRange[1]);
-  if (defRange) filtered = filtered.filter(p => p['방어력 성장률'] >= defRange[0] && p['방어력 성장률'] <= defRange[1]);
-  if (spdRange) filtered = filtered.filter(p => p['순발력 성장률'] >= spdRange[0] && p['순발력 성장률'] <= spdRange[1]);
-  if (hpRange) filtered = filtered.filter(p => p['체력 성장률'] >= hpRange[0] && p['체력 성장률'] <= hpRange[1]);
-  if (totalRange) filtered = filtered.filter(p => p['총 성장률'] >= totalRange[0] && p['총 성장률'] <= totalRange[1]);
-  if (attr1) filtered = filtered.filter(p => (p['속성1'] || '').toLowerCase().includes(attr1) || (p['속성2'] || '').toLowerCase().includes(attr1));
-  if (attr2) filtered = filtered.filter(p => (p['속성1'] || '').toLowerCase().includes(attr2) || (p['속성2'] || '').toLowerCase().includes(attr2));
-
-  // 노출 개수 제한 적용
-  const limit = parseInt(document.getElementById("limitCount").value) || filtered.length; // 기본적으로 전체를 노출
-  const shown = filtered.slice(0, limit);
-
-  // 결과 출력
-  displayPets(shown);
-}
-
 
   function comparePets() {
     const pets = getSelectedData();
