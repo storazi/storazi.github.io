@@ -1,0 +1,88 @@
+input, select, button {
+margin: 5px;
+padding: 10px;
+font-size: 1em;
+box-sizing: border-box;
+}
+
+.form-row {
+display: flex;
+align-items: center;
+gap: 8px;
+margin-top: 8px;
+}
+
+.form-row label {
+flex-shrink: 0;
+white-space: nowrap;
+font-weight: bold;
+}
+
+.form-row input {
+flex: 1;
+min-width: 0;
+}
+
+@media (max-width: 600px) {
+input, select, button {
+    width: 100%;
+    font-size: 14px;
+    margin: 4px 0;
+}
+
+#controls,
+#advancedSearch,
+#compareSection,
+.form-row {
+    flex-direction: column;
+    align-items: stretch;
+}
+
+#controls > *,
+#advancedSearch > *,
+#compareSection > *,
+.form-row input,
+.form-row label {
+    width: 100%;
+}
+
+.form-row label {
+    margin-bottom: 4px;
+}
+
+#filterBtn,
+#compareBtn {
+    width: 100%;
+    margin-top: 10px;
+}
+}
+
+#modalOverlay {
+display: none;
+position: fixed;
+top: 0; left: 0;
+width: 100vw;
+height: 100vh;
+background-color: rgba(0,0,0,0.6);
+justify-content: center;
+align-items: center;
+z-index: 1000;
+}
+
+#modalContent {
+background: white;
+padding: 20px;
+max-width: 600px;
+max-height: 80vh;
+overflow-y: auto;
+border-radius: 6px;
+}
+
+.pet-block {
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 10px;
+  margin-bottom: 10px;
+  background-color: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
