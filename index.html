@@ -6,6 +6,8 @@
 <base href="./"/><meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>📊 페트 뷰어 템플릿</title>
+
+<!-- ✅ 스타일: 반응형 폼 정렬 + 모달 디자인 -->
 <style>
   input, select, button {
     margin: 5px;
@@ -65,7 +67,39 @@
       margin-top: 10px;
     }
   }
+
+  #modalOverlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0,0,0,0.6);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+
+  #modalContent {
+    background: white;
+    padding: 20px;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
+    border-radius: 6px;
+  }
 </style>
+
+<!-- ✅ 모달 구조 HTML -->
+<div id="modalOverlay">
+  <div id="modalContent">
+    <div id="results"></div>
+    <br />
+    <button id="modalCloseBtn">닫기</button>
+  </div>
+</div>
+
+
 
 </head>
 <body>
