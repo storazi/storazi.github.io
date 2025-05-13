@@ -9,32 +9,39 @@ window.addEventListener("DOMContentLoaded", () => {
         return oldPetList.includes(name.trim().toLowerCase());
     }
 
-    function displayPets(data) {
-        const modal = document.getElementById("modalOverlay");
-        const results = document.getElementById("results");
+function displayPets(data) {
+    const modal = document.getElementById("modalOverlay");
+    const results = document.getElementById("results");
 
-        if (!data || !data.length) {
-            results.innerHTML = "❌ 결과 없음";
-        } else {
-            const isReborn = document.getElementById("petType").value === "reborn";
+    if (!data || !data.length) {
+        results.innerHTML = "❌ 결과 없음";
+    } else {
+        const isReborn = document.getElementById("petType").value === "reborn";
 
-            data = [...data].sort((a, b) => parseFloat(b["총 성장률"] || 0) - parseFloat(a["총 성장률"] || 0));
-            results.innerHTML = data.map(p => `
-                <div class="pet-block">
-                    <strong>${p["이름"]}${isReborn ? "" : isOldPet(p["이름"]) ? " (구펫)" : " (신펫)"}</strong><br>
-                    속성: ${p["속성1"] || ""}${p["속성2"] ? "/" + p["속성2"] : ""}<br>
-                    ⚔️ 공격력: ${p["공격력 성장률"].toFixed(3)} |
-                    🛡️ 방어력: ${p["방어력 성장률"].toFixed(3)} |
-                    🏃 순발력: ${p["순발력 성장률"].toFixed(3)} |
-                    ❤️ 체력: ${p["체력 성장률"].toFixed(3)}<br>
-                    🌟 총 성장률: ${p["총 성장률"].toFixed(3)}<br>
-                    📦 획득처: ${p["획득처"] || "정보 없음"}
-                </div>
-            `).join("");
-        }
+        data = [...data].sort((a, b) => parseFloat(b["총 성장률"] || 0) - parseFloat(a["총 성장률"] || 0));
 
-        modal.style.display = "flex"; // 모달을 열 때 호출
+        // 여기에 console.log 추가
+        data.forEach(p => {
+            console.log("Checking pet:", p["이름"], "isOldPet:", isOldPet(p["이름"]));
+        });
+
+        results.innerHTML = data.map(p => `
+            <div class="pet-block">
+                <strong>${p["이름"]}${isReborn ? "" : isOldPet(p["이름"]) ? " (구펫)" : " (신펫)"}</strong><br>
+                속성: ${p["속성1"] || ""}${p["속성2"] ? "/" + p["속성2"] : ""}<br>
+                ⚔️ 공격력: ${p["공격력 성장률"].toFixed(3)} |
+                🛡️ 방어력: ${p["방어력 성장률"].toFixed(3)} |
+                🏃 순발력: ${p["순발력 성장률"].toFixed(3)} |
+                ❤️ 체력: ${p["체력 성장률"].toFixed(3)}<br>
+                🌟 총 성장률: ${p["총 성장률"].toFixed(3)}<br>
+                📦 획득처: ${p["획득처"] || "정보 없음"}
+            </div>
+        `).join("");
     }
+
+    modal.style.display = "flex"; // 모달을 열 때 호출
+}
+
 
     function parseRange(val) {
         if (!val) return null;
