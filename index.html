@@ -7,316 +7,66 @@
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>📊 페트 뷰어 템플릿</title>
 <style>
-    body { font-family: sans-serif; padding: 20px; }
-    input, select, button { margin: 5px; padding: 10px; }
-    #modalOverlay {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 999;
-    }
-    
-#modalContent {
-  background: white;
-  padding: 12px;
-  max-width: 700px;
-  max-height: 80vh;
-  overflow-y: auto;
-  border-radius: 6px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-    .pet-block {
-  margin: 10px 0;
-  padding: 10px;
-  box-sizing: border-box;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  word-break: break-word;
-  white-space: normal;
-      border: 1px solid #ccc;
-      margin: 10px 0;
-      padding: 10px;
-    }
-  
-#modalOverlay {
-  display: none;
-  position: fixed;
-  z-index: 1000;
-  left: 0;
-  top: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0,0,0,0.6);
-  justify-content: center;
-  align-items: center;
-}
-
-
-#modalContent {
-  background: white;
-  padding: 12px;
-  max-width: 700px;
-  max-height: 80vh;
-  overflow-y: auto;
-  border-radius: 6px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-
-#results {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  align-items: stretch;
-  max-height: 70vh;
-  overflow-y: auto;
-}
-
-@media screen and (max-width: 768px) {
   input, select, button {
-    font-size: 14px;
-    width: 100%;
-    margin: 4px 0;
-  }
-
-  .pet-block {
-  margin: 10px 0;
-  padding: 10px;
-  box-sizing: border-box;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  word-break: break-word;
-  white-space: normal;
-    font-size: 14px;
+    margin: 5px;
     padding: 10px;
+    font-size: 1em;
+    box-sizing: border-box;
   }
 
-  
-#modalContent {
-  background: white;
-  padding: 12px;
-  max-width: 700px;
-  max-height: 80vh;
-  overflow-y: auto;
-  border-radius: 6px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-
-  table {
-    font-size: 13px;
-    word-break: break-word;
-  }
-
-  h1, h2 {
-    font-size: 1.5em;
-  }
-
-  #compare1, #compare2, #compare3, #compare4, #compare5,
-  #atk, #def, #spd, #hp, #total, #attr1, #attr2, #limitCount {
-    width: 48%;
-    display: inline-block;
-  }
-
-  #compare2, #def, #spd, #hp, #attr2 {
-    margin-left: 4%;
-  }
-
-  #filterBtn, #compareBtn {
-    width: 100%;
-    margin-top: 6px;
-  }
-}
-
-#modalOverlay {
-  display: none;
-  position: absolute;
-  inset: 0;
-  z-index: 1000;
-  width: 100vw;
-  height: 100%;
-  max-height: -webkit-fill-available;
-  background-color: rgba(0,0,0,0.6);
-  justify-content: center;
-  align-items: center;
-}
-
-
-#modalContent {
-  background: white;
-  padding: 12px;
-  max-width: 700px;
-  max-height: 80vh;
-  overflow-y: auto;
-  border-radius: 6px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-
-/* 입력 요소 공통 스타일 정리 */
-input[type="text"],
-input[type="number"],
-select,
-button {
-  padding: 6px;
-  font-size: 1em;
-  box-sizing: border-box;
-  margin: 4px 0;
-}
-
-/* 컨테이너 내부에서 너비 균일하게 설정 */
-form,
-#controls,
-#advancedSearch,
-#compareSection {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  align-items: center;
-}
-
-#controls > *,
-#advancedSearch > *,
-#compareSection > * {
-  flex: 1 1 120px;
-  min-width: 100px;
-}
-
-/* 모바일 대응: 작은 화면에서는 한 줄씩 배치 */
-@media (max-width: 600px) {
-  #controls,
-  #advancedSearch,
-  #compareSection {
-    flex-direction: column;
-    align-items: stretch;
-  }
-}
-
-
-@media (max-width: 600px) {
-  #controls label,
-  #controls input,
-  #controls select,
-  #controls button,
-  #advancedSearch input,
-  #advancedSearch button,
-  #compareSection input,
-  #compareSection button {
-    display: block;
-    width: 100%;
-    margin-bottom: 8px;
-  }
-
-  #controls,
-  #advancedSearch,
-  #compareSection {
-    flex-direction: column;
-    align-items: stretch;
-  }
-}
-
-
-.form-row {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 8px;
-  margin-top: 8px;
-  max-width: 100%;
-}
-
-.form-row label {
-  white-space: nowrap;
-  flex-shrink: 0;
-  font-weight: bold;
-}
-
-.form-row input {
-  flex: 1;
-  min-width: 0;
-}
-@media (max-width: 600px) {
   .form-row {
-    flex-wrap: nowrap;
-    flex-direction: row !important;
+    display: flex;
     align-items: center;
+    gap: 8px;
+    margin-top: 8px;
   }
 
   .form-row label {
-    margin-bottom: 0;
+    flex-shrink: 0;
+    white-space: nowrap;
+    font-weight: bold;
   }
 
   .form-row input {
-    width: auto;
     flex: 1;
     min-width: 0;
   }
-}
 
+  @media (max-width: 600px) {
+    input, select, button {
+      width: 100%;
+      font-size: 14px;
+      margin: 4px 0;
+    }
 
-@media (max-width: 600px) {
-  .form-row {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 8px;
-  margin-top: 8px;
-  max-width: 100%;
-}
+    #controls,
+    #advancedSearch,
+    #compareSection,
+    .form-row {
+      flex-direction: column;
+      align-items: stretch;
+    }
 
-.form-row label {
-  white-space: nowrap;
-  flex-shrink: 0;
-  font-weight: bold;
-}
+    #controls > *,
+    #advancedSearch > *,
+    #compareSection > *,
+    .form-row input,
+    .form-row label {
+      width: 100%;
+    }
 
-.form-row input {
-  flex: 1;
-  min-width: 0;
-}
-@media (max-width: 600px) {
-  .form-row {
-    flex-wrap: nowrap;
-    flex-direction: row !important;
-    align-items: center;
+    .form-row label {
+      margin-bottom: 4px;
+    }
+
+    #filterBtn,
+    #compareBtn {
+      width: 100%;
+      margin-top: 10px;
+    }
   }
-
-  .form-row label {
-    margin-bottom: 0;
-  }
-
-  .form-row input {
-    width: auto;
-    flex: 1;
-    min-width: 0;
-  }
-}
-}
-
-
-.growth-inputs input {
-  max-width: 200px;
-  width: 100%;
-}
-
-
-.growth-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 8px;
-  max-width: 100%;
-}
-
-#limitCount {
-  max-width: 120px;
-}
-
 </style>
+
 </head>
 <body>
 <h1>📜 페트 정보 뷰어</h1>
