@@ -64,6 +64,14 @@ window.addEventListener("DOMContentLoaded", () => {
       if (hp) result = result.filter(p => p["체력 성장률"] >= hp[0] && p["체력 성장률"] <= hp[1]);
       if (total) result = result.filter(p => p["총 성장률"] >= total[0] && p["총 성장률"] <= total[1]);
   
+      const petAge = document.getElementById("petAge").value;
+
+      if (petAge === "old") {
+        result = result.filter(p => isOldPet(p["이름"]));
+      } else if (petAge === "new") {
+        result = result.filter(p => !isOldPet(p["이름"]));
+      }
+
       const limit = parseInt(document.getElementById("limitCount")?.value) || result.length;
       result = result.sort((a, b) => b["총 성장률"] - a["총 성장률"]).slice(0, limit);
       displayPets(result);
@@ -134,3 +142,17 @@ window.addEventListener("DOMContentLoaded", () => {
     
   });
   
+  // ESC 키로 모달 닫기
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    document.getElementById("modalOverlay").style.display = "none";
+  }
+});
+
+// 모달 바깥 클릭 시 닫기
+document.getElementById("modalOverlay").addEventListener("click", (e) => {
+  const modal = document.getElementById("modalContent");
+  if (!modal.contains(e.target)) {
+    document.getElementById("modalOverlay").style.display = "none";
+  }
+});
