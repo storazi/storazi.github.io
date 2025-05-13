@@ -88,6 +88,16 @@
     overflow-y: auto;
     border-radius: 6px;
   }
+
+.pet-block {
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 10px;
+  margin-bottom: 10px;
+  background-color: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
 </style>
 
 <!-- ✅ 모달 구조 HTML -->
@@ -166,28 +176,37 @@ window.addEventListener("DOMContentLoaded", () => {
     return oldPetList.includes(name.trim().toLowerCase());
   }
 
-  function displayPets(data) {
-    const modal = document.getElementById("modalOverlay");
-    const results = document.getElementById("results");
-    if (!data.length) {
-      results.innerHTML = "❌ 결과 없음";
-    } else {
-      const isReborn = document.getElementById("petType").value === "reborn";
-      results.innerHTML = data.map(p => `
-        <div class="pet-block">
-          <strong>${p["이름"]}${isReborn ? "" : isOldPet(p["이름"]) ? " (구펫)" : " (신펫)"}</strong><br>
-          속성: ${p["속성1"] || ""}${p["속성2"] ? "/" + p["속성2"] : ""}<br>
-          ⚔️ 공격력: ${p["공격력 성장률"].toFixed(3)} |
-          🛡️ 방어력: ${p["방어력 성장률"].toFixed(3)} |
-          🏃 순발력: ${p["순발력 성장률"].toFixed(3)} |
-          ❤️ 체력: ${p["체력 성장률"].toFixed(3)}<br>
-          🌟 총 성장률: ${p["총 성장률"].toFixed(3)}<br>
-          📦 획득처: ${p["획득처"] || "정보 없음"}
-        </div>
-      `).join("");
-    }
-    modal.style.display = "flex";
+function displayPets(data) {
+  const modal = document.getElementById("modalOverlay");
+  const results = document.getElementById("results");
+
+  if (!data || !data.length) {
+    results.innerHTML = "❌ 결과 없음";
+  } else {
+    const isReborn = document.getElementById("petType").value === "reborn";
+
+    // ✅ 여기서 총 성장률 내림차순 정렬
+    data = [...data].sort((a, b) =>
+      parseFloat(b["총 성장률"] || 0) - parseFloat(a["총 성장률"] || 0)
+    );
+
+    results.innerHTML = data.map(p => `
+      <div class="pet-block">
+        <strong>${p["이름"]}${isReborn ? "" : isOldPet(p["이름"]) ? " (구펫)" : " (신펫)"}</strong><br>
+        속성: ${p["속성1"] || ""}${p["속성2"] ? "/" + p["속성2"] : ""}<br>
+        ⚔️ 공격력: ${p["공격력 성장률"].toFixed(3)} |
+        🛡️ 방어력: ${p["방어력 성장률"].toFixed(3)} |
+        🏃 순발력: ${p["순발력 성장률"].toFixed(3)} |
+        ❤️ 체력: ${p["체력 성장률"].toFixed(3)}<br>
+        🌟 총 성장률: ${p["총 성장률"].toFixed(3)}<br>
+        📦 획득처: ${p["획득처"] || "정보 없음"}
+      </div>
+    `).join("");
   }
+
+  modal.style.display = "flex";
+}
+
 
   function parseRange(val) {
     if (!val) return null;
@@ -201,26 +220,33 @@ window.addEventListener("DOMContentLoaded", () => {
     return [num - 0.1, num + 0.1];
   }
 
-  function advancedSearch() {
-    const pets = getSelectedData();
-    const atk = parseRange(document.getElementById("atk").value);
-    const def = parseRange(document.getElementById("def").value);
-    const spd = parseRange(document.getElementById("spd").value);
-    const hp = parseRange(document.getElementById("hp").value);
-    const total = parseRange(document.getElementById("total").value);
+function advancedSearch() {
+  const pets = getSelectedData();
+  const atk = parseRange(document.getElementById("atk").value);
+  const def = parseRange(document.getElementById("def").value);
+  const spd = parseRange(document.getElementById("spd").value);
+  const hp = parseRange(document.getElementById("hp").value);
+  const total = parseRange(document.getElementById("total").value);
 
-    let result = pets;
-    if (atk) result = result.filter(p => p["공격력 성장률"] >= atk[0] && p["공격력 성장률"] <= atk[1]);
-    if (def) result = result.filter(p => p["방어력 성장률"] >= def[0] && p["방어력 성장률"] <= def[1]);
-    if (spd) result = result.filter(p => p["순발력 성장률"] >= spd[0] && p["순발력 성장률"] <= spd[1]);
-    if (hp) result = result.filter(p => p["체력 성장률"] >= hp[0] && p["체력 성장률"] <= hp[1]);
-    if (total) result = result.filter(p => p["총 성장률"] >= total[0] && p["총 성장률"] <= total[1]);
+  let result = pets;
 
-    
-    const limit = parseInt(document.getElementById("limitCount")?.value) || result.length;
-    result = result.slice(0, limit);
-    displayPets(result);
-  }
+  if (atk) result = result.filter(p => p["공격력 성장률"] >= atk[0] && p["공격력 성장률"] <= atk[1]);
+  if (def) result = result.filter(p => p["방어력 성장률"] >= def[0] && p["방어력 성장률"] <= def[1]);
+  if (spd) result = result.filter(p => p["순발력 성장률"] >= spd[0] && p["순발력 성장률"] <= spd[1]);
+  if (hp) result = result.filter(p => p["체력 성장률"] >= hp[0] && p["체력 성장률"] <= hp[1]);
+  if (total) result = result.filter(p => p["총 성장률"] >= total[0] && p["총 성장률"] <= total[1]);
+
+  // ✅ 총 성장률 기준 정렬 (내림차순)
+  result = result.sort((a, b) => b["총 성장률"] - a["총 성장률"]);
+
+  // ✅ 그 후 slice
+  const limit = parseInt(document.getElementById("limitCount")?.value) || result.length;
+  result = result.slice(0, limit);
+
+  // ✅ displayPets는 정렬된 결과만 출력하면 됨
+  displayPets(result);
+}
+
 
   function comparePets() {
     const pets = getSelectedData();
