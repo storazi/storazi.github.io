@@ -5,43 +5,63 @@ window.addEventListener("DOMContentLoaded", () => {
         return document.getElementById("petType").value === "reborn" ? rebornPets : normalPets;
     }
 
-    function isOldPet(name) {
-        return oldPetList.includes(name.trim().toLowerCase());
+    // 이름 정제 함수 (괄호, 기호 제거 + trim + 소문자화)
+    function cleanName(name) {
+        return (name || "")
+            .replace(/\(.*?\)/g, "")           // 괄호 제거
+            .replace(/[^\p{L}\p{N}]/gu, "")    // 기호 제거 (한글/숫자만 남김)
+            .trim()
+            .toLowerCase();
     }
 
-function displayPets(data) {
-    const modal = document.getElementById("modalOverlay");
-    const results = document.getElementById("results");
+    function isOldPet(name) {
+        return oldPetList.includes(cleanName(name));
+    }
 
-    if (!data || !data.length) {
-        results.innerHTML = "❌ 결과 없음";
-    } else {
+    function displayPets(data) {
+        const modal = document.getElementById("modalOverlay");
+        const results = document.getElementById("results");
         const isReborn = document.getElementById("petType").value === "reborn";
 
-        data = [...data].sort((a, b) => parseFloat(b["총 성장률"] || 0) - parseFloat(a["총 성장률"] || 0));
+        if (!data || !data.length) {
+            results.innerHTML = "❌ 결과 없음";
+        } else {
+            data = [...data].sort((a, b) => parseFloat(b["총 성장률"] || 0) - parseFloat(a["총 성장률"] || 0));
 
-        // 여기에 console.log 추가
-        data.forEach(p => {
-            console.log("Checking pet:", p["이름"], "isOldPet:", isOldPet(p["이름"]));
-        });
+            results.innerHTML = data.map(p => {
+                const attr1 = (p["속성1"] || "").trim();
+                const attr2 = (p["속성2"] || "").trim();
 
-        results.innerHTML = data.map(p => `
-            <div class="pet-block">
-                <strong>${p["이름"]}${isReborn ? "" : isOldPet(p["이름"]) ? " (구펫)" : " (신펫)"}</strong><br>
-                속성: ${p["속성1"] || ""}${p["속성2"] ? "/" + p["속성2"] : ""}<br>
-                ⚔️ 공격력: ${p["공격력 성장률"].toFixed(3)} |
-                🛡️ 방어력: ${p["방어력 성장률"].toFixed(3)} |
-                🏃 순발력: ${p["순발력 성장률"].toFixed(3)} |
-                ❤️ 체력: ${p["체력 성장률"].toFixed(3)}<br>
-                🌟 총 성장률: ${p["총 성장률"].toFixed(3)}<br>
-                📦 획득처: ${p["획득처"] || "정보 없음"}
-            </div>
-        `).join("");
+                const getTagClass = attr => {
+                    if (attr.startsWith("수")) return "water";
+                    if (attr.startsWith("화")) return "fire";
+                    if (attr.startsWith("풍")) return "wind";
+                    if (attr.startsWith("지")) return "earth";
+                    return "neutral";
+                };
+
+                return `
+                    <div class="pet-block">
+                        <div class="pet-name">
+                            ${p["이름"]}${isReborn ? "" : isOldPet(p["이름"]) ? " (구펫)" : " (신펫)"}
+                        </div>
+                        <div>
+                            <span class="tag ${getTagClass(attr1)}">${attr1}</span>
+                            ${attr2 ? `<span class="tag ${getTagClass(attr2)}">${attr2}</span>` : ""}
+                        </div>
+                        ⚔️ 공격력: ${p["공격력 성장률"].toFixed(3)} |
+                        🛡️ 방어력: ${p["방어력 성장률"].toFixed(3)} |
+                        🏃 순발력: ${p["순발력 성장률"].toFixed(3)} |
+                        ❤️ 체력: ${p["체력 성장률"].toFixed(3)}<br>
+                        🌟 총 성장률: ${p["총 성장률"].toFixed(3)}<br>
+                        📦 획득처: ${p["획득처"] || "정보 없음"}
+                    </div>
+                `;
+            }).join("");
+        }
+
+        modal.style.display = "flex";
     }
-
-    modal.style.display = "flex"; // 모달을 열 때 호출
-}
-
 
     function parseRange(val) {
         if (!val) return null;
@@ -72,7 +92,6 @@ function displayPets(data) {
         if (total) result = result.filter(p => p["총 성장률"] >= total[0] && p["총 성장률"] <= total[1]);
 
         const petAge = document.getElementById("petAge").value;
-
         if (petAge === "old") {
             result = result.filter(p => isOldPet(p["이름"]));
         } else if (petAge === "new") {
@@ -87,7 +106,7 @@ function displayPets(data) {
     function comparePets() {
         const pets = getSelectedData();
         const names = [1, 2, 3, 4, 5].map(i => document.getElementById(`compare${i}`).value.trim().toLowerCase()).filter(Boolean);
-        const selected = names.map(name => pets.find(p => p["이름"] && p["이름"].toLowerCase() === name)).filter(Boolean);
+        const selected = names.map(name => pets.find(p => p["이름"] && cleanName(p["이름"]) === name)).filter(Boolean);
 
         if (selected.length < 2) {
             alert("비교할 페트를 2개 이상 입력하세요.");
@@ -104,15 +123,13 @@ function displayPets(data) {
         document.getElementById("modalOverlay").style.display = "flex";
     }
 
-    // 이벤트 연결
     document.getElementById("nameSearchBtn").addEventListener("click", () => {
         const keyword = document.getElementById('nameSearch').value.trim().toLowerCase();
         const pets = getSelectedData();
-        const filtered = keyword === "" ? pets : pets.filter(p => p["이름"] && p["이름"].toLowerCase().includes(keyword));
+        const filtered = keyword === "" ? pets : pets.filter(p => cleanName(p["이름"]).includes(keyword));
         displayPets(filtered);
     });
 
-    // Enter 키로 이름 검색
     document.getElementById("nameSearch").addEventListener("keydown", (e) => {
         if (e.key === "Enter") {
             e.preventDefault();
@@ -120,7 +137,6 @@ function displayPets(data) {
         }
     });
 
-    // 모달 닫기
     document.getElementById("modalCloseBtn").addEventListener("click", () => {
         document.getElementById("modalOverlay").style.display = "none";
     });
@@ -128,7 +144,6 @@ function displayPets(data) {
     document.getElementById("filterBtn").addEventListener("click", advancedSearch);
     document.getElementById("compareBtn").addEventListener("click", comparePets);
 
-    // 확대/축소 기능
     const zoomInBtn = document.getElementById("zoomInBtn");
     const zoomOutBtn = document.getElementById("zoomOutBtn");
     const modal = document.getElementById("modalContent");
@@ -149,19 +164,15 @@ function displayPets(data) {
 
     modal.style.fontSize = currentFontSize + '%';
 
-    // ESC 키로 모달 닫기
     document.addEventListener("keydown", (e) => {
         if (e.key === "Escape") {
             document.getElementById("modalOverlay").style.display = "none";
         }
     });
 
-    // 모달 바깥 클릭 시 닫기
     document.getElementById("modalOverlay").addEventListener("click", (e) => {
-        const modal = document.getElementById("modalContent");
         if (!modal.contains(e.target)) {
             document.getElementById("modalOverlay").style.display = "none";
         }
     });
-
 });
