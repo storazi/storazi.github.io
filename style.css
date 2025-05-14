@@ -1,4 +1,4 @@
-
+/* 기본 입력 스타일 */
 input, select, button {
   margin: 5px;
   padding: 10px;
@@ -6,6 +6,7 @@ input, select, button {
   box-sizing: border-box;
 }
 
+/* 폼 행 스타일 */
 .form-row {
   display: flex;
   align-items: center;
@@ -24,6 +25,7 @@ input, select, button {
   min-width: 0;
 }
 
+/* 반응형 스타일 */
 @media (max-width: 600px) {
   input, select, button {
     width: 100%;
@@ -41,9 +43,7 @@ input, select, button {
 
   #controls > *,
   #advancedSearch > *,
-  #compareSection > *,
-  .form-row input,
-  .form-row label {
+  #compareSection > * {
     width: 100%;
   }
 
@@ -58,6 +58,7 @@ input, select, button {
   }
 }
 
+/* 모달 배경 */
 #modalOverlay {
   display: none;
   position: fixed;
@@ -70,6 +71,7 @@ input, select, button {
   z-index: 1000;
 }
 
+/* 모달 내용 */
 #modalContent {
   background: white;
   padding: 20px;
@@ -79,18 +81,35 @@ input, select, button {
   border-radius: 6px;
 }
 
-.pet-block {
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  padding: 10px;
-  margin-bottom: 10px;
-  background-color: #fff;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+/* 검색 결과 영역 */
+#resultsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
+.pet-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 
+.pet-image img {
+  width: 50px;
+  height: 50px;
+  border-radius: 8px;
+}
 
-/* 🌑 Dark Theme and Attribute Tag Styling */
+.pet-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.pet-details div {
+  margin-bottom: 5px;
+}
+
+/* 🌑 다크 테마 스타일 */
 body {
   background-color: #1e1e2f;
   color: #f0f0f0;
@@ -135,32 +154,39 @@ input, select, button {
 
 .tag.water { background-color: #3498db; }
 .tag.fire { background-color: #e74c3c; }
-.tag.wind { background-color: #27ae60; }
-.tag.earth { background-color: #8e44ad; }
+.tag.wind { background-color: #ca9e0d; }
+.tag.earth { background-color: #27ae60; }
 
 h1 {
-  color: #FCD34D;
+  color: #d4a815;
   font-size: 2.75rem;
-  font-weight: 900;
   margin-top: 1.5rem;
   margin-bottom: 1.2rem;
   text-shadow: 0 0 8px rgba(252, 211, 77, 0.4);
 }
+
 h2 {
-  color: #FCD34D;
+  color: #d4a815;
   font-size: 1.75rem;
   margin-top: 1.25rem;
 }
 
 h3 {
-  color: #FCD34D;
+  color: #d4a815;
   font-size: 1.5rem;
   margin-top: 1rem;
 }
 
 h4 {
-  color: #FCD34D;
+  color: #d4a815;
   font-size: 1.25rem;
   margin-top: 0.75rem;
 }
 
+/* 이미지 크기를 동일하게 고정 */
+.pet-image img {
+  width: 100px;   /* 고정된 가로 크기 */
+  height: 100px;  /* 고정된 세로 크기 */
+  object-fit: cover; /* 이미지 비율을 유지하면서 크기를 맞춤 */
+  border-radius: 8px;
+}

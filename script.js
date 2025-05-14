@@ -18,50 +18,82 @@ window.addEventListener("DOMContentLoaded", () => {
         return oldPetList.includes(cleanName(name));
     }
 
-    function displayPets(data) {
-        const modal = document.getElementById("modalOverlay");
-        const results = document.getElementById("results");
-        const isReborn = document.getElementById("petType").value === "reborn";
-
-        if (!data || !data.length) {
-            results.innerHTML = "❌ 결과 없음";
-        } else {
-            data = [...data].sort((a, b) => parseFloat(b["총 성장률"] || 0) - parseFloat(a["총 성장률"] || 0));
-
-            results.innerHTML = data.map(p => {
-                const attr1 = (p["속성1"] || "").trim();
-                const attr2 = (p["속성2"] || "").trim();
-
-                const getTagClass = attr => {
-                    if (attr.startsWith("수")) return "water";
-                    if (attr.startsWith("화")) return "fire";
-                    if (attr.startsWith("풍")) return "wind";
-                    if (attr.startsWith("지")) return "earth";
-                    return "neutral";
-                };
-
-                return `
-                    <div class="pet-block">
-                        <div class="pet-name">
-                            ${p["이름"]}${isReborn ? "" : isOldPet(p["이름"]) ? " (구펫)" : " (신펫)"}
-                        </div>
-                        <div>
-                            <span class="tag ${getTagClass(attr1)}">${attr1}</span>
-                            ${attr2 ? `<span class="tag ${getTagClass(attr2)}">${attr2}</span>` : ""}
-                        </div>
-                        ⚔️ 공격력: ${p["공격력 성장률"].toFixed(3)} |
-                        🛡️ 방어력: ${p["방어력 성장률"].toFixed(3)} |
-                        🏃 순발력: ${p["순발력 성장률"].toFixed(3)} |
-                        ❤️ 체력: ${p["체력 성장률"].toFixed(3)}<br>
-                        🌟 총 성장률: ${p["총 성장률"].toFixed(3)}<br>
-                        📦 획득처: ${p["획득처"] || "정보 없음"}
-                    </div>
-                `;
-            }).join("");
-        }
-
-        modal.style.display = "flex";
+    // GitHub에서 이미지 URL을 동적으로 생성하는 함수
+    function getImageUrl(petName) {
+        const cleanedName = cleanName(petName);  // 이름 정제
+        return `https://raw.githubusercontent.com/storazi/images/main/${cleanedName}.gif`;
     }
+
+    // 이미지를 화면에 동적으로 추가하는 함수
+    function loadImage(petName) {
+    const imageContainer = document.getElementById('imageContainer');  // 'imageContainer'가 존재하는지 확인
+    
+    if (imageContainer) {
+        const petImage = document.createElement('img');
+        petImage.src = `https://raw.githubusercontent.com/storazi/images/main/${petName}.gif`;
+        petImage.alt = `${petName} 이미지`;
+        petImage.style.width = '100px'; // 이미지 크기 설정
+        petImage.style.height = '100px';
+
+        imageContainer.appendChild(petImage); // 이미지 추가
+    } else {
+        console.error("이미지를 추가할 요소가 없습니다. 'imageContainer' 요소를 확인하세요.");
+    }
+}
+
+// displayPets 함수 내에서 사용
+function displayPets(data) {
+    const modal = document.getElementById("modalOverlay");
+    const results = document.getElementById("results");
+    const isReborn = document.getElementById("petType").value === "reborn";
+
+    if (!data || !data.length) {
+        results.innerHTML = "❌ 결과 없음";
+    } else {
+        data = [...data].sort((a, b) => parseFloat(b["총 성장률"] || 0) - parseFloat(a["총 성장률"] || 0));
+
+        results.innerHTML = data.map(p => {
+            const attr1 = (p["속성1"] || "").trim();
+            const attr2 = (p["속성2"] || "").trim();
+            const petImageUrl = `https://raw.githubusercontent.com/storazi/images/main/${cleanName(p["이름"])}.gif`; // 이미지 URL
+
+            const getTagClass = attr => {
+                if (attr.startsWith("수")) return "water";
+                if (attr.startsWith("화")) return "fire";
+                if (attr.startsWith("풍")) return "wind";
+                if (attr.startsWith("지")) return "earth";
+                return "neutral";
+            };
+
+            // loadImage 호출
+            loadImage(cleanName(p["이름"])); // 이미지를 로드하여 추가
+
+            return `
+                <div class="pet-block">
+                    <div class="pet-name">
+                        ${p["이름"]}${isReborn ? "" : isOldPet(p["이름"]) ? " (구펫)" : " (신펫)"}
+                    </div>
+                    <div>
+                        <img src="${petImageUrl}" alt="${p["이름"]} 이미지" style="width: 100px; height: 100px;">
+                        <span class="tag ${getTagClass(attr1)}">${attr1}</span>
+                        ${attr2 ? `<span class="tag ${getTagClass(attr2)}">${attr2}</span>` : ""}
+                    </div>
+                    ⚔️ 공격력: ${p["공격력 성장률"].toFixed(3)} |
+                    🛡️ 방어력: ${p["방어력 성장률"].toFixed(3)} |
+                    🏃 순발력: ${p["순발력 성장률"].toFixed(3)} |
+                    ❤️ 체력: ${p["체력 성장률"].toFixed(3)}<br>
+                    🌟 총 성장률: ${p["총 성장률"].toFixed(3)}<br>
+                    📦 획득처: ${p["획득처"] || "정보 없음"}
+                </div>
+            `;
+        }).join("");
+    }
+
+    modal.style.display = "flex";
+}
+
+
+
 
     function parseRange(val) {
         if (!val) return null;

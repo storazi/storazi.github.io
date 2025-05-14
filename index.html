@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>📊 페트 뷰어 템플릿</title>
+  <title>📊 페트 정보 뷰어 템플릿</title>
 
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -19,14 +19,14 @@
   <button id="nameSearchBtn">검색</button>
 
   <h2>🧪 확장 조건 검색</h2>
-<div class="form-row">
-  <label for="petAge">🕰️ 펫 구분:</label>
-  <select id="petAge">
-    <option value="all">전체</option>
-    <option value="old">구펫</option>
-    <option value="new">신펫</option>
-  </select>
-</div>
+  <div class="form-row">
+    <label for="petAge">🕰️ 펫 구분:</label>
+    <select id="petAge">
+      <option value="all">전체</option>
+      <option value="old">구펫</option>
+      <option value="new">신펫</option>
+    </select>
+  </div>
 
   <input id="atk" placeholder="공격력 성장률" />
   <input id="def" placeholder="방어력 성장률" />
@@ -56,22 +56,23 @@
         <button id="zoomOutBtn">🔍 축소</button>
       </div>
       <div id="results">⏳ 데이터 로딩 중...</div>
+
+      <!-- 검색 결과 영역 -->
+      <div id="resultsContainer"></div>
+
       <br />
       <button id="modalCloseBtn">닫기</button>
     </div>
   </div>
 
-
-
-
   <script src="pets.js"></script>
   <script src="script.js"></script>
 
-<br>
-<a href="https://www.hitwebcounter.com" target="_blank">
-  <img src="https://hitwebcounter.com/counter/counter.php?page=20661525&style=0007&nbdigits=5&type=page&initCount=0"
-       title="Counter Widget" alt="Visit counter For Websites" border="0" />
-</a>
+  <br>
+  <a href="https://www.hitwebcounter.com" target="_blank">
+    <img src="https://hitwebcounter.com/counter/counter.php?page=20661525&style=0007&nbdigits=5&type=page&initCount=0"
+         title="Counter Widget" alt="Visit counter For Websites" border="0" />
+  </a>
 
 </body>
 </html>
