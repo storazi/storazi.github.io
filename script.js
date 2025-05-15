@@ -13,6 +13,14 @@ window.addEventListener("DOMContentLoaded", () => {
             .trim()
             .toLowerCase();
     }
+        [1, 2, 3, 4, 5].forEach(i => {
+    document.getElementById(`compare${i}`).addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            document.getElementById("compareBtn").click();
+        }
+    });
+});
 
     function isOldPet(name) {
         return oldPetList.includes(cleanName(name));
@@ -136,24 +144,48 @@ function displayPets(data) {
     }
 
     function comparePets() {
-        const pets = getSelectedData();
-        const names = [1, 2, 3, 4, 5].map(i => document.getElementById(`compare${i}`).value.trim().toLowerCase()).filter(Boolean);
-        const selected = names.map(name => pets.find(p => p["이름"] && cleanName(p["이름"]) === name)).filter(Boolean);
+    const pets = getSelectedData();
+    const names = [1, 2, 3, 4, 5]
+        .map(i => document.getElementById(`compare${i}`).value.trim().toLowerCase())
+        .filter(Boolean);
+    const selected = names
+        .map(name => pets.find(p => p["이름"] && cleanName(p["이름"]) === name))
+        .filter(Boolean);
 
-        if (selected.length < 2) {
-            alert("비교할 페트를 2개 이상 입력하세요.");
-            return;
-        }
-
-        const keys = ["공격력 성장률", "방어력 성장률", "순발력 성장률", "체력 성장률", "총 성장률"];
-        let html = '<table border="1" style="width:100%;text-align:center;"><tr><th>항목</th>' + selected.map(p => `<th>${p["이름"]}</th>`).join('') + '</tr>';
-        keys.forEach(k => {
-            html += `<tr><td>${k}</td>` + selected.map(p => `<td>${p[k].toFixed(3)}</td>`).join('') + '</tr>';
-        });
-        html += '</table>';
-        document.getElementById("results").innerHTML = html;
-        document.getElementById("modalOverlay").style.display = "flex";
+    if (selected.length < 2) {
+        alert("비교할 페트를 2개 이상 입력하세요.");
+        return;
     }
+
+    // ✅ 여기서 먼저 선언!
+    const keys = ["공격력 성장률", "방어력 성장률", "순발력 성장률", "체력 성장률", "총 성장률"];
+
+    let html = '<table border="1" style="width:100%; text-align:center;">';
+
+    // ✅ 이름 아래 이미지
+    html += '<tr><th>펫</th>' + selected.map(p => {
+    const imgUrl = getImageUrl(p["이름"]);
+    return `<td>
+        <div style="display: flex; flex-direction: column; align-items: center;">
+         <img src="${imgUrl}" alt="${p["이름"]} 이미지" style="height:100px; width:100px; object-fit: contain;">
+        <strong>${p["이름"]}</strong>
+        </div>
+
+    </td>`;
+}).join('') + '</tr>';
+
+
+    // ✅ 능력치 항목들
+    keys.forEach(k => {
+        html += `<tr><td>${k}</td>` + selected.map(p => `<td>${p[k].toFixed(3)}</td>`).join('') + '</tr>';
+    });
+
+    html += '</table>';
+    document.getElementById("results").innerHTML = html;
+    document.getElementById("modalOverlay").style.display = "flex";
+}
+
+
 
     document.getElementById("nameSearchBtn").addEventListener("click", () => {
         const keyword = document.getElementById('nameSearch').value.trim().toLowerCase();
