@@ -103,17 +103,35 @@ function displayPets(data) {
 
 
 
-    function parseRange(val) {
-        if (!val) return null;
-        val = val.trim();
-        if (val.includes('-')) return val.split('-').map(Number);
-        if (val.includes('±')) {
-            const [base, range] = val.split('±').map(parseFloat);
-            return [base - range, base + range];
-        }
-        const num = parseFloat(val);
-        return [num - 0.1, num + 0.1];
+  function parseRange(val) {
+    if (!val) return null;
+    val = val.trim();
+
+    // "5.3 - 5.7" 형태
+    if (val.includes('-')) {
+        const parts = val.split('-').map(Number);
+        if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) return parts;
     }
+
+    // "5.3 ± 0.3" 형태
+    if (val.includes('±')) {
+        const [base, range] = val.split('±').map(parseFloat);
+        if (!isNaN(base) && !isNaN(range)) return [base - range, base + range];
+    }
+
+    // "5.3 + 0.3" 또는 "5.3+0.3" 형태
+    if (val.includes('+')) {
+        const [base, plus] = val.split('+').map(parseFloat);
+        if (!isNaN(base) && !isNaN(plus)) return [base, base + plus];
+    }
+
+    // 숫자만 있을 경우 ±0.3 범위로 검색
+    const num = parseFloat(val);
+    if (!isNaN(num)) return [num - 0.3, num + 0.3];
+
+    return null;
+}
+
 
     function advancedSearch() {
         const pets = getSelectedData();
