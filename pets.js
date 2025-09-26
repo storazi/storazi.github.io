@@ -1,4 +1,4 @@
-const normalPets = [
+var normalPets = [
   {
     "이름": "우리",
     "속성1": "지8",
