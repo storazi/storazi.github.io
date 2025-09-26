@@ -2,14 +2,13 @@ window.addEventListener("DOMContentLoaded", () => {
     let currentFontSize = 100;
 
     function getSelectedData() {
-        return document.getElementById("petType").value === "reborn" ? rebornPets : normalPets;
+        return normalPets; // ✅ 환생펫 제거 → 항상 normalPets 사용
     }
 
-    // 이름 정제 함수 (괄호, 기호 제거 + trim + 소문자화)
     function cleanName(name) {
         return (name || "")
-            .replace(/\(.*?\)/g, "")           // 괄호 제거
-            .replace(/[^\p{L}\p{N}]/gu, "")    // 기호 제거 (한글/숫자만 남김)
+            .replace(/\(.*?\)/g, "")
+            .replace(/[^\p{L}\p{N}]/gu, "")
             .trim()
             .toLowerCase();
     }
@@ -23,13 +22,11 @@ window.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // GitHub에서 이미지 URL을 동적으로 생성하는 함수
     function getImageUrl(petName) {
-        const cleanedName = cleanName(petName);  // 이름 정제
+        const cleanedName = cleanName(petName);
         return `https://raw.githubusercontent.com/storazi/images/main/${cleanedName}.gif`;
     }
 
-    // displayPets 함수
     function displayPets(data) {
         const modal = document.getElementById("modalOverlay");
         const results = document.getElementById("results");
@@ -37,12 +34,17 @@ window.addEventListener("DOMContentLoaded", () => {
         if (!data || !data.length) {
             results.innerHTML = "❌ 결과 없음";
         } else {
+            // ✅ 중복 제거 (cleanName 기준)
+            data = data.filter(
+                (p, idx, self) => idx === self.findIndex(q => cleanName(q["이름"]) === cleanName(p["이름"]))
+            );
+
             data = [...data].sort((a, b) => parseFloat(b["총 성장률"] || 0) - parseFloat(a["총 성장률"] || 0));
 
             results.innerHTML = data.map(p => {
                 const attr1 = (p["속성1"] || "").trim();
                 const attr2 = (p["속성2"] || "").trim();
-                const petImageUrl = `https://raw.githubusercontent.com/storazi/images/main/${cleanName(p["이름"])}.gif`;
+                const petImageUrl = getImageUrl(p["이름"]);
 
                 const getTagClass = attr => {
                     if (attr.startsWith("수")) return "water";
