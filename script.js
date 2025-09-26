@@ -13,18 +13,15 @@ window.addEventListener("DOMContentLoaded", () => {
             .trim()
             .toLowerCase();
     }
-        [1, 2, 3, 4, 5].forEach(i => {
-    document.getElementById(`compare${i}`).addEventListener("keydown", (e) => {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            document.getElementById("compareBtn").click();
-        }
-    });
-});
 
-    function isOldPet(name) {
-        return oldPetList.includes(cleanName(name));
-    }
+    [1, 2, 3, 4, 5].forEach(i => {
+        document.getElementById(`compare${i}`).addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                document.getElementById("compareBtn").click();
+            }
+        });
+    });
 
     // GitHub에서 이미지 URL을 동적으로 생성하는 함수
     function getImageUrl(petName) {
@@ -32,106 +29,74 @@ window.addEventListener("DOMContentLoaded", () => {
         return `https://raw.githubusercontent.com/storazi/images/main/${cleanedName}.gif`;
     }
 
-    // 이미지를 화면에 동적으로 추가하는 함수
-    function loadImage(petName) {
-    const imageContainer = document.getElementById('imageContainer');  // 'imageContainer'가 존재하는지 확인
-    
-    if (imageContainer) {
-        const petImage = document.createElement('img');
-        petImage.src = `https://raw.githubusercontent.com/storazi/images/main/${petName}.gif`;
-        petImage.alt = `${petName} 이미지`;
-        petImage.style.width = '100px'; // 이미지 크기 설정
-        petImage.style.height = '100px';
+    // displayPets 함수
+    function displayPets(data) {
+        const modal = document.getElementById("modalOverlay");
+        const results = document.getElementById("results");
 
-        imageContainer.appendChild(petImage); // 이미지 추가
-    } else {
-        console.error("이미지를 추가할 요소가 없습니다. 'imageContainer' 요소를 확인하세요.");
-    }
-}
+        if (!data || !data.length) {
+            results.innerHTML = "❌ 결과 없음";
+        } else {
+            data = [...data].sort((a, b) => parseFloat(b["총 성장률"] || 0) - parseFloat(a["총 성장률"] || 0));
 
-// displayPets 함수 내에서 사용
-function displayPets(data) {
-    const modal = document.getElementById("modalOverlay");
-    const results = document.getElementById("results");
-    const isReborn = document.getElementById("petType").value === "reborn";
+            results.innerHTML = data.map(p => {
+                const attr1 = (p["속성1"] || "").trim();
+                const attr2 = (p["속성2"] || "").trim();
+                const petImageUrl = `https://raw.githubusercontent.com/storazi/images/main/${cleanName(p["이름"])}.gif`;
 
-    if (!data || !data.length) {
-        results.innerHTML = "❌ 결과 없음";
-    } else {
-        data = [...data].sort((a, b) => parseFloat(b["총 성장률"] || 0) - parseFloat(a["총 성장률"] || 0));
+                const getTagClass = attr => {
+                    if (attr.startsWith("수")) return "water";
+                    if (attr.startsWith("화")) return "fire";
+                    if (attr.startsWith("풍")) return "wind";
+                    if (attr.startsWith("지")) return "earth";
+                    return "neutral";
+                };
 
-        results.innerHTML = data.map(p => {
-            const attr1 = (p["속성1"] || "").trim();
-            const attr2 = (p["속성2"] || "").trim();
-            const petImageUrl = `https://raw.githubusercontent.com/storazi/images/main/${cleanName(p["이름"])}.gif`; // 이미지 URL
-
-            const getTagClass = attr => {
-                if (attr.startsWith("수")) return "water";
-                if (attr.startsWith("화")) return "fire";
-                if (attr.startsWith("풍")) return "wind";
-                if (attr.startsWith("지")) return "earth";
-                return "neutral";
-            };
-
-            // loadImage 호출
-            loadImage(cleanName(p["이름"])); // 이미지를 로드하여 추가
-
-            return `
-                <div class="pet-block">
-                    <div class="pet-name">
-                        ${p["이름"]}${isReborn ? "" : isOldPet(p["이름"]) ? " (구펫)" : " (신펫)"}
+                return `
+                    <div class="pet-block">
+                        <div class="pet-name">${p["이름"]}</div>
+                        <div>
+                            <img src="${petImageUrl}" alt="${p["이름"]} 이미지" style="width: 100px; height: 100px;">
+                            <span class="tag ${getTagClass(attr1)}">${attr1}</span>
+                            ${attr2 ? `<span class="tag ${getTagClass(attr2)}">${attr2}</span>` : ""}
+                        </div>
+                        ⚔️ 공격력: ${p["공격력 성장률"].toFixed(3)} |
+                        🛡️ 방어력: ${p["방어력 성장률"].toFixed(3)} |
+                        🏃 순발력: ${p["순발력 성장률"].toFixed(3)} |
+                        ❤️ 체력: ${p["체력 성장률"].toFixed(3)}<br>
+                        🌟 총 성장률: ${p["총 성장률"].toFixed(3)}
                     </div>
-                    <div>
-                        <img src="${petImageUrl}" alt="${p["이름"]} 이미지" style="width: 100px; height: 100px;">
-                        <span class="tag ${getTagClass(attr1)}">${attr1}</span>
-                        ${attr2 ? `<span class="tag ${getTagClass(attr2)}">${attr2}</span>` : ""}
-                    </div>
-                    ⚔️ 공격력: ${p["공격력 성장률"].toFixed(3)} |
-                    🛡️ 방어력: ${p["방어력 성장률"].toFixed(3)} |
-                    🏃 순발력: ${p["순발력 성장률"].toFixed(3)} |
-                    ❤️ 체력: ${p["체력 성장률"].toFixed(3)}<br>
-                    🌟 총 성장률: ${p["총 성장률"].toFixed(3)}<br>
-                    📦 획득처: ${p["획득처"] || "정보 없음"}
-                </div>
-            `;
-        }).join("");
+                `;
+            }).join("");
+        }
+
+        modal.style.display = "flex";
     }
 
-    modal.style.display = "flex";
-}
+    function parseRange(val) {
+        if (!val) return null;
+        val = val.trim();
 
+        if (val.includes('-')) {
+            const parts = val.split('-').map(Number);
+            if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) return parts;
+        }
 
+        if (val.includes('±')) {
+            const [base, range] = val.split('±').map(parseFloat);
+            if (!isNaN(base) && !isNaN(range)) return [base - range, base + range];
+        }
 
+        if (val.includes('+')) {
+            const [base, plus] = val.split('+').map(parseFloat);
+            if (!isNaN(base) && !isNaN(plus)) return [base, base + plus];
+        }
 
-  function parseRange(val) {
-    if (!val) return null;
-    val = val.trim();
+        const num = parseFloat(val);
+        if (!isNaN(num)) return [num - 0.3, num + 0.3];
 
-    // "5.3 - 5.7" 형태
-    if (val.includes('-')) {
-        const parts = val.split('-').map(Number);
-        if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) return parts;
+        return null;
     }
-
-    // "5.3 ± 0.3" 형태
-    if (val.includes('±')) {
-        const [base, range] = val.split('±').map(parseFloat);
-        if (!isNaN(base) && !isNaN(range)) return [base - range, base + range];
-    }
-
-    // "5.3 + 0.3" 또는 "5.3+0.3" 형태
-    if (val.includes('+')) {
-        const [base, plus] = val.split('+').map(parseFloat);
-        if (!isNaN(base) && !isNaN(plus)) return [base, base + plus];
-    }
-
-    // 숫자만 있을 경우 ±0.3 범위로 검색
-    const num = parseFloat(val);
-    if (!isNaN(num)) return [num - 0.3, num + 0.3];
-
-    return null;
-}
-
 
     function advancedSearch() {
         const pets = getSelectedData();
@@ -149,61 +114,47 @@ function displayPets(data) {
         if (hp) result = result.filter(p => p["체력 성장률"] >= hp[0] && p["체력 성장률"] <= hp[1]);
         if (total) result = result.filter(p => p["총 성장률"] >= total[0] && p["총 성장률"] <= total[1]);
 
-        const petAge = document.getElementById("petAge").value;
-        if (petAge === "old") {
-            result = result.filter(p => isOldPet(p["이름"]));
-        } else if (petAge === "new") {
-            result = result.filter(p => !isOldPet(p["이름"]));
-        }
-
         const limit = parseInt(document.getElementById("limitCount")?.value) || result.length;
         result = result.sort((a, b) => b["총 성장률"] - a["총 성장률"]).slice(0, limit);
         displayPets(result);
     }
 
     function comparePets() {
-    const pets = getSelectedData();
-    const names = [1, 2, 3, 4, 5]
-        .map(i => document.getElementById(`compare${i}`).value.trim().toLowerCase())
-        .filter(Boolean);
-    const selected = names
-        .map(name => pets.find(p => p["이름"] && cleanName(p["이름"]) === name))
-        .filter(Boolean);
+        const pets = getSelectedData();
+        const names = [1, 2, 3, 4, 5]
+            .map(i => document.getElementById(`compare${i}`).value.trim().toLowerCase())
+            .filter(Boolean);
+        const selected = names
+            .map(name => pets.find(p => p["이름"] && cleanName(p["이름"]) === name))
+            .filter(Boolean);
 
-    if (selected.length < 2) {
-        alert("비교할 페트를 2개 이상 입력하세요.");
-        return;
+        if (selected.length < 2) {
+            alert("비교할 페트를 2개 이상 입력하세요.");
+            return;
+        }
+
+        const keys = ["공격력 성장률", "방어력 성장률", "순발력 성장률", "체력 성장률", "총 성장률"];
+
+        let html = '<table border="1" style="width:100%; text-align:center;">';
+
+        html += '<tr><th>펫</th>' + selected.map(p => {
+            const imgUrl = getImageUrl(p["이름"]);
+            return `<td>
+                <div style="display: flex; flex-direction: column; align-items: center;">
+                 <img src="${imgUrl}" alt="${p["이름"]} 이미지" style="height:100px; width:100px; object-fit: contain;">
+                <strong>${p["이름"]}</strong>
+                </div>
+            </td>`;
+        }).join('') + '</tr>';
+
+        keys.forEach(k => {
+            html += `<tr><td>${k}</td>` + selected.map(p => `<td>${p[k].toFixed(3)}</td>`).join('') + '</tr>';
+        });
+
+        html += '</table>';
+        document.getElementById("results").innerHTML = html;
+        document.getElementById("modalOverlay").style.display = "flex";
     }
-
-    // ✅ 여기서 먼저 선언!
-    const keys = ["공격력 성장률", "방어력 성장률", "순발력 성장률", "체력 성장률", "총 성장률"];
-
-    let html = '<table border="1" style="width:100%; text-align:center;">';
-
-    // ✅ 이름 아래 이미지
-    html += '<tr><th>펫</th>' + selected.map(p => {
-    const imgUrl = getImageUrl(p["이름"]);
-    return `<td>
-        <div style="display: flex; flex-direction: column; align-items: center;">
-         <img src="${imgUrl}" alt="${p["이름"]} 이미지" style="height:100px; width:100px; object-fit: contain;">
-        <strong>${p["이름"]}</strong>
-        </div>
-
-    </td>`;
-}).join('') + '</tr>';
-
-
-    // ✅ 능력치 항목들
-    keys.forEach(k => {
-        html += `<tr><td>${k}</td>` + selected.map(p => `<td>${p[k].toFixed(3)}</td>`).join('') + '</tr>';
-    });
-
-    html += '</table>';
-    document.getElementById("results").innerHTML = html;
-    document.getElementById("modalOverlay").style.display = "flex";
-}
-
-
 
     document.getElementById("nameSearchBtn").addEventListener("click", () => {
         const keyword = document.getElementById('nameSearch').value.trim().toLowerCase();
