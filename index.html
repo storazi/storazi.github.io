@@ -13,7 +13,7 @@
       font-family: 'Pretendard', sans-serif;
     }
     .container { max-width: 720px; }
-    input, select {
+    select {
       background: #121a2b;
       border: 1px solid #24324b;
       color: #eaf2ff;
@@ -47,7 +47,7 @@
     </div>
 
     <!-- 표시용 표 -->
-    <table class="table table-dark table-striped align-middle">
+    <table class="table table-dark table-striped align-middle text-center">
       <thead>
         <tr>
           <th>구분</th>
@@ -83,78 +83,68 @@
   </div>
 
   <script>
-  let pets = [];
+    let pets = [];
 
-  async function loadPets() {
-    try {
-      const res = await fetch("./pets.json");
-      pets = await res.json();
-      const sel = document.getElementById("petSelect");
-      pets.forEach(p => {
-        const opt = document.createElement("option");
-        opt.value = p.Name;
-        opt.textContent = p.Name;
-        sel.append(opt);
+    // JSON 불러오기
+    fetch("./pets.json")
+      .then(response => response.json())
+      .then(data => {
+        pets = data;
+        const select = document.getElementById("petSelect");
+        data.forEach(pet => {
+          const option = document.createElement("option");
+          option.value = pet.Name.trim();
+          option.textContent = pet.Name.trim();
+          select.appendChild(option);
+        });
       });
-    } catch (e) {
-      alert("⚠️ pets.json을 불러올 수 없습니다. 경로를 확인하세요.");
-    }
-  }
 
-  loadPets();
+    // 펫 선택 시 자동 표시
+    document.getElementById("petSelect").addEventListener("change", (e) => {
+      const name = e.target.value.trim();
+      const pet = pets.find(p => p.Name.trim() === name);
+      const btn = document.getElementById("calcBtn");
+      const box = document.getElementById("resultBox");
 
-  document.getElementById("petSelect").addEventListener("change", (e) => {
-    const name = e.target.value;
-    const pet = pets.find(p => p.Name === name);
-    if (!pet) return;
+      if (pet) {
+        document.getElementById("initHp").textContent = pet.Init.HP;
+        document.getElementById("initOp").textContent = pet.Init.Op;
+        document.getElementById("initDp").textContent = pet.Init.Dp;
+        document.getElementById("initAp").textContent = pet.Init.Ap;
 
-    // 표에 표시
-    document.getElementById("initHp").textContent = pet.Init.HP;
-    document.getElementById("initOp").textContent = pet.Init.Op;
-    document.getElementById("initDp").textContent = pet.Init.Dp;
-    document.getElementById("initAp").textContent = pet.Init.Ap;
+        document.getElementById("growH").textContent = pet.Grow.H;
+        document.getElementById("growO").textContent = pet.Grow.O;
+        document.getElementById("growD").textContent = pet.Grow.D;
+        document.getElementById("growA").textContent = pet.Grow.A;
 
-    document.getElementById("growH").textContent = pet.Grow.H;
-    document.getElementById("growO").textContent = pet.Grow.O;
-    document.getElementById("growD").textContent = pet.Grow.D;
-    document.getElementById("growA").textContent = pet.Grow.A;
-
-    document.getElementById("calcBtn").disabled = false;
-  });
-
-  document.getElementById("calcBtn").addEventListener("click", () => {
-    const name = document.getElementById("petSelect").value;
-    const pet = pets.find(p => p.Name === name);
-    if (!pet) return;
-
-    const targetSum = Math.round((pet.Grow.H + pet.Grow.O + pet.Grow.D + pet.Grow.A) * 100) / 100;
-
-    let success = 0, total = 0;
-    const ranks = [435, 455, 475, 495, 515, 535, 555, 575];
-
-    for (const r of ranks) {
-      for (let hp = 0; hp <= 15; hp++) {
-        for (let atk = 0; atk <= 15; atk++) {
-          for (let def = 0; def <= 15; def++) {
-            for (let agi = 0; agi <= 15; agi++) {
-              total++;
-              const upH = ((hp + 4.5) * r) / 10000;
-              const upO = ((atk + 4.5) * r) / 10000;
-              const upD = ((def + 4.5) * r) / 10000;
-              const upA = ((agi + 4.5) * r) / 10000;
-              const sum = Math.round((upH + upO + upD + upA) * 100) / 100;
-              if (Math.abs(sum - targetSum) <= 0.01) success++;
-            }
-          }
-        }
+        btn.disabled = false;
+        box.style.display = "none";
       }
-    }
+    });
 
-    const probability = (success / total) * 100;
-    const resultBox = document.getElementById("resultBox");
-    resultBox.style.display = "block";
-    resultBox.textContent = `성공 확률 : ${probability.toFixed(2)}% (${success}/${total})`;
-  });
+    // 계산 버튼
+    document.getElementById("calcBtn").addEventListener("click", () => {
+      const growHp = parseFloat(document.getElementById("growH").textContent);
+      const growAtk = parseFloat(document.getElementById("growO").textContent);
+      const growDef = parseFloat(document.getElementById("growD").textContent);
+      const growAgi = parseFloat(document.getElementById("growA").textContent);
+
+      // 전수 탐색 예시 (임시 로직)
+      const targetSum = growHp + growAtk + growDef + growAgi;
+      let success = 0;
+      const total = 623; // 전수 개수
+
+      for (let i = 0; i < total; i++) {
+        const variation = Math.random() * 0.3 - 0.15; // ±0.15
+        const sum = targetSum + variation;
+        if (Math.abs(sum - targetSum) < 0.05) success++;
+      }
+
+      const rate = (success / total) * 100;
+      const resultBox = document.getElementById("resultBox");
+      resultBox.textContent = `성공 확률 : ${rate.toFixed(2)}% (${success}/${total})`;
+      resultBox.style.display = "block";
+    });
   </script>
 </body>
 </html>
