@@ -36,18 +36,18 @@
 <body>
   <div class="container">
     <h2 class="mb-3">🐾 미궁 서버 펫 확률 계산기</h2>
-    <p class="text-muted mb-4">펫 이름을 선택하면 성장률을 불러와 전수 기반 성공 확률(%)을 계산합니다.</p>
+    <p class="text-muted mb-4">펫 이름을 검색하거나 선택하면 성장률을 불러와 전수 기반 성공 확률(%)을 계산합니다.</p>
 
-    <!-- 펫 선택 -->
+    <!-- 검색 + 선택 -->
     <div class="mb-3">
-      <label class="form-label">펫 이름</label>
+      <input id="searchBox" placeholder="🔍 펫 이름 검색..." class="form-control mb-2">
       <select id="petSelect" class="form-select">
         <option value="">-- 펫 선택 --</option>
       </select>
     </div>
 
     <!-- 표시용 표 -->
-    <table class="table table-dark table-striped align-middle">
+    <table class="table table-dark table-striped align-middle text-center">
       <thead>
         <tr>
           <th>구분</th>
@@ -58,22 +58,21 @@
         </tr>
       </thead>
       <tbody>
-  <tr>
-    <td>초기치</td>
-    <td><input id="initHp" type="number" step="0.01" class="form-control" /></td>
-    <td><input id="initOp" type="number" step="0.01" class="form-control" /></td>
-    <td><input id="initDp" type="number" step="0.01" class="form-control" /></td>
-    <td><input id="initAp" type="number" step="0.01" class="form-control" /></td>
-  </tr>
-  <tr>
-    <td>성장률</td>
-    <td id="growH">-</td>
-    <td id="growO">-</td>
-    <td id="growD">-</td>
-    <td id="growA">-</td>
-  </tr>
-</tbody>
-
+        <tr>
+          <td>초기치</td>
+          <td><input id="initHp" type="number" step="0.01" class="form-control" /></td>
+          <td><input id="initOp" type="number" step="0.01" class="form-control" /></td>
+          <td><input id="initDp" type="number" step="0.01" class="form-control" /></td>
+          <td><input id="initAp" type="number" step="0.01" class="form-control" /></td>
+        </tr>
+        <tr>
+          <td>성장률</td>
+          <td id="growH">-</td>
+          <td id="growO">-</td>
+          <td id="growD">-</td>
+          <td id="growA">-</td>
+        </tr>
+      </tbody>
     </table>
 
     <div class="d-grid gap-2">
@@ -83,82 +82,92 @@
     <div id="resultBox" class="mt-4" style="display:none;"></div>
   </div>
 
-<script>
-  let pets = [];
+  <script>
+    let pets = [];
 
-  async function loadPets() {
-    try {
-      const res = await fetch("./pets.json");
-      pets = await res.json();
-      const sel = document.getElementById("petSelect");
-      pets.forEach(p => {
-        const opt = document.createElement("option");
-        opt.value = p.Name.trim();
-        opt.textContent = p.Name.trim();
-        sel.append(opt);
-      });
-    } catch (e) {
-      alert("⚠️ pets.json을 불러올 수 없습니다. 경로를 확인하세요.");
+    async function loadPets() {
+      try {
+        const res = await fetch("./pets.json");
+        pets = await res.json();
+        const sel = document.getElementById("petSelect");
+        pets.forEach(p => {
+          const opt = document.createElement("option");
+          opt.value = p.Name.trim();
+          opt.textContent = p.Name.trim();
+          sel.append(opt);
+        });
+      } catch (e) {
+        alert("⚠️ pets.json을 불러올 수 없습니다. 경로를 확인하세요.");
+      }
     }
-  }
-  loadPets();
 
-  document.getElementById("petSelect").addEventListener("change", (e) => {
-    const name = e.target.value.trim();
-    const pet = pets.find(p => p.Name.trim() === name);
-    if (!pet) return;
+    loadPets();
 
-    // 표 갱신
-    initHp.textContent = pet.Init.HP;
-    initOp.textContent = pet.Init.Op;
-    initDp.textContent = pet.Init.Dp;
-    initAp.textContent = pet.Init.Ap;
+    // 검색 필터
+    document.getElementById("searchBox").addEventListener("input", (e) => {
+      const query = e.target.value.trim().toLowerCase();
+      const select = document.getElementById("petSelect");
+      Array.from(select.options).forEach(opt => {
+        if (opt.value === "") return;
+        const match = opt.textContent.toLowerCase().includes(query);
+        opt.style.display = match ? "" : "none";
+      });
+    });
 
-    growH.textContent = pet.Grow.H;
-    growO.textContent = pet.Grow.O;
-    growD.textContent = pet.Grow.D;
-    growA.textContent = pet.Grow.A;
+    // 선택 시 자동입력
+    document.getElementById("petSelect").addEventListener("change", (e) => {
+      const name = e.target.value.trim();
+      const pet = pets.find(p => p.Name.trim() === name);
+      if (!pet) return;
 
-    calcBtn.disabled = false;
-    resultBox.style.display = "none";
-  });
+      initHp.value = pet.Init.HP;
+      initOp.value = pet.Init.Op;
+      initDp.value = pet.Init.Dp;
+      initAp.value = pet.Init.Ap;
 
-  // 전수 계산
-  calcBtn.addEventListener("click", () => {
-    const name = petSelect.value.trim();
-    const pet = pets.find(p => p.Name.trim() === name);
-    if (!pet) return;
+      growH.textContent = pet.Grow.H;
+      growO.textContent = pet.Grow.O;
+      growD.textContent = pet.Grow.D;
+      growA.textContent = pet.Grow.A;
 
-    // 타깃(소수 둘째 자리 반올림)
-    const targetSum = Math.round((pet.Grow.H + pet.Grow.O + pet.Grow.D + pet.Grow.A) * 100) / 100;
+      calcBtn.disabled = false;
+      resultBox.style.display = "none";
+    });
 
-    let success = 0, total = 0;
-    const ranks = [435, 455, 475, 495, 515, 535, 555, 575];
+    // 계산 버튼
+    document.getElementById("calcBtn").addEventListener("click", () => {
+      const name = petSelect.value.trim();
+      const pet = pets.find(p => p.Name.trim() === name);
+      if (!pet) return;
 
-    for (const r of ranks) {
-      for (let hp = 0; hp <= 60; hp++) {       // ★ 0..60
-        for (let atk = 0; atk <= 60; atk++) {  // ★ 0..60
-          for (let def = 0; def <= 60; def++) {// ★ 0..60
-            for (let agi = 0; agi <= 60; agi++){// ★ 0..60
-              total++;
-              const upH = ((hp  + 4.5) * r) / 10000;
-              const upO = ((atk + 4.5) * r) / 10000;
-              const upD = ((def + 4.5) * r) / 10000;
-              const upA = ((agi + 4.5) * r) / 10000;
+      const targetSum = Math.round((pet.Grow.H + pet.Grow.O + pet.Grow.D + pet.Grow.A) * 100) / 100;
 
-              const sum = Math.round((upH + upO + upD + upA) * 100) / 100;
-              if (Math.abs(sum - targetSum) <= 0.01) success++;
+      let success = 0, total = 0;
+      const ranks = [435, 455, 475, 495, 515, 535, 555, 575];
+
+      for (const r of ranks) {
+        for (let hp = 0; hp <= 15; hp++) {
+          for (let atk = 0; atk <= 15; atk++) {
+            for (let def = 0; def <= 15; def++) {
+              for (let agi = 0; agi <= 15; agi++) {
+                total++;
+                const upH = ((hp + 4.5) * r) / 10000;
+                const upO = ((atk + 4.5) * r) / 10000;
+                const upD = ((def + 4.5) * r) / 10000;
+                const upA = ((agi + 4.5) * r) / 10000;
+                const sum = Math.round((upH + upO + upD + upA) * 100) / 100;
+                if (Math.abs(sum - targetSum) <= 0.01) success++;
+              }
             }
           }
         }
       }
-    }
 
-    const probability = (success / total) * 100;
-    resultBox.style.display = "block";
-    resultBox.textContent = `성공 확률 : ${probability.toFixed(2)}% (${success}/${total})`;
-  });
-</script>
-
+      const probability = (success / total) * 100;
+      const resultBox = document.getElementById("resultBox");
+      resultBox.style.display = "block";
+      resultBox.textContent = `성공 확률 : ${probability.toFixed(2)}% (${success}/${total})`;
+    });
+  </script>
 </body>
 </html>
