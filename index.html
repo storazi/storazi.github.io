@@ -1,80 +1,160 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>📊 페트 정보 뷰어 템플릿</title>
-
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>미궁 펫 확률 계산기</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: #0b1220;
+      color: #eaf2ff;
+      padding: 2rem;
+      font-family: 'Pretendard', sans-serif;
+    }
+    .container { max-width: 720px; }
+    input, select {
+      background: #121a2b;
+      border: 1px solid #24324b;
+      color: #eaf2ff;
+      border-radius: 6px;
+      padding: 6px 10px;
+      width: 100%;
+    }
+    #resultBox {
+      background: #121a2b;
+      border: 1px solid #24324b;
+      padding: 15px;
+      margin-top: 20px;
+      border-radius: 10px;
+      font-size: 1.2rem;
+      text-align: center;
+      color: #6aa0ff;
+    }
+  </style>
 </head>
-
 <body>
-  <h1>📜 페트 정보 뷰어</h1>
+  <div class="container">
+    <h2 class="mb-3">🐾 미궁 서버 펫 확률 계산기</h2>
+    <p class="text-muted mb-4">펫 이름을 선택하면 성장률을 불러와 전수 기반 성공 확률(%)을 계산합니다.</p>
 
-  <select id="petType">
-    <option value="normal">일반 페트</option>
-    <option value="reborn">환생 페트</option>
-  </select>
-  <input id="nameSearch" placeholder="이름 검색" />
-  <button id="nameSearchBtn">검색</button>
-
-  <h2>🧪 확장 조건 검색</h2>
-  <div class="form-row">
-    <label for="petAge">🕰️ 펫 구분:</label>
-    <select id="petAge">
-      <option value="all">전체</option>
-      <option value="old">구펫</option>
-      <option value="new">신펫</option>
-    </select>
-  </div>
-
-  <input id="atk" placeholder="공격력 성장률" />
-  <input id="def" placeholder="방어력 성장률" />
-  <input id="spd" placeholder="순발력 성장률" />
-  <input id="hp" placeholder="체력 성장률" />
-  <input id="total" placeholder="총 성장률" />
-
-  <div class="form-row">
-    <label for="limitCount">🧮 노출 개수 제한:</label>
-    <input id="limitCount" type="number" placeholder="예: 10" min="1" style="max-width: 100px;" />
-  </div>
-  <button id="filterBtn">조건 검색</button>
-
-  <h2>📊 다중 비교</h2>
-  <input id="compare1" placeholder="이름1" />
-  <input id="compare2" placeholder="이름2" />
-  <input id="compare3" placeholder="이름3" />
-  <input id="compare4" placeholder="이름4" />
-  <input id="compare5" placeholder="이름5" />
-  <button id="compareBtn">비교</button>
-
-  <!-- ✅ 모달 -->
-  <div id="modalOverlay">
-    <div id="modalContent">
-      <div style="text-align:right; margin-bottom:10px;">
-        <button id="zoomInBtn">🔍 확대</button>
-        <button id="zoomOutBtn">🔍 축소</button>
-      </div>
-      <div id="results">⏳ 데이터 로딩 중...</div>
-
-      <!-- 검색 결과 영역 -->
-      <div id="resultsContainer"></div>
-
-      <br />
-      <button id="modalCloseBtn">닫기</button>
+    <!-- 펫 선택 -->
+    <div class="mb-3">
+      <label class="form-label">펫 이름</label>
+      <select id="petSelect" class="form-select">
+        <option value="">-- 펫 선택 --</option>
+      </select>
     </div>
+
+    <!-- 표시용 표 -->
+    <table class="table table-dark table-striped align-middle">
+      <thead>
+        <tr>
+          <th>구분</th>
+          <th>HP</th>
+          <th>Atk</th>
+          <th>Def</th>
+          <th>Agi</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>초기치</td>
+          <td id="initHp">-</td>
+          <td id="initOp">-</td>
+          <td id="initDp">-</td>
+          <td id="initAp">-</td>
+        </tr>
+        <tr>
+          <td>성장률</td>
+          <td id="growH">-</td>
+          <td id="growO">-</td>
+          <td id="growD">-</td>
+          <td id="growA">-</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="d-grid gap-2">
+      <button id="calcBtn" class="btn btn-primary btn-lg" disabled>계산하기</button>
+    </div>
+
+    <div id="resultBox" class="mt-4" style="display:none;"></div>
   </div>
 
-  <script src="pets.js"></script>
-  <script src="script.js"></script>
+  <script>
+  let pets = [];
 
+  async function loadPets() {
+    try {
+      const res = await fetch("./pets.json");
+      pets = await res.json();
+      const sel = document.getElementById("petSelect");
+      pets.forEach(p => {
+        const opt = document.createElement("option");
+        opt.value = p.Name;
+        opt.textContent = p.Name;
+        sel.append(opt);
+      });
+    } catch (e) {
+      alert("⚠️ pets.json을 불러올 수 없습니다. 경로를 확인하세요.");
+    }
+  }
 
-<br>
-<br>
-<br>
-<br>
-<a href="https://hits.sh/storazi.github.io/"><img alt="Hits" src="https://hits.sh/storazi.github.io.svg?view=today-total&label=sup"/></a>
+  loadPets();
 
+  document.getElementById("petSelect").addEventListener("change", (e) => {
+    const name = e.target.value;
+    const pet = pets.find(p => p.Name === name);
+    if (!pet) return;
+
+    // 표에 표시
+    document.getElementById("initHp").textContent = pet.Init.HP;
+    document.getElementById("initOp").textContent = pet.Init.Op;
+    document.getElementById("initDp").textContent = pet.Init.Dp;
+    document.getElementById("initAp").textContent = pet.Init.Ap;
+
+    document.getElementById("growH").textContent = pet.Grow.H;
+    document.getElementById("growO").textContent = pet.Grow.O;
+    document.getElementById("growD").textContent = pet.Grow.D;
+    document.getElementById("growA").textContent = pet.Grow.A;
+
+    document.getElementById("calcBtn").disabled = false;
+  });
+
+  document.getElementById("calcBtn").addEventListener("click", () => {
+    const name = document.getElementById("petSelect").value;
+    const pet = pets.find(p => p.Name === name);
+    if (!pet) return;
+
+    const targetSum = Math.round((pet.Grow.H + pet.Grow.O + pet.Grow.D + pet.Grow.A) * 100) / 100;
+
+    let success = 0, total = 0;
+    const ranks = [435, 455, 475, 495, 515, 535, 555, 575];
+
+    for (const r of ranks) {
+      for (let hp = 0; hp <= 15; hp++) {
+        for (let atk = 0; atk <= 15; atk++) {
+          for (let def = 0; def <= 15; def++) {
+            for (let agi = 0; agi <= 15; agi++) {
+              total++;
+              const upH = ((hp + 4.5) * r) / 10000;
+              const upO = ((atk + 4.5) * r) / 10000;
+              const upD = ((def + 4.5) * r) / 10000;
+              const upA = ((agi + 4.5) * r) / 10000;
+              const sum = Math.round((upH + upO + upD + upA) * 100) / 100;
+              if (Math.abs(sum - targetSum) <= 0.01) success++;
+            }
+          }
+        }
+      }
+    }
+
+    const probability = (success / total) * 100;
+    const resultBox = document.getElementById("resultBox");
+    resultBox.style.display = "block";
+    resultBox.textContent = `성공 확률 : ${probability.toFixed(2)}% (${success}/${total})`;
+  });
+  </script>
 </body>
 </html>
