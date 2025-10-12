@@ -136,41 +136,54 @@
 
     // 계산 버튼
     document.getElementById("calcBtn").addEventListener("click", () => {
-      const name = petSelect.value.trim();
-      const pet = pets.find(p => p.Name.trim() === name);
-      if (!pet) return;
+  const name = petSelect.value.trim();
+  const pet = pets.find(p => p.Name.trim() === name);
+  if (!pet) return;
 
-      // 오차 허용 & 반올림 제거
-      const targetSum = pet.Grow.H + pet.Grow.O + pet.Grow.D + pet.Grow.A;
+  // 목표 성장률 4개
+  const target = {
+    H: pet.Grow.H,
+    O: pet.Grow.O,
+    D: pet.Grow.D,
+    A: pet.Grow.A
+  };
 
-      let success = 0, total = 0;
-      const ranks = [435, 455, 475, 495, 515, 535, 555, 575];
+  let success = 0, total = 0;
+  const ranks = [435, 455, 475, 495, 515, 535, 555, 575];
 
-      for (const r of ranks) {
-        for (let hp = 0; hp <= 15; hp++) {
-          for (let atk = 0; atk <= 15; atk++) {
-            for (let def = 0; def <= 15; def++) {
-              for (let agi = 0; agi <= 15; agi++) {
-                total++;
-                const upH = ((hp + 4.5) * r) / 10000;
-                const upO = ((atk + 4.5) * r) / 10000;
-                const upD = ((def + 4.5) * r) / 10000;
-                const upA = ((agi + 4.5) * r) / 10000;
-                const sum = upH + upO + upD + upA;
+  for (const r of ranks) {
+    for (let hp = 0; hp <= 15; hp++) {
+      for (let atk = 0; atk <= 15; atk++) {
+        for (let def = 0; def <= 15; def++) {
+          for (let agi = 0; agi <= 15; agi++) {
+            total++;
 
-                ㅁㄴㅇㄹ
-                if (Math.abs(sum - targetSum) <= 0.08) success++;
-              }
-            }
+            // 실제 성장률 계산
+            const upH = ((hp + 4.5) * r) / 10000;
+            const upO = ((atk + 4.5) * r) / 10000;
+            const upD = ((def + 4.5) * r) / 10000;
+            const upA = ((agi + 4.5) * r) / 10000;
+
+            // 각 항목별 오차 비교
+            const ok =
+              Math.abs(upH - target.H) <= 0.05 &&
+              Math.abs(upO - target.O) <= 0.05 &&
+              Math.abs(upD - target.D) <= 0.05 &&
+              Math.abs(upA - target.A) <= 0.05;
+
+            if (ok) success++;
           }
         }
       }
+    }
+  }
 
-      const probability = (success / total) * 100;
-      const resultBox = document.getElementById("resultBox");
-      resultBox.style.display = "block";
-      resultBox.textContent = `성공 확률 : ${probability.toFixed(2)}% (${success}/${total})`;
-    });
+  const probability = (success / total) * 100;
+  const resultBox = document.getElementById("resultBox");
+  resultBox.style.display = "block";
+  resultBox.textContent = `성공 확률 : ${probability.toFixed(2)}% (${success}/${total})`;
+});
+
   </script>
 </body>
 </html>
