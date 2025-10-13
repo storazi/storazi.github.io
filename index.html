@@ -1,52 +1,43 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🐾 미궁 서버 펫 확률 계산기</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>미궁 서버 펫 확률 계산기</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
   <style>
-    body {
-      background: #0b1220;
-      color: #eaf2ff;
-      padding: 2rem;
-      font-family: 'Pretendard', sans-serif;
-    }
-    .container { max-width: 720px; }
-    input, select {
-      background: #121a2b;
-      border: 1px solid #24324b;
-      color: #eaf2ff;
-      border-radius: 6px;
-      padding: 6px 10px;
-      width: 100%;
-    }
-    #resultBox {
-      background: #121a2b;
-      border: 1px solid #24324b;
-      padding: 15px;
-      margin-top: 20px;
-      border-radius: 10px;
-      font-size: 1.2rem;
-      text-align: center;
-      color: #6aa0ff;
-    }
+    .container { margin-top: 20px; color:#eaf2ff; background:#0b1220; padding:30px; border-radius:10px; }
+    .form-control { width: auto; display: inline-block; background:#121a2b; border:1px solid #24324b; color:#eaf2ff; }
+    table { margin-top: 20px; background:#121a2b; }
+    .panel-info>.panel-heading{background:#24324b;color:#eaf2ff;}
+    .panel-body{background:#121a2b;color:#a9b5cc;}
   </style>
 </head>
 <body>
-  <div class="container">
-    <h2 class="mb-3">🐾 미궁 서버 펫 확률 계산기</h2>
-    <p class="text-muted mb-4">펫 이름을 선택하면 초기치·성장률을 불러와 전수 기반 성공 확률(%)을 계산합니다.</p>
 
-    <!-- 검색 입력 -->
-    <div class="mb-3">
-      <label class="form-label">펫 이름</label>
-      <input list="petList" id="petSelect" class="form-control" placeholder="펫 이름 검색..." />
-      <datalist id="petList"></datalist>
+<div class="container">
+  <h2>🐾 미궁 서버 펫 확률 계산기</h2>
+  <hr>
+
+  <div class="panel panel-info">
+    <div class="panel-heading"><strong>사용법</strong></div>
+    <div class="panel-body">
+      ① 펫 이름을 선택하면 성장률이 자동으로 불러와집니다.<br>
+      ② 초기치를 입력하면 내부 계산으로 성공 확률(%)을 보여줍니다.
     </div>
+  </div>
 
-    <!-- 표 -->
-    <table class="table table-dark table-striped align-middle">
+  <div>
+    <label>펫 이름</label>
+    <select id="petSelect" class="form-control">
+      <option value="">-- 펫 선택 --</option>
+    </select>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-striped table-bordered">
       <thead>
         <tr>
           <th>구분</th>
@@ -54,140 +45,105 @@
           <th>Atk</th>
           <th>Def</th>
           <th>Agi</th>
+          <th></th>
         </tr>
       </thead>
       <tbody>
         <tr>
           <td>초기치</td>
-          <td><input type="number" id="initHp" step="0.01" /></td>
-          <td><input type="number" id="initOp" step="0.01" /></td>
-          <td><input type="number" id="initDp" step="0.01" /></td>
-          <td><input type="number" id="initAp" step="0.01" /></td>
+          <td><input type="number" class="form-control" id="statHp" placeholder="예: 52"></td>
+          <td><input type="number" class="form-control" id="statAtk" placeholder="예: 12"></td>
+          <td><input type="number" class="form-control" id="statDef" placeholder="예: 7"></td>
+          <td><input type="number" class="form-control" id="statAgi" placeholder="예: 6"></td>
+          <td><button type="button" class="btn btn-primary" id="calculate">계산하기</button></td>
         </tr>
         <tr>
-          <td>성장률</td>
-          <td id="growH">-</td>
-          <td id="growO">-</td>
-          <td id="growD">-</td>
-          <td id="growA">-</td>
+          <td>성장률 (자동)</td>
+          <td id="growHp">-</td>
+          <td id="growAtk">-</td>
+          <td id="growDef">-</td>
+          <td id="growAgi">-</td>
+          <td></td>
+        </tr>
+        <tr id="resultRow" style="display:none;">
+          <td><strong>결과</strong></td>
+          <td colspan="5" id="resultValue"></td>
         </tr>
       </tbody>
     </table>
-
-    <div class="d-grid gap-2">
-      <button id="calcBtn" class="btn btn-primary btn-lg" disabled>계산하기</button>
-    </div>
-
-    <div id="resultBox" class="mt-4" style="display:none;"></div>
   </div>
+</div>
 
-  <script>
-  let pets = [];
+<script>
+let pets = [];
 
-  async function loadPets() {
-    try {
-      const res = await fetch("./pets.json");
-      pets = await res.json();
-      const list = document.getElementById("petList");
-      pets.forEach(p => {
-        const opt = document.createElement("option");
-        opt.value = p.Name;
-        list.appendChild(opt);
-      });
-    } catch (e) {
-      alert("⚠️ pets.json을 불러올 수 없습니다. 경로를 확인하세요.");
-    }
+async function loadPets() {
+  try {
+    const res = await fetch("./pets.json");
+    pets = await res.json();
+    const sel = $("#petSelect");
+    pets.forEach(p => sel.append(`<option value="${p.Name}">${p.Name}</option>`));
+  } catch (e) {
+    alert("⚠️ pets.json 파일을 불러올 수 없습니다.");
+  }
+}
+
+loadPets();
+
+$("#petSelect").on("change", function() {
+  const name = $(this).val();
+  const pet = pets.find(p => p.Name === name);
+  if (!pet) return;
+
+  $("#growHp").text(pet.Grow.H);
+  $("#growAtk").text(pet.Grow.O);
+  $("#growDef").text(pet.Grow.D);
+  $("#growAgi").text(pet.Grow.A);
+});
+
+$("#calculate").on("click", function() {
+  const name = $("#petSelect").val();
+  const pet = pets.find(p => p.Name === name);
+  if (!pet) { alert("펫을 먼저 선택하세요."); return; }
+
+  const initHp = parseFloat($("#statHp").val());
+  const initAtk = parseFloat($("#statAtk").val());
+  const initDef = parseFloat($("#statDef").val());
+  const initAgi = parseFloat($("#statAgi").val());
+
+  if (isNaN(initHp) || isNaN(initAtk) || isNaN(initDef) || isNaN(initAgi)) {
+    alert("초기치를 모두 입력해주세요.");
+    return;
   }
 
-  loadPets();
+  const g = pet.Grow;
+  const targetSum = g.H + g.O + g.D + g.A;
+  const ranks = [435,455,475,495,515,535,555,575];
+  let success = 0, total = 0;
 
-  const calcBtn = document.getElementById("calcBtn");
-  const resultBox = document.getElementById("resultBox");
-
-  document.getElementById("petSelect").addEventListener("input", (e) => {
-    const name = e.target.value.trim();
-    const pet = pets.find(p => p.Name.trim() === name);
-    if (!pet) { calcBtn.disabled = true; return; }
-
-    // 초기치 입력 자동 채움
-    document.getElementById("initHp").value = pet.Init.HP;
-    document.getElementById("initOp").value = pet.Init.Op;
-    document.getElementById("initDp").value = pet.Init.Dp;
-    document.getElementById("initAp").value = pet.Init.Ap;
-
-    // 성장률 표시
-    document.getElementById("growH").textContent = pet.Grow.H;
-    document.getElementById("growO").textContent = pet.Grow.O;
-    document.getElementById("growD").textContent = pet.Grow.D;
-    document.getElementById("growA").textContent = pet.Grow.A;
-
-    calcBtn.disabled = false;
-  });
-
-  calcBtn.addEventListener("click", () => {
-    const name = document.getElementById("petSelect").value.trim();
-    const pet = pets.find(p => p.Name.trim() === name);
-    if (!pet) return;
-
-    const init = {
-      HP: parseFloat(document.getElementById("initHp").value),
-      Op: parseFloat(document.getElementById("initOp").value),
-      Dp: parseFloat(document.getElementById("initDp").value),
-      Ap: parseFloat(document.getElementById("initAp").value)
-    };
-    const g = pet.Grow;
-
-    const avgInit = (init.HP + init.Op + init.Dp + init.Ap) / 4;
-    const ratioH = init.HP / avgInit;
-    const ratioO = init.Op / avgInit;
-    const ratioD = init.Dp / avgInit;
-    const ratioA = init.Ap / avgInit;
-
-    // 고정 계산값
-    const ranks = [435, 455, 475, 495, 515, 535, 555, 575];
-    const EPS = 0.08;
-    const B_STEP = 0.01;
-    const SCALE = 0.0017;
-    let success = 0, total = 0;
-
-    for (const r of ranks) {
-      for (let b = 2.0; b <= 3.0; b += B_STEP) {
-        for (let hp = 0; hp <= 15; hp++) {
-          for (let atk = 0; atk <= 15; atk++) {
-            for (let def = 0; def <= 15; def++) {
-              for (let agi = 0; agi <= 15; agi++) {
-                total++;
-                const upH = ((hp + 2 + b) * r * SCALE * ratioH);
-                const upO = ((atk + 2 + b) * r * SCALE * ratioO);
-                const upD = ((def + 2 + b) * r * SCALE * ratioD);
-                const upA = ((agi + 2 + b) * r * SCALE * ratioA);
-
-                const closeEnough =
-                  Math.abs(upH - g.H) <= EPS &&
-                  Math.abs(upO - g.O) <= EPS &&
-                  Math.abs(upD - g.D) <= EPS &&
-                  Math.abs(upA - g.A);
-
-                if (closeEnough) success++;
-              }
-            }
+  for (const r of ranks) {
+    for (let hp = 0; hp <= 15; hp++) {
+      for (let atk = 0; atk <= 15; atk++) {
+        for (let def = 0; def <= 15; def++) {
+          for (let agi = 0; agi <= 15; agi++) {
+            total++;
+            const upH = ((hp + 4.5) * r) / 10000;
+            const upO = ((atk + 4.5) * r) / 10000;
+            const upD = ((def + 4.5) * r) / 10000;
+            const upA = ((agi + 4.5) * r) / 10000;
+            const sum = Math.round((upH + upO + upD + upA) * 100) / 100;
+            if (Math.abs(sum - targetSum) < 0.02) success++;
           }
         }
       }
     }
+  }
 
-    // 확률 계산 (작은 값도 보이게 보정)
-    const rawProb = (success / total) * 100;
-    const displayProb = rawProb < 0.001 ? rawProb * 10000 : rawProb; // 소수확률 확대
-    const probText =
-      displayProb < 0.01 && displayProb > 0
-        ? displayProb.toExponential(2) + "%"
-        : displayProb.toFixed(4) + "%";
+  const rate = (success / total) * 100;
+  $("#resultValue").html(`성공 확률 : ${rate.toFixed(2)}% (${success}/${total})`);
+  $("#resultRow").show();
+});
+</script>
 
-    resultBox.style.display = "block";
-    resultBox.textContent = 
-      `성공 확률 : ${isNaN(displayProb) ? '0.0000%' : probText} (${success}/${total})`;
-  });
-  </script>
 </body>
 </html>
