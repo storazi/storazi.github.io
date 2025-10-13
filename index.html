@@ -137,6 +137,7 @@
     const ranks = [435, 455, 475, 495, 515, 535, 555, 575];
     const EPS = 0.08;
     const B_STEP = 0.01;
+    const SCALE = 0.0017;
     let success = 0, total = 0;
 
     for (const r of ranks) {
@@ -146,10 +147,10 @@
             for (let def = 0; def <= 15; def++) {
               for (let agi = 0; agi <= 15; agi++) {
                 total++;
-                const upH = ((hp + 2 + b) * r * 0.0017 * ratioH);
-                const upO = ((atk + 2 + b) * r * 0.0017 * ratioO);
-                const upD = ((def + 2 + b) * r * 0.0017 * ratioD);
-                const upA = ((agi + 2 + b) * r * 0.0017 * ratioA);
+                const upH = ((hp + 2 + b) * r * SCALE * ratioH);
+                const upO = ((atk + 2 + b) * r * SCALE * ratioO);
+                const upD = ((def + 2 + b) * r * SCALE * ratioD);
+                const upA = ((agi + 2 + b) * r * SCALE * ratioA);
 
                 const closeEnough =
                   Math.abs(upH - g.H) <= EPS &&
@@ -166,9 +167,13 @@
     }
 
     const prob = (success / total) * 100;
+    const probText = (prob < 0.01 && prob > 0)
+      ? prob.toExponential(2) + "%"
+      : prob.toFixed(2) + "%";
+
     resultBox.style.display = "block";
-    resultBox.textContent = 
-      `성공 확률 : ${isNaN(prob) ? '0.00' : prob.toFixed(2)}% (${success}/${total})`;
+    resultBox.textContent =
+      `성공 확률 : ${isNaN(prob) ? '0.00%' : probText} (${success}/${total})`;
   });
   </script>
 </body>
