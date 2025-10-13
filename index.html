@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>미궁 펫 확률 계산기</title>
+  <title>미궁 서버 펫 확률 계산기</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     body {
@@ -36,18 +36,15 @@
 <body>
   <div class="container">
     <h2 class="mb-3">🐾 미궁 서버 펫 확률 계산기</h2>
-    <p class="text-muted mb-4">펫 이름을 검색하거나 선택하면 성장률을 불러와 전수 기반 성공 확률(%)을 계산합니다.</p>
+    <p class="text-muted mb-4">펫 이름을 선택하면 초기치·성장률을 불러와 전수 기반 성공 확률(%)을 계산합니다.</p>
 
-    <!-- 검색 + 선택 -->
     <div class="mb-3">
-      <input id="searchBox" placeholder="🔍 펫 이름 검색..." class="form-control mb-2">
-      <select id="petSelect" class="form-select">
-        <option value="">-- 펫 선택 --</option>
-      </select>
+      <label class="form-label">펫 이름</label>
+      <input list="petList" id="petSelect" class="form-control" placeholder="펫 이름 검색..." />
+      <datalist id="petList"></datalist>
     </div>
 
-    <!-- 표시용 표 -->
-    <table class="table table-dark table-striped align-middle text-center">
+    <table class="table table-dark table-striped align-middle">
       <thead>
         <tr>
           <th>구분</th>
@@ -60,10 +57,10 @@
       <tbody>
         <tr>
           <td>초기치</td>
-          <td><input id="initHp" type="number" step="0.01" class="form-control" /></td>
-          <td><input id="initOp" type="number" step="0.01" class="form-control" /></td>
-          <td><input id="initDp" type="number" step="0.01" class="form-control" /></td>
-          <td><input id="initAp" type="number" step="0.01" class="form-control" /></td>
+          <td id="initHp">-</td>
+          <td id="initOp">-</td>
+          <td id="initDp">-</td>
+          <td id="initAp">-</td>
         </tr>
         <tr>
           <td>성장률</td>
@@ -83,106 +80,96 @@
   </div>
 
   <script>
-    let pets = [];
+  let pets = [];
 
-    async function loadPets() {
-      try {
-        const res = await fetch("./pets.json");
-        pets = await res.json();
-        const sel = document.getElementById("petSelect");
-        pets.forEach(p => {
-          const opt = document.createElement("option");
-          opt.value = p.Name.trim();
-          opt.textContent = p.Name.trim();
-          sel.append(opt);
-        });
-      } catch (e) {
-        alert("⚠️ pets.json을 불러올 수 없습니다. 경로를 확인하세요.");
-      }
-    }
-
-    loadPets();
-
-    // 검색 필터
-    document.getElementById("searchBox").addEventListener("input", (e) => {
-      const query = e.target.value.trim().toLowerCase();
-      const select = document.getElementById("petSelect");
-      Array.from(select.options).forEach(opt => {
-        if (opt.value === "") return;
-        const match = opt.textContent.toLowerCase().includes(query);
-        opt.style.display = match ? "" : "none";
+  async function loadPets() {
+    try {
+      const res = await fetch("./pets.json");
+      pets = await res.json();
+      const list = document.getElementById("petList");
+      pets.forEach(p => {
+        const opt = document.createElement("option");
+        opt.value = p.Name;
+        list.appendChild(opt);
       });
-    });
+    } catch (e) {
+      alert("⚠️ pets.json을 불러올 수 없습니다. 경로를 확인하세요.");
+    }
+  }
 
-    // 선택 시 자동입력
-    document.getElementById("petSelect").addEventListener("change", (e) => {
-      const name = e.target.value.trim();
-      const pet = pets.find(p => p.Name.trim() === name);
-      if (!pet) return;
+  loadPets();
 
-      initHp.value = pet.Init.HP;
-      initOp.value = pet.Init.Op;
-      initDp.value = pet.Init.Dp;
-      initAp.value = pet.Init.Ap;
+  const calcBtn = document.getElementById("calcBtn");
+  const resultBox = document.getElementById("resultBox");
 
-      growH.textContent = pet.Grow.H;
-      growO.textContent = pet.Grow.O;
-      growD.textContent = pet.Grow.D;
-      growA.textContent = pet.Grow.A;
+  document.getElementById("petSelect").addEventListener("input", (e) => {
+    const name = e.target.value.trim();
+    const pet = pets.find(p => p.Name.trim() === name);
+    if (!pet) { calcBtn.disabled = true; return; }
 
-      calcBtn.disabled = false;
-      resultBox.style.display = "none";
-    });
+    document.getElementById("initHp").textContent = pet.Init.HP;
+    document.getElementById("initOp").textContent = pet.Init.Op;
+    document.getElementById("initDp").textContent = pet.Init.Dp;
+    document.getElementById("initAp").textContent = pet.Init.Ap;
 
-    // 계산 버튼
-    document.getElementById("calcBtn").addEventListener("click", () => {
-  const name = petSelect.value.trim();
-  const pet = pets.find(p => p.Name.trim() === name);
-  if (!pet) return;
+    document.getElementById("growH").textContent = pet.Grow.H;
+    document.getElementById("growO").textContent = pet.Grow.O;
+    document.getElementById("growD").textContent = pet.Grow.D;
+    document.getElementById("growA").textContent = pet.Grow.A;
 
-  const g = pet.Grow;
-  const ranks = [435, 455, 475, 495, 515, 535, 555, 575];
+    calcBtn.disabled = false;
+  });
 
-  const EPS = 0.08;        // 각 성장률 허용 오차
-  const B_STEP = 0.01;     // 베이스 스캔 간격
-  let success = 0, total = 0;
+  calcBtn.addEventListener("click", () => {
+    const name = document.getElementById("petSelect").value.trim();
+    const pet = pets.find(p => p.Name.trim() === name);
+    if (!pet) return;
 
-  for (const r of ranks) {
-    for (let b = 2.00; b <= 3.0001; b += B_STEP) {
-      // 16^4 전수
-      for (let h = 0; h <= 15; h++) {
-        const dH = (h + 2 + b) * r;
-        // HP로부터 스케일 추정
-        const s = g.H / dH;
+    const g = pet.Grow;
+    const init = pet.Init;
+    const avgInit = (init.HP + init.Op + init.Dp + init.Ap) / 4;
 
-        // s가 말이 되는 범위가 아니면 바로 스킵 (속도↑)
-        if (s <= 0 || s > 0.01) continue;
+    const ratioH = init.HP / avgInit;
+    const ratioO = init.Op / avgInit;
+    const ratioD = init.Dp / avgInit;
+    const ratioA = init.Ap / avgInit;
 
-        for (let o = 0; o <= 15; o++) {
-          const predO = ((o + 2 + b) * r) * s;
-          if (Math.abs(predO - g.O) > EPS) continue;
+    const ranks = [435, 455, 475, 495, 515, 535, 555, 575];
+    const EPS = 0.08;
+    const B_STEP = 0.01;
+    let success = 0, total = 0;
 
-          for (let d = 0; d <= 15; d++) {
-            const predD = ((d + 2 + b) * r) * s;
-            if (Math.abs(predD - g.D) > EPS) continue;
+    for (const r of ranks) {
+      for (let b = 2.0; b <= 3.0; b += B_STEP) {
+        for (let hp = 0; hp <= 15; hp++) {
+          for (let atk = 0; atk <= 15; atk++) {
+            for (let def = 0; def <= 15; def++) {
+              for (let agi = 0; agi <= 15; agi++) {
+                total++;
+                const upH = ((hp + 2 + b) * r * 0.0017 * ratioH);
+                const upO = ((atk + 2 + b) * r * 0.0017 * ratioO);
+                const upD = ((def + 2 + b) * r * 0.0017 * ratioD);
+                const upA = ((agi + 2 + b) * r * 0.0017 * ratioA);
 
-            for (let a = 0; a <= 15; a++) {
-              total++;
-              const predA = ((a + 2 + b) * r) * s;
-              if (Math.abs(predA - g.A) <= EPS) {
-                success++;
+                const closeEnough =
+                  Math.abs(upH - g.H) <= EPS &&
+                  Math.abs(upO - g.O) <= EPS &&
+                  Math.abs(upD - g.D) <= EPS &&
+                  Math.abs(upA - g.A) <= EPS;
+
+                if (closeEnough) success++;
               }
             }
           }
         }
       }
     }
-  }
 
-  const p = (success / total) * 100;
-  resultBox.style.display = "block";
-  resultBox.textContent = `성공 확률 : ${p.toFixed(2)}% (${success}/${total})`;
-});
-</script>
+    const prob = (success / total) * 100;
+    resultBox.style.display = "block";
+    resultBox.textContent = 
+      `성공 확률 : ${isNaN(prob) ? '0.00' : prob.toFixed(2)}% (${success}/${total})`;
+  });
+  </script>
 </body>
 </html>
