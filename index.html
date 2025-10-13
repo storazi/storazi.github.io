@@ -75,75 +75,116 @@
 </div>
 
 <script>
-let pets = [];
+const RANKS = [435,455,475,495,515,535,555,575];
 
-async function loadPets() {
-  try {
-    const res = await fetch("./pets.json");
-    pets = await res.json();
-    const sel = $("#petSelect");
-    pets.forEach(p => sel.append(`<option value="${p.Name}">${p.Name}</option>`));
-  } catch (e) {
-    alert("⚠️ pets.json 파일을 불러올 수 없습니다.");
-  }
+// 소수 둘째자리까지 “수치 동일” 비교
+const eq2 = (a, b) => Math.abs(Number(a.toFixed(2)) - Number(b.toFixed(2))) < 0.005;
+
+// initnum, base → 초기 실수 스탯
+function initStat(initnum, base){ return initnum * (base + 4.5) / 100; }
+
+// base, rank → 성장률
+function growFrom(base, rank){ return ((base + 4.5) * rank) / 10000; }
+
+// 한 후보(initnum, 4베이스)가 입력 초기치를 만족하는지 검사
+function matchInitials(initnum, hb, ob, db, ab, IHP, IATK, IDEF, IAGI){
+  const H = initStat(initnum, hb);
+  const O = initStat(initnum, ob);
+  const D = initStat(initnum, db);
+  const A = initStat(initnum, ab);
+
+  // 표기 규칙(문제에서 쓰던 정수화)
+  const shownHP  = Math.floor(H*4 + O + D + A);
+  const shownATK = Math.floor(H*0.1 + O + D*0.1 + A*0.05);
+  const shownDEF = Math.floor(H*0.1 + O*0.1 + D + A*0.05);
+  const shownAGI = Math.floor(A);
+
+  return (shownHP===IHP && shownATK===IATK && shownDEF===IDEF && shownAGI===IAGI);
 }
 
-loadPets();
+// 해당 후보가 주어진 펫 성장률 4개와 일치하는 랭크가 몇 개인지
+function countRankMatches(hb, ob, db, ab, grow){
+  let hit = 0;
+  for(const r of RANKS){
+    const gH = growFrom(hb, r);
+    const gO = growFrom(ob, r);
+    const gD = growFrom(db, r);
+    const gA = growFrom(ab, r);
+    if (eq2(gH, grow.H) && eq2(gO, grow.O) && eq2(gD, grow.D) && eq2(gA, grow.A)) hit++;
+  }
+  return hit;
+}
 
-$("#petSelect").on("change", function() {
-  const name = $(this).val();
-  const pet = pets.find(p => p.Name === name);
-  if (!pet) return;
+// 메인: 전수로 후보 찾고 확률 계산
+async function calcProbability(){
+  // 선택 펫/입력값 가져오기
+  const name = document.getElementById("petSelect").value.trim();
+  const pet  = (window.pets||[]).find(p => p.Name.trim()===name);
+  if(!pet){ alert("펫을 먼저 선택해주세요."); return; }
 
-  $("#growHp").text(pet.Grow.H);
-  $("#growAtk").text(pet.Grow.O);
-  $("#growDef").text(pet.Grow.D);
-  $("#growAgi").text(pet.Grow.A);
-});
-
-$("#calculate").on("click", function() {
-  const name = $("#petSelect").val();
-  const pet = pets.find(p => p.Name === name);
-  if (!pet) { alert("펫을 먼저 선택하세요."); return; }
-
-  const initHp = parseFloat($("#statHp").val());
-  const initAtk = parseFloat($("#statAtk").val());
-  const initDef = parseFloat($("#statDef").val());
-  const initAgi = parseFloat($("#statAgi").val());
-
-  if (isNaN(initHp) || isNaN(initAtk) || isNaN(initDef) || isNaN(initAgi)) {
-    alert("초기치를 모두 입력해주세요.");
-    return;
+  const IHP  = parseInt(document.getElementById("hpInput").value,10);
+  const IATK = parseInt(document.getElementById("atkInput").value,10);
+  const IDEF = parseInt(document.getElementById("defInput").value,10);
+  const IAGI = parseInt(document.getElementById("agiInput").value,10);
+  if([IHP,IATK,IDEF,IAGI].some(v=>Number.isNaN(v))){
+    alert("초기치를 모두 입력해주세요."); return;
   }
 
-  const g = pet.Grow;
-  const targetSum = g.H + g.O + g.D + g.A;
-  const ranks = [435,455,475,495,515,535,555,575];
-  let success = 0, total = 0;
+  const grow = pet.Grow; // {H,O,D,A}
 
-  for (const r of ranks) {
-    for (let hp = 0; hp <= 15; hp++) {
-      for (let atk = 0; atk <= 15; atk++) {
-        for (let def = 0; def <= 15; def++) {
-          for (let agi = 0; agi <= 15; agi++) {
-            total++;
-            const upH = ((hp + 4.5) * r) / 10000;
-            const upO = ((atk + 4.5) * r) / 10000;
-            const upD = ((def + 4.5) * r) / 10000;
-            const upA = ((agi + 4.5) * r) / 10000;
-            const sum = Math.round((upH + upO + upD + upA) * 100) / 100;
-            if (Math.abs(sum - targetSum) < 0.02) success++;
+  let candidates = 0;
+  let success = 0;
+
+  // 1) 아지로 1차 가지치기
+  for(let initnum=10; initnum<=30; initnum++){
+    for(let ab=0; ab<=60; ab++){
+      const A = initStat(initnum, ab);
+      if (Math.floor(A)!==IAGI) continue; // 아지 안맞으면 skip
+
+      // 2) HP/Atk/Def 베이스 전수 (0..60), 초기치 정확 매칭만 채택
+      for(let hb=0; hb<=60; hb++){
+        for(let ob=0; ob<=60; ob++){
+          for(let db=0; db<=60; db++){
+            if (!matchInitials(initnum, hb, ob, db, ab, IHP, IATK, IDEF, IAGI)) continue;
+            candidates++;
+
+            // 3) 8랭크 중 펫 성장률 4개가 모두 맞는 랭크 수
+            success += countRankMatches(hb, ob, db, ab, grow);
           }
         }
       }
     }
   }
 
-  const rate = (success / total) * 100;
-  $("#resultValue").html(`성공 확률 : ${rate.toFixed(2)}% (${success}/${total})`);
-  $("#resultRow").show();
+  // 후보×랭크가 전체 경우의 수
+  const total = candidates * RANKS.length;
+  const prob = total>0 ? (success/total*100) : 0;
+
+  const box = document.getElementById("resultBox");
+  box.style.display = "block";
+  box.textContent = `성공 확률 : ${prob.toFixed(2)}% (${success}/${total})`;
+}
+
+// ▼ 이 IDs가 페이지에 있어야 함(입력칸/버튼/결과창)
+document.getElementById("calcBtn").addEventListener("click", calcProbability);
+
+// 선택 시 입력칸 자동 채우기(초기치가 있으면 세팅, 성장률 표시는 그대로)
+document.getElementById("petSelect").addEventListener("change", (e)=>{
+  const pet = (window.pets||[]).find(p=>p.Name===e.target.value);
+  if(!pet) return;
+  // 필요 시 placeholder만 채우고, 값은 사용자가 적는 구조면 아래 두 줄 주석 처리
+  document.getElementById("hpInput").value  = Math.floor(pet.Init.HP*4 + pet.Init.Op + pet.Init.Dp + pet.Init.Ap);
+  document.getElementById("atkInput").value = Math.floor(pet.Init.HP*0.1 + pet.Init.Op + pet.Init.Dp*0.1 + pet.Init.Ap*0.05);
+  document.getElementById("defInput").value = Math.floor(pet.Init.HP*0.1 + pet.Init.Op*0.1 + pet.Init.Dp + pet.Init.Ap*0.05);
+  document.getElementById("agiInput").value = Math.floor(pet.Init.Ap);
+  // 성장률 표시도 갱신(표 셀 id는 기존 페이지에 맞춰두기)
+  document.getElementById("growH").textContent = pet.Grow.H;
+  document.getElementById("growO").textContent = pet.Grow.O;
+  document.getElementById("growD").textContent = pet.Grow.D;
+  document.getElementById("growA").textContent = pet.Grow.A;
 });
 </script>
+
 
 </body>
 </html>
