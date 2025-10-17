@@ -15,8 +15,8 @@
   body{
     margin:0;background:var(--bg);color:var(--text);
     font-family:system-ui,-apple-system,Segoe UI,Roboto,Pretendard,Apple SD Gothic Neo,sans-serif;
-    display:flex;justify-content:center;align-items:center;
-    min-height:100vh;padding:20px;
+    display:flex;flex-direction:column;justify-content:center;align-items:center;
+    min-height:100vh;padding:20px;gap:20px;
   }
 
   .wrapper{
@@ -59,6 +59,7 @@
   }
   .stat small{display:block;color:var(--muted);font-size:clamp(12px,1.5vw,13px);}
   .stat strong{display:block;margin-top:4px;font-size:clamp(16px,2vw,18px);}
+  #visits{text-align:center;color:var(--muted);}
 </style>
 </head>
 <body>
@@ -67,23 +68,20 @@
   <!-- ⬅ 왼쪽: 레벨업 계산기 -->
   <div class="card">
     <h2>레벨업 계산기</h2>
-<div class="row"><label>현재 레벨</label><input id="currentLevel" type="number" /></div>
-<div class="row"><label>현재 진행도(%)</label><input id="currentPercent" type="number" min="0" max="100" placeholder="예: 45" /></div>
-<div class="row"><label>목표 레벨</label><input id="targetLevel" type="number"/></div>
-<div class="row"><label>시간당 획득 경험치</label><input id="xpPerHour" type="number" /></div>
-<div class="row buttons">
-  <button class="btn" id="run">계산</button>
-  <button class="btn ghost" id="reset">초기화</button>
-</div>
-<div class="results" id="results" hidden>
-  <div class="stat"><small>남은 경험치</small><strong id="statRemain">-</strong></div>
-  <div class="stat"><small>예상 시간</small><strong id="statHours">-</strong></div>
-  <div class="stat"><small>예상 일수</small><strong id="statDays">-</strong></div>
+    <div class="row"><label>현재 레벨</label><input id="currentLevel" type="number" /></div>
+    <div class="row"><label>현재 진행도(%)</label><input id="currentPercent" type="number" min="0" max="100" placeholder="예: 45" /></div>
+    <div class="row"><label>목표 레벨</label><input id="targetLevel" type="number"/></div>
+    <div class="row"><label>시간당 획득 경험치</label><input id="xpPerHour" type="number" /></div>
+    <div class="row buttons">
+      <button class="btn" id="run">계산</button>
+      <button class="btn ghost" id="reset">초기화</button>
+    </div>
+    <div class="results" id="results" hidden>
+      <div class="stat"><small>남은 경험치</small><strong id="statRemain">-</strong></div>
+      <div class="stat"><small>예상 시간</small><strong id="statHours">-</strong></div>
+      <div class="stat"><small>예상 일수</small><strong id="statDays">-</strong></div>
     </div>
   </div>
-
-
-
 
   <!-- ➡ 오른쪽: 시간당 경험치 계산기 -->
   <div class="card">
@@ -98,46 +96,17 @@
   </div>
 </div>
 
-<script id="embedded-data" type="application/json">{
-  "levels": [
-  {"level":0,"cum":0},{"level":1,"cum":2},{"level":2,"cum":6},{"level":3,"cum":17},{"level":4,"cum":37},
-  {"level":5,"cum":67},{"level":6,"cum":111},{"level":7,"cum":169},{"level":8,"cum":247},{"level":9,"cum":344},
-  {"level":10,"cum":464},{"level":11,"cum":609},{"level":12,"cum":783},{"level":13,"cum":985},{"level":14,"cum":1221},
-  {"level":15,"cum":1491},{"level":16,"cum":1799},{"level":17,"cum":2145},{"level":18,"cum":2535},{"level":19,"cum":2968},
-  {"level":20,"cum":3448},{"level":21,"cum":3977},{"level":22,"cum":4559},{"level":23,"cum":5193},{"level":24,"cum":5885},
-  {"level":25,"cum":6635},{"level":26,"cum":7447},{"level":27,"cum":8321},{"level":28,"cum":9263},{"level":29,"cum":10272},
-  {"level":30,"cum":11352},{"level":31,"cum":12506},{"level":32,"cum":13734},{"level":33,"cum":15042},{"level":34,"cum":16429},
-  {"level":35,"cum":17899},{"level":36,"cum":19454},{"level":37,"cum":21098},{"level":38,"cum":22830},{"level":39,"cum":24656},
-  {"level":40,"cum":26576},{"level":41,"cum":28594},{"level":42,"cum":30710},{"level":43,"cum":32930},{"level":44,"cum":35253},
-  {"level":45,"cum":37683},{"level":46,"cum":40222},{"level":47,"cum":42874},{"level":48,"cum":45638},{"level":49,"cum":48520},
-  {"level":50,"cum":51520},{"level":51,"cum":54642},{"level":52,"cum":57886},{"level":53,"cum":61258},{"level":54,"cum":64757},
-  {"level":55,"cum":68387},{"level":56,"cum":72150},{"level":57,"cum":76050},{"level":58,"cum":80086},{"level":59,"cum":84264},
-  {"level":60,"cum":106110},{"level":61,"cum":113412},{"level":62,"cum":121149},{"level":63,"cum":129352},{"level":64,"cum":138044},
-  {"level":65,"cum":147256},{"level":66,"cum":157019},{"level":67,"cum":167366},{"level":68,"cum":178334},{"level":69,"cum":189958},
-  {"level":70,"cum":202282},{"level":71,"cum":215348},{"level":72,"cum":229205},{"level":73,"cum":243901},{"level":74,"cum":259495},
-  {"level":75,"cum":276041},{"level":76,"cum":293606},{"level":77,"cum":312258},{"level":78,"cum":332071},{"level":79,"cum":353126},
-  {"level":80,"cum":375511},{"level":81,"cum":399318},{"level":82,"cum":424655},{"level":83,"cum":451631},{"level":84,"cum":480370},
-  {"level":85,"cum":511007},{"level":86,"cum":543686},{"level":87,"cum":578571},{"level":88,"cum":616838},{"level":89,"cum":655680},
-  {"level":90,"cum":698312},{"level":91,"cum":743970},{"level":92,"cum":795918},{"level":93,"cum":842442},{"level":94,"cum":901869},
-  {"level":95,"cum":962553},{"level":96,"cum":1026899},{"level":97,"cum":1098354},{"level":98,"cum":1174419},{"level":99,"cum":1256664},
-  {"level":100,"cum":1407463},{"level":101,"cum":1576358},{"level":102,"cum":1765521},{"level":103,"cum":1977384},{"level":104,"cum":2214670},
-  {"level":105,"cum":2480430},{"level":106,"cum":2778082},{"level":107,"cum":3111451},{"level":108,"cum":3484825},{"level":109,"cum":3903005},
-  {"level":110,"cum":4371365},{"level":111,"cum":4895929},{"level":112,"cum":5483440},{"level":113,"cum":6141453},{"level":114,"cum":6878428},
-  {"level":115,"cum":7703839},{"level":116,"cum":8628300},{"level":117,"cum":9663695},{"level":118,"cum":10823339},{"level":119,"cum":12122140},
-  {"level":120,"cum":13576796},{"level":121,"cum":15206012},{"level":122,"cum":17030733},{"level":123,"cum":19074421},{"level":124,"cum":21363352},
-  {"level":125,"cum":23926954},{"level":126,"cum":26798189},{"level":127,"cum":30013971},{"level":128,"cum":33615648},{"level":129,"cum":37649526},
-  {"level":130,"cum":42167469},{"level":131,"cum":47227565},{"level":132,"cum":52894873},{"level":133,"cum":59242257},{"level":134,"cum":66351328},
-  {"level":135,"cum":74313488},{"level":136,"cum":83231106},{"level":137,"cum":93218839},{"level":138,"cum":104405100},{"level":139,"cum":116933712},
-  {"level":140,"cum":116981000}
-]
-}</script>
-
+<!-- 🌙 방문자수 표시 -->
+<div id="visits">총 방문자
+<br><br>
+<img src="https://hits.sh/storazi.github.io.svg?style=for-the-badge&label=visits&color=007ec6" alt="Hits">
+</div>
 <script>
 document.addEventListener('DOMContentLoaded',()=>{
   const $ = s=>document.querySelector(s);
   const fmt = n=>isFinite(n)?Number(n).toLocaleString():'-';
 
-  // 📘 요구 경험치 테이블 (각 레벨 → 다음 레벨)
+  // 📘 경험치 테이블
   const EXP_TABLE = {
     0:0,1:2,2:6,3:17,4:37,5:67,6:111,7:169,8:247,9:344,10:464,11:609,12:783,13:985,14:1221,
     15:1491,16:1799,17:2145,18:2535,19:2968,20:3448,21:3977,22:4559,23:5193,24:5885,25:6635,
@@ -166,6 +135,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     return sum;
   };
 
+  // 레벨업 계산
   $('#run').addEventListener('click',()=>{
     try{
       const currLv = Number($('#currentLevel').value);
@@ -177,7 +147,6 @@ document.addEventListener('DOMContentLoaded',()=>{
       if(targetLv<=currLv)
         throw new Error('목표 레벨은 현재보다 커야 합니다.');
 
-      // 현재 레벨 진행도 반영
       const remainFromCurr = EXP_TABLE[currLv]*(1-(currPct/100));
       const remainAfterCurr = getTotalExp(currLv+1,targetLv);
       const remain = remainFromCurr + remainAfterCurr;
@@ -199,6 +168,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     $('#results').hidden=true;$('#rateResult').hidden=true;
   });
 
+  // 시간당 경험치 계산
   $('#calcRate').addEventListener('click',()=>{
     try{
       const start=Number($('#startXP').value);
@@ -211,5 +181,23 @@ document.addEventListener('DOMContentLoaded',()=>{
       $('#rateResult').hidden=false;
     }catch(e){alert(e.message);}
   });
+
+  // 🌙 방문자 카운터
+  const NAMESPACE = 'storazi-github-io';
+  const KEY = 'total-visits';
+  const FLAG = 'counted:' + KEY;
+
+  (async () => {
+    const shouldCount = !sessionStorage.getItem(FLAG);
+    const url = `https://api.countapi.xyz/${shouldCount ? 'hit' : 'get'}/${NAMESPACE}/${KEY}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    document.getElementById('visits').textContent =
+      `총 방문자: ${data.value.toLocaleString()}`;
+    if (shouldCount) sessionStorage.setItem(FLAG, '1');
+  })();
+
 });
 </script>
+</body>
+</html>
