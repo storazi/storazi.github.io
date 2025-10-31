@@ -1,16 +1,15 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>경험치 & 8등급 확률 계산기</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>펫 경험치 & 8등급 확률 계산기</title>
 <style>
 :root{
   --bg:#0b1220; --panel:#121a2b; --soft:#1c2538; --ring:#24324b;
   --text:#eaf2ff; --muted:#a9b5cc; --accent:#6aa0ff;
   --ok:#36d17b; --warn:#ffbd4a; --bad:#ff6b81;
 }
-*{box-sizing:border-box;transition:all .15s ease-in-out;}
 body{
   margin:0;background:var(--bg);color:var(--text);
   font-family:system-ui,-apple-system,Segoe UI,Roboto,Pretendard,Apple SD Gothic Neo,sans-serif;
@@ -19,11 +18,11 @@ body{
 h1,h2{color:var(--accent);margin:10px 0;}
 .panel{
   background:var(--panel);border:1px solid var(--ring);border-radius:12px;
-  padding:20px;margin:10px 0;width:90%;max-width:600px;
+  padding:20px;margin:10px 0;width:90%;max-width:700px;
 }
-label{display:inline-block;width:120px;color:var(--muted);}
+label{display:inline-block;width:130px;color:var(--muted);}
 input{
-  width:100px;padding:6px;background:var(--soft);border:1px solid var(--ring);
+  width:120px;padding:6px;background:var(--soft);border:1px solid var(--ring);
   border-radius:6px;color:var(--text);margin:2px 0;
 }
 button{
@@ -40,11 +39,20 @@ button:hover{filter:brightness(1.2);}
 .muted{color:var(--muted);}
 .prob{color:var(--ok);font-weight:600;}
 hr{border:none;border-top:1px solid var(--ring);margin:25px 0;width:90%;}
+.petname-input{
+  width:250px;font-weight:600;font-size:16px;margin-bottom:10px;
+}
 </style>
 </head>
 <body>
 
-<h1>⚔️ 경험치 & 8등급 확률 계산기</h1>
+<h1>🐾 펫 경험치 & 8등급 확률 계산기</h1>
+
+<!-- 펫 이름 입력 -->
+<div class="panel">
+  <h2>🔖 펫 이름 입력</h2>
+  <input id="petName" class="petname-input" placeholder="예: 포이비스" />
+</div>
 
 <!-- 경험치 계산기 -->
 <div class="panel">
@@ -62,13 +70,13 @@ hr{border:none;border-top:1px solid var(--ring);margin:25px 0;width:90%;}
 <!-- 8등급 확률 계산기 -->
 <div class="panel">
   <h2>🎯 8등급 확률 계산기</h2>
+  <div id="probHeader" class="muted"></div>
   <div id="probOutput"></div>
 </div>
 
 <script>
 /* ────────────────────────────────
    📘 경험치 계산 로직
-   (간단한 지수 성장식: Lv^3 * 10)
 ──────────────────────────────── */
 function expForLevel(lv){ return Math.pow(lv,3)*10; }
 
@@ -77,6 +85,7 @@ function calcExp(){
   const targetLv = parseInt(document.getElementById('targetLv').value);
   const expPerBattle = parseInt(document.getElementById('expPerBattle').value);
   const battlesPerMin = parseInt(document.getElementById('battlesPerMin').value);
+  const petName = document.getElementById('petName').value || '이름 없는 펫';
 
   if(targetLv <= curLv){
     document.getElementById('expResult').innerText = '목표 레벨은 현재보다 높아야 합니다.';
@@ -90,6 +99,7 @@ function calcExp(){
   const minutes = Math.round(needMinutes % 60);
 
   document.getElementById('expResult').innerHTML = `
+    <b>${petName}</b>이(가) Lv.${curLv} → Lv.${targetLv}로 성장하려면:<br>
     필요 경험치: ${needExp.toLocaleString()}<br>
     예상 전투 수: ${needBattles.toLocaleString()}회<br>
     예상 소요 시간: ${hours}시간 ${minutes}분
@@ -131,13 +141,19 @@ function calcComboRates(list){
 }
 
 function renderProb(){
+  const petName = document.getElementById('petName').value || '이름 없는 펫';
   const rows = calcComboRates(combos);
   const global = getGlobalStats(combos);
+  const header = document.getElementById('probHeader');
   const out = document.getElementById('probOutput');
-  out.innerHTML = `
-    <div class="muted">전체 경우의 수: <b>${global.totalAll.toLocaleString()}</b> |
-    전체 8등급 케이스: <b>${global.grade8All.toLocaleString()}</b></div><br>
+
+  header.innerHTML = `
+    <b>${petName}</b> 기준<br>
+    전체 경우의 수: <b>${global.totalAll.toLocaleString()}</b> |
+    전체 8등급 케이스: <b>${global.grade8All.toLocaleString()}</b><br><br>
   `;
+
+  out.innerHTML = '';
   rows.forEach((r,i)=>{
     out.innerHTML += `
       <div class="combo-box">
@@ -149,8 +165,7 @@ function renderProb(){
           <span>순발력: ${r.agi}</span>
         </div>
         <div class="muted">
-          조합 내 경우의 수: ${r.total.toLocaleString()} /
-          8등급: ${r.grade8.toLocaleString()}
+          조합 내 경우의 수: ${r.total.toLocaleString()} / 8등급: ${r.grade8.toLocaleString()}
         </div>
         <div>
           ▶ 조합별 8등급 확률: <span class="prob">${r.localRate}</span><br>
@@ -159,7 +174,9 @@ function renderProb(){
       </div>`;
   });
 }
+
 renderProb();
+document.getElementById('petName').addEventListener('input', renderProb);
 </script>
 </body>
 </html>
