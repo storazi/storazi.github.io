@@ -3,47 +3,47 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>펫 초기화 시뮬레이터</title>
+<title>펫 능력치 시뮬레이터 (정수형)</title>
 <style>
 :root{
   --bg:#0b1220; --panel:#121a2b; --soft:#1c2538; --ring:#24324b;
-  --text:#eaf2ff; --muted:#a9b5cc; --accent:#6aa0ff;
-  --ok:#36d17b; --warn:#ffbd4a; --bad:#ff6b81;
+  --text:#eaf2ff; --muted:#a9b5cc; --accent:#6aa0ff; --ok:#36d17b;
 }
 body{
-  margin:0;background:var(--bg);color:var(--text);
-  font-family:system-ui,-apple-system,Segoe UI,Roboto,Pretendard,Apple SD Gothic Neo,sans-serif;
-  display:flex;flex-direction:column;align-items:center;padding:20px;
+  background:var(--bg);color:var(--text);
+  font-family:Pretendard,system-ui,sans-serif;
+  display:flex;flex-direction:column;align-items:center;margin:0;padding:20px;
 }
 .panel{
   background:var(--panel);border:1px solid var(--ring);
-  border-radius:12px;padding:20px;margin:10px 0;width:90%;max-width:720px;
+  border-radius:12px;padding:20px;margin-top:10px;width:90%;max-width:700px;
 }
-h2{color:var(--accent);}
-label{display:inline-block;width:120px;color:var(--muted);}
+h1{color:var(--accent);margin-bottom:5px;}
+label{display:inline-block;width:110px;color:var(--muted);}
 input{
-  width:100px;padding:6px;background:var(--soft);border:1px solid var(--ring);
-  border-radius:6px;color:var(--text);margin:2px 0;
+  width:100px;padding:6px;background:var(--soft);
+  border:1px solid var(--ring);border-radius:6px;color:var(--text);
 }
 button{
-  margin-top:10px;padding:8px 16px;background:var(--accent);
-  color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;
+  margin:8px 6px 0 0;padding:8px 16px;background:var(--accent);
+  color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;
 }
-button:hover{filter:brightness(1.2);}
-.result{margin-top:10px;color:var(--ok);font-weight:600;}
-.combo-box{
+button:hover{filter:brightness(1.15);}
+hr{border:none;border-top:1px solid var(--ring);margin:20px 0;}
+.combo{
   background:var(--panel);border:1px solid var(--ring);
-  border-radius:12px;padding:10px;margin-top:10px;
+  border-radius:12px;padding:12px;margin-top:10px;
 }
-.combo-box span{display:inline-block;margin-right:8px;}
-.muted{color:var(--muted);}
+.combo span{display:inline-block;margin-right:8px;}
+h3{color:var(--accent);}
 .prob{color:var(--ok);font-weight:700;}
-hr{border:none;border-top:1px solid var(--ring);margin:25px 0;width:90%;}
+.muted{color:var(--muted);}
 </style>
 </head>
 <body>
 
-<h2>🎯 펫 초기화 시뮬레이터</h2>
+<h1>펫 능력치 시뮬레이터 (정수형)</h1>
+
 <div class="panel">
   <label>펫 이름</label><input id="petName" type="text" placeholder="예: 반기노"><br>
   <label>체력(HP)</label><input id="sHp" type="number" value="50"><br>
@@ -51,94 +51,82 @@ hr{border:none;border-top:1px solid var(--ring);margin:25px 0;width:90%;}
   <label>방어력(Def)</label><input id="sDef" type="number" value="7"><br>
   <label>순발력(Agi)</label><input id="sAgi" type="number" value="6"><br>
   <label>JSON 업로드</label><input id="jsonFile" type="file" accept=".json"><br>
-  <button id="run1">랜덤 초기화 1회</button>
-  <button id="run5">랜덤 초기화 5회</button>
+  <button id="run1">초기화 1회</button>
+  <button id="run5">초기화 5회</button>
 
-  <div id="sStat" class="result" style="margin-top:15px;"></div>
   <hr>
-  <div id="probHeader" class="muted"></div>
-  <div id="probOutput"></div>
+  <div id="sDisplay" class="muted"></div>
+  <div id="baseRate" class="muted" style="margin-bottom:10px;"></div>
+  <div id="comboList"></div>
 </div>
 
 <script>
-let petData = [];
+let petData=[];
+
+// JSON 업로드
 document.getElementById('jsonFile').addEventListener('change', async e=>{
   const file=e.target.files?.[0];
-  if(!file) return;
-  const text=await file.text();
+  if(!file)return;
   try{
+    const text=await file.text();
     petData=JSON.parse(text);
-    document.getElementById('probHeader').innerText='✅ JSON 데이터 로드 완료 ('+petData.length+'건)';
+    alert(`✅ JSON 데이터 ${petData.length}건 불러옴`);
   }catch(err){
-    alert('JSON 파싱 실패: '+err.message);
-    petData=[];
+    alert('JSON 파싱 오류: '+err.message);
   }
 });
 
+// 랜덤 정수 함수
 function rand(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
-function getGlobalStats(list){
-  let totalAll=0,grade8All=0;
-  list.forEach(d=>{totalAll+=d.total;grade8All+=d.grade8;});
-  return{totalAll,grade8All};
-}
-function calcRates(list){
-  const g=getGlobalStats(list);
-  return list.map(c=>{
-    const local = c.total?c.grade8/c.total:0;
-    const global=g.totalAll?c.grade8/g.totalAll:0;
-    return {...c,localRate:(local*100).toFixed(2)+'%',globalRate:(global*100).toFixed(3)+'%'};
-  });
-}
-function renderCombos(name, combos){
-  const global=getGlobalStats(petData);
-  const out=document.getElementById('probOutput');
-  const header=document.getElementById('probHeader');
-  out.innerHTML='';
-  header.innerHTML=`전체 경우의 수: <b>${global.totalAll.toLocaleString()}</b> | 전체 8등급 케이스: <b>${global.grade8All.toLocaleString()}</b>`;
-  combos.forEach((r,i)=>{
-    const div=document.createElement('div');
-    div.className='combo-box';
-    div.innerHTML=`
-      <div>#${i+1}</div>
-      <div>
-        <span>체력: ${r.hp}</span>
-        <span>공격력: ${r.atk}</span>
-        <span>방어력: ${r.def}</span>
-        <span>순발력: ${r.agi}</span>
-      </div>
-      <div class="muted">조합 내 경우의 수: ${r.total.toLocaleString()} / 8등급: ${r.grade8.toLocaleString()}</div>
-      <div>▶ 조합별 8등급 확률: <span class="prob">${r.localRate}</span><br>
-           ▶ 전체 대비 비중: <span class="prob">${r.globalRate}</span></div>`;
-    out.appendChild(div);
-  });
+
+// 전체 확률 기준 계산
+function globalStats(data){
+  let total=0,grade8=0;
+  data.forEach(d=>{total+=d.total;grade8+=d.grade8;});
+  return {total,grade8,rate:(grade8/total*100).toFixed(2)};
 }
 
+// 개별 확률 계산
+function calcRate(hp,atk,def,agi){
+  const matched=petData.filter(p=>p.hp===hp&&p.atk===atk&&p.def===def&&p.agi===agi);
+  if(!matched.length)return null;
+  const total=matched.reduce((a,b)=>a+b.total,0);
+  const g8=matched.reduce((a,b)=>a+b.grade8,0);
+  return (g8/total*100).toFixed(2);
+}
+
+// 시뮬레이터 실행
 function simulate(count){
-  const name=document.getElementById('petName').value||'이름 없는 펫';
   if(!petData.length){alert('JSON 데이터를 먼저 업로드하세요.');return;}
+  const name=document.getElementById('petName').value||'이름 없는 펫';
   const sHp=+document.getElementById('sHp').value;
   const sAtk=+document.getElementById('sAtk').value;
   const sDef=+document.getElementById('sDef').value;
   const sAgi=+document.getElementById('sAgi').value;
-  document.getElementById('sStat').innerHTML=
-    `<b>${name}</b> S급 기준 능력치<br>체력:${sHp} / 공격력:${sAtk} / 방어력:${sDef} / 순발력:${sAgi}`;
 
-  const pool=petData;
-  const results=[];
-  for(let i=0;i<count;i++){
+  const global=globalStats(petData);
+  document.getElementById('sDisplay').innerHTML=
+    `<b>${name}</b> S급 기준 능력치<br>체력:${sHp} / 공격력:${sAtk} / 방어력:${sDef} / 순발력:${sAgi}`;
+  document.getElementById('baseRate').innerHTML=
+    `🎯 8등급 기준 확률: <span class="prob">${global.rate}%</span>`;
+
+  const list=document.getElementById('comboList');
+  list.innerHTML='';
+
+  for(let i=1;i<=count;i++){
     const hp=sHp+rand(-3,3);
     const atk=sAtk+rand(-2,2);
     const def=sDef+rand(-2,2);
     const agi=sAgi+rand(-2,2);
-    const filtered=pool.filter(p=>p.hp===hp && p.atk===atk && p.def===def && p.agi===agi);
-    if(filtered.length){
-      const rates=calcRates(filtered);
-      results.push(...rates.slice(0,1)); // 하나만 표시
-    }else{
-      results.push({hp,atk,def,agi,total:0,grade8:0,localRate:'0%',globalRate:'0%'});
-    }
+    const rate=calcRate(hp,atk,def,agi);
+    const div=document.createElement('div');
+    div.className='combo';
+    div.innerHTML=`
+      <div>#${i}</div>
+      <div><span>체력:${hp}</span><span>공격력:${atk}</span><span>방어력:${def}</span><span>순발력:${agi}</span></div>
+      <div>해당 조합 8등급 확률: <span class="prob">${rate?rate:'0.00'}%</span></div>`;
+    list.appendChild(div);
   }
-  renderCombos(name, results);
 }
 
 document.getElementById('run1').addEventListener('click',()=>simulate(1));
