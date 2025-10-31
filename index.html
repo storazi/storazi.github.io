@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>펫 능력치 시뮬레이터 (정수형, JSON키형)</title>
+<title>펫 능력치 시뮬레이터 (정수형, 자동인식형)</title>
 <style>
 :root{
   --bg:#0b1220; --panel:#121a2b; --soft:#1c2538; --ring:#24324b;
@@ -59,8 +59,8 @@ hr{border:none;border-top:1px solid var(--ring);margin:20px 0;}
 </div>
 
 <script>
-// ✅ GitHub JSON 자동 로드
-const DATA_URL = "https://raw.githubusercontent.com/storazi/storazi.github.io/main/guaranteed_rank8.full.json";
+// ✅ JSON 자동 인식 (같은 폴더의 guaranteed_rank8.full.json)
+const DATA_URL = "./guaranteed_rank8.full.json"; 
 let petData = {};
 
 fetch(DATA_URL)
@@ -68,28 +68,31 @@ fetch(DATA_URL)
   .then(text => {
     const clean = text.replace(/^\uFEFF/, ""); // BOM 제거
     petData = JSON.parse(clean);
-    document.getElementById('loadStatus').innerText = `✅ JSON 데이터 로드 완료 (${Object.keys(petData).length}종 펫)`;
+    document.getElementById('loadStatus').innerText =
+      `✅ JSON 데이터 로드 완료 (${Object.keys(petData).length}종 펫)`;
   })
   .catch(err => {
-    document.getElementById('loadStatus').innerText = `❌ JSON 불러오기 실패: ${err.message}`;
+    document.getElementById('loadStatus').innerText =
+      `❌ JSON 불러오기 실패: ${err.message}`;
   });
 
 // 🎲 랜덤 정수
 function rand(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
 
-// 🔍 펫 데이터 가져오기
+// 🔍 특정 펫 데이터 가져오기
 function getPetData(name){
   if(!petData[name]) return [];
   const arr = petData[name]["obs-100_rank8"];
+  if(!arr) return [];
   return arr.map(a => ({hp:a[0], atk:a[1], def:a[2], agi:a[3]}));
 }
 
-// 📊 확률 계산 (단순 일치 비율)
-function calcMatchRate(sHp,sAtk,sDef,sAgi,pool){
+// 📊 확률 계산 (일치 비율)
+function calcMatchRate(hp,atk,def,agi,pool){
   if(!pool.length) return 0;
   let match=0;
   pool.forEach(p=>{
-    if(p.hp===sHp && p.atk===sAtk && p.def===sDef && p.agi===sAgi) match++;
+    if(p.hp===hp && p.atk===atk && p.def===def && p.agi===agi) match++;
   });
   return (match/pool.length*100).toFixed(2);
 }
@@ -109,7 +112,8 @@ function simulate(count){
   list.innerHTML='';
 
   document.getElementById('sDisplay').innerHTML =
-    `<b>${name}</b> S급 기준 능력치<br>체력:${sHp} / 공격력:${sAtk} / 방어력:${sDef} / 순발력:${sAgi}<br>
+    `<b>${name}</b> S급 기준 능력치<br>
+     체력:${sHp} / 공격력:${sAtk} / 방어력:${sDef} / 순발력:${sAgi}<br>
      데이터 조합 수: ${pool.length.toLocaleString()}건`;
 
   for(let i=1;i<=count;i++){
