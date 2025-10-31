@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>StoneAge 계산기 통합</title>
+<title>StoneAge 통합 계산기</title>
 <style>
   :root{
     --bg:#0b1220; --panel:#121a2b; --soft:#1c2538; --ring:#24324b;
@@ -39,7 +39,12 @@
     border:none;color:#fff;padding:10px 14px;border-radius:10px;
     cursor:pointer;font-weight:700;
   }
-  .stat{background:var(--soft);padding:12px;border-radius:12px;text-align:center;margin-top:10px;}
+  .stat{
+    background:var(--soft);
+    padding:12px;border-radius:12px;
+    margin-top:10px;line-height:1.6;
+    border:1px solid var(--ring);
+  }
   .muted{color:var(--muted);}
   .highlight{color:var(--accent);font-weight:700;}
 </style>
@@ -122,7 +127,7 @@ function simulateIntStats(petName,times=1){
   const k=pet.k??24;
   const u=pet.u;
 
-  let html=`<p>🎯 8등급 확률: ${(rank.count??0).toFixed(2)}%</p>`;
+  let html=`<p class="muted">🎯 8등급 기준 표본 수: <b>${rank.count??0}</b></p>`;
   for(let i=0;i<times;i++){
     // 오차(±2)와 분배치(총합 10)
     const ar=randomInt(-2,2),dr=randomInt(-2,2),gr=randomInt(-2,2),hr=randomInt(-2,2);
@@ -144,7 +149,14 @@ function simulateIntStats(petName,times=1){
     const calcAgi=Math.floor(iG);
     const calcHp =Math.floor(iH*4+iA+iD+iG);
 
-    html+=`<div class="stat">#${i+1} → HP:<b>${calcHp}</b> / Atk:<b>${calcAtk}</b> / Def:<b>${calcDef}</b> / Agi:<b>${calcAgi}</b></div>`;
+    // 확률 계산 (rank 데이터 존재 시)
+    const rate=(rank.rate??rank.count??0);
+    html+=`
+      <div class="stat">
+        #${i+1}<br>
+        체력: <b>${calcHp}</b> / 공격력: <b>${calcAtk}</b> / 방어력: <b>${calcDef}</b> / 순발력: <b>${calcAgi}</b><br>
+        <span class="muted">해당 조합 8등급 확률:</span> <span class="highlight">${rate.toFixed(2)}%</span>
+      </div>`;
   }
   res.innerHTML=html;
 }
