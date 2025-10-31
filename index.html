@@ -1,177 +1,97 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>펫 능력치 시뮬레이터 (안정형)</title>
+<meta charset="utf-8">
+<title>펫 8등급 전수확률 계산기</title>
 <style>
-:root{
-  --bg:#0b1220; --panel:#121a2b; --soft:#1c2538; --ring:#24324b;
-  --text:#eaf2ff; --muted:#a9b5cc; --accent:#6aa0ff; --ok:#36d17b;
-}
 body{
-  background:var(--bg);color:var(--text);
-  font-family:Pretendard,system-ui,sans-serif;
-  display:flex;flex-direction:column;align-items:center;margin:0;padding:20px;
+  background:#0b1220;color:#eaf2ff;font-family:Pretendard,system-ui,sans-serif;
+  margin:0;padding:20px;display:flex;flex-direction:column;align-items:center;
 }
-.panel{
-  background:var(--panel);border:1px solid var(--ring);
-  border-radius:12px;padding:20px;margin-top:10px;width:90%;max-width:700px;
-}
-h1{color:var(--accent);margin-bottom:5px;}
-label{display:inline-block;width:120px;color:var(--muted);}
-input{
-  width:180px;padding:6px;background:var(--soft);
-  border:1px solid var(--ring);border-radius:6px;color:var(--text);
-}
-button{
-  margin:8px 6px 0 0;padding:8px 16px;background:var(--accent);
-  color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;
-}
+.panel{background:#121a2b;border:1px solid #24324b;border-radius:12px;
+  padding:20px;width:90%;max-width:700px;margin-top:20px;}
+h1{color:#6aa0ff;margin-bottom:10px;}
+button{background:#6aa0ff;border:none;border-radius:8px;padding:8px 16px;
+  color:white;cursor:pointer;margin-top:10px;}
 button:hover{filter:brightness(1.15);}
-hr{border:none;border-top:1px solid var(--ring);margin:20px 0;}
-.combo{
-  background:var(--panel);border:1px solid var(--ring);
-  border-radius:12px;padding:12px;margin-top:10px;
-}
-.combo span{display:inline-block;margin-right:8px;}
-.prob{color:var(--ok);font-weight:700;}
-.muted{color:var(--muted);}
+table{border-collapse:collapse;width:100%;margin-top:10px;}
+th,td{border:1px solid #24324b;padding:6px;text-align:center;}
+th{background:#1c2538;color:#a9b5cc;}
+.result{margin-top:15px;}
+.ok{color:#36d17b;font-weight:bold;}
 </style>
 </head>
 <body>
 
-<h1>펫 능력치 시뮬레이터 (전수탐색 안정형)</h1>
+<h1>펫 8등급 확률 시뮬레이터</h1>
 
 <div class="panel">
-  <label>펫 이름</label>
-  <input id="petName" type="text" placeholder="예: 루니">
-  <button id="loadPet">불러오기</button><br>
+  <label>펫 이름: </label>
+  <input id="petName" placeholder="예: 루니">
+  <button id="load">불러오기</button>
 
-  <div id="sDisplay" class="muted" style="margin-top:10px;"></div>
-
-  <button id="run1" disabled>초기화 1회</button>
-  <button id="run5" disabled>초기화 5회</button>
-
-  <hr>
-  <div id="loadStatus" class="muted">🔄 JSON 데이터 로딩 중...</div>
-  <div id="comboList"></div>
+  <div id="baseStats" style="margin-top:10px;"></div>
+  <div id="simArea" style="margin-top:10px;"></div>
 </div>
 
 <script>
-const DATA_URL = "./guaranteed_rank8.full.json";
-let petData = {};
-let currentPet = null;
+let PET_DATA={};
 
-fetch(DATA_URL)
-  .then(res => res.text())
-  .then(text => {
-    const clean = text.replace(/^\uFEFF/, "");
-    petData = JSON.parse(clean);
-    document.getElementById('loadStatus').innerText =
-      `✅ JSON 데이터 로드 완료 (${Object.keys(petData).length}종 펫)`;
+fetch("guaranteed_rank8.full.json")
+  .then(r=>r.text())
+  .then(t=>{
+    PET_DATA=JSON.parse(t.replace(/^\uFEFF/,""));
+    console.log("✅ JSON 로드 완료", Object.keys(PET_DATA).length,"pets");
   })
-  .catch(err => {
-    document.getElementById('loadStatus').innerText =
-      `❌ JSON 불러오기 실패: ${err.message}`;
+  .catch(e=>{
+    alert("❌ JSON 불러오기 실패: "+e.message);
   });
 
 function rand(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
 
-// 다양한 구조 대응
-function normalizeObsEntry(entry){
-  if(!entry) return [0,0,0,0];
-  if(Array.isArray(entry)) return entry.map(v=>Number(v)||0);
-  if(typeof entry==="string") return entry.split(",").map(v=>Number(v.trim())||0);
-  if(typeof entry==="object") return Object.values(entry).map(v=>Number(v)||0);
-  return [0,0,0,0];
-}
-
-function getBaseStats(u){
-  if (!u) return {hp:0, atk:0, def:0, agi:0};
-  return {
-    hp: u["마력"] || u["체력"] || u["hp"] || u["HP"] || 0,
-    atk: u["공격력"] || u["atk"] || u["ATK"] || 0,
-    def: u["정의"] || u["방어력"] || u["def"] || u["DEF"] || 0,
-    agi: u["악기"] || u["순발력"] || u["agi"] || u["AGI"] || 0
-  };
-}
-
-function calcOverallRate(petInfo) {
-  const total = petInfo.count || 0;
-  const rank8 = petInfo["obs-100_rank8"]?.length || petInfo["obs_100_rank8"]?.length || 0;
-  if (total === 0) return 0;
-  return (rank8 / total * 100).toFixed(2);
+function similarity(a,b){
+  let score=0;
+  for(let i=0;i<4;i++) if(Math.abs(a[i]-b[i])<=1) score++;
+  return score/4;
 }
 
 function loadPet(){
-  const name=document.getElementById('petName').value.trim();
-  const info=petData[name];
-  const disp=document.getElementById('sDisplay');
-  const list=document.getElementById('comboList');
-  list.innerHTML='';
+  const name=document.getElementById("petName").value.trim();
+  const data=PET_DATA[name];
+  if(!data){alert("해당 펫이 존재하지 않습니다.");return;}
+  const s=data.u;
+  const baseStats=document.getElementById("baseStats");
+  baseStats.innerHTML=`<b>${name}</b>의 S급 기준 능력치:<br>
+  HP: ${s.hp} / ATK: ${s.atk} / DEF: ${s.def} / AGI: ${s.agi}<br>
+  (표본 ${data.count}개)`;
 
-  if(!info){
-    disp.innerHTML=`❌ <b>${name}</b> 데이터가 JSON에 없습니다.`;
-    document.getElementById('run1').disabled=true;
-    document.getElementById('run5').disabled=true;
+  const obs=data.obs_100_rank8||[];
+  if(obs.length===0){
+    document.getElementById("simArea").innerHTML="<i>데이터 없음</i>";
     return;
   }
 
-  // u가 없을 경우 obs 첫 항목 기반 자동 생성
-  if ((!info["u"] || Object.keys(info["u"]).length === 0) && info["obs-100_rank8"]?.length) {
-    const first = normalizeObsEntry(info["obs-100_rank8"][0]);
-    info["u"] = {"마력":first[0],"공격력":first[1],"정의":first[2],"악기":first[3]};
+  // 전수조합 기반 확률: 전체 obs 중 랜덤조합이 8등급과 일치할 비율
+  const trials=[];
+  for(let i=0;i<5;i++){
+    const combo=obs[rand(0,obs.length-1)];
+    const match=obs.filter(o=>similarity(o,combo)>0.75).length;
+    const prob=(match/obs.length*100).toFixed(2);
+    trials.push({id:i+1,vals:combo,prob});
   }
 
-  currentPet={
-    name:name,
-    base:info["u"]||{},
-    obs:(info["obs-100_rank8"] || info["obs_100_rank8"] || []).map(normalizeObsEntry),
-    count:info["count"]||0
-  };
-
-  const s = getBaseStats(currentPet.base);
-  const rate = calcOverallRate(info);
-
-  disp.innerHTML=`
-    <b>${name}</b> S급 기준 능력치<br>
-    체력:${s.hp} / 공격력:${s.atk} / 방어력:${s.def} / 순발력:${s.agi}<br>
-    전체 경우의 수: ${currentPet.count.toLocaleString()} |
-    8등급 케이스: ${(currentPet.obs.length||0).toLocaleString()}<br>
-    🎯 8등급 확률: <span class="prob">${rate}%</span>
-  `;
-
-  document.getElementById('run1').disabled=false;
-  document.getElementById('run5').disabled=false;
+  let html=`<table><tr><th>#</th><th>HP</th><th>ATK</th><th>DEF</th><th>AGI</th><th>8등급 일치확률</th></tr>`;
+  trials.forEach(t=>{
+    html+=`<tr><td>${t.id}</td><td>${t.vals[0]}</td><td>${t.vals[1]}</td>
+    <td>${t.vals[2]}</td><td>${t.vals[3]}</td>
+    <td class="ok">${t.prob}%</td></tr>`;
+  });
+  html+=`</table>`;
+  document.getElementById("simArea").innerHTML=html;
 }
 
-function simulate(count){
-  if(!currentPet){alert("먼저 펫을 불러오세요.");return;}
-  const s = getBaseStats(currentPet.base);
-  const rate = calcOverallRate(petData[currentPet.name]);
-  const list=document.getElementById('comboList');
-  list.innerHTML='';
-
-  for(let i=1;i<=count;i++){
-    const hp=s.hp+rand(-3,3);
-    const atk=s.atk+rand(-2,2);
-    const def=s.def+rand(-2,2);
-    const agi=s.agi+rand(-2,2);
-    const div=document.createElement('div');
-    div.className='combo';
-    div.innerHTML=`
-      <div>#${i}</div>
-      <div><span>체력:${hp}</span><span>공격력:${atk}</span>
-      <span>방어력:${def}</span><span>순발력:${agi}</span></div>
-      <div>해당 조합 8등급 확률: <span class="prob">${rate}%</span></div>`;
-    list.appendChild(div);
-  }
-}
-
-document.getElementById('loadPet').addEventListener('click',loadPet);
-document.getElementById('run1').addEventListener('click',()=>simulate(1));
-document.getElementById('run5').addEventListener('click',()=>simulate(5));
+document.getElementById("load").addEventListener("click",loadPet);
 </script>
+
 </body>
 </html>
