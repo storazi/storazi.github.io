@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>펫 능력치 시뮬레이터 (S급 자동형)</title>
+<title>펫 능력치 시뮬레이터 (전수탐색형)</title>
 <style>
 :root{
   --bg:#0b1220; --panel:#121a2b; --soft:#1c2538; --ring:#24324b;
@@ -41,12 +41,13 @@ hr{border:none;border-top:1px solid var(--ring);margin:20px 0;}
 </head>
 <body>
 
-<h1>펫 능력치 시뮬레이터 (정수형)</h1>
+<h1>펫 능력치 시뮬레이터 (전수탐색형)</h1>
 
 <div class="panel">
   <label>펫 이름</label>
   <input id="petName" type="text" placeholder="예: 가가로스">
   <button id="loadPet">불러오기</button><br>
+
   <div id="sDisplay" class="muted" style="margin-top:10px;"></div>
 
   <button id="run1" disabled>초기화 1회</button>
@@ -76,7 +77,7 @@ fetch(DATA_URL)
       `❌ JSON 불러오기 실패: ${err.message}`;
   });
 
-// 🎲 랜덤 정수
+// 🎲 랜덤 정수 생성기
 function rand(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
 
 // 🔍 펫 데이터 불러오기
@@ -86,6 +87,7 @@ function loadPet(){
   const disp=document.getElementById('sDisplay');
   const list=document.getElementById('comboList');
   list.innerHTML='';
+
   if(!info){
     disp.innerHTML=`❌ <b>${name}</b> 데이터가 JSON에 없습니다.`;
     document.getElementById('run1').disabled=true;
@@ -96,38 +98,40 @@ function loadPet(){
   currentPet={
     name:name,
     base:info["u"]||{},
-    obs:info["obs-100_rank8"]||[]
+    obs:info["obs-100_rank8"] || info["obs_100_rank8"] || [],
+    count:info["count"]||0
   };
 
-  // S급 능력치 표시
   const u=currentPet.base;
   disp.innerHTML=`
     <b>${name}</b> S급 기준 능력치<br>
     체력:${u["마력"]||"-"} / 공격력:${u["공격력"]||"-"} /
     방어력:${u["정의"]||"-"} / 순발력:${u["악기"]||"-"}<br>
-    데이터 조합 수: ${currentPet.obs.length.toLocaleString()}건
+    전체 경우의 수: ${currentPet.count.toLocaleString()} |
+    8등급 케이스: ${(currentPet.obs.length||0).toLocaleString()}<br>
+    🎯 8등급 확률: <span class="prob">${calcOverallRate(info)}%</span>
   `;
 
   document.getElementById('run1').disabled=false;
   document.getElementById('run5').disabled=false;
 }
 
-// 📊 확률 계산 (정확 일치 비율)
-function calcMatchRate(hp,atk,def,agi,pool){
-  if(!pool.length) return 0;
-  let match=0;
-  pool.forEach(p=>{
-    if(p[0]===hp && p[1]===atk && p[2]===def && p[3]===agi) match++;
-  });
-  return (match/pool.length*100).toFixed(2);
+// 📊 전수조합 기반 확률 계산
+function calcOverallRate(petInfo) {
+  if (!petInfo.count || !petInfo["obs-100_rank8"]) return 0;
+  const total = petInfo.count;
+  const rank8 = petInfo["obs-100_rank8"].length;
+  return (rank8 / total * 100).toFixed(2);
 }
 
 // 🚀 시뮬레이터 실행
 function simulate(count){
   if(!currentPet){alert("먼저 펫을 불러오세요.");return;}
   const u=currentPet.base;
-  const baseHp=u["마력"], baseAtk=u["공격력"], baseDef=u["정의"], baseAgi=u["악기"];
   const pool=currentPet.obs;
+  const total=currentPet.count||0;
+  const baseHp=u["마력"], baseAtk=u["공격력"], baseDef=u["정의"], baseAgi=u["악기"];
+  const rate = calcOverallRate(petData[currentPet.name]);
 
   const list=document.getElementById('comboList');
   list.innerHTML='';
@@ -137,14 +141,13 @@ function simulate(count){
     const atk=baseAtk+rand(-2,2);
     const def=baseDef+rand(-2,2);
     const agi=baseAgi+rand(-2,2);
-    const rate=calcMatchRate(hp,atk,def,agi,pool);
     const div=document.createElement('div');
     div.className='combo';
     div.innerHTML=`
       <div>#${i}</div>
       <div><span>체력:${hp}</span><span>공격력:${atk}</span>
       <span>방어력:${def}</span><span>순발력:${agi}</span></div>
-      <div>해당 조합 8등급 일치 확률: <span class="prob">${rate}%</span></div>`;
+      <div>해당 조합 8등급 확률: <span class="prob">${rate}%</span></div>`;
     list.appendChild(div);
   }
 }
