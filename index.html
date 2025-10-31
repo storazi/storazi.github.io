@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>펫 능력치 시뮬레이터 (전수탐색 완전판)</title>
+<title>펫 능력치 시뮬레이터 (안정형)</title>
 <style>
 :root{
   --bg:#0b1220; --panel:#121a2b; --soft:#1c2538; --ring:#24324b;
@@ -41,11 +41,11 @@ hr{border:none;border-top:1px solid var(--ring);margin:20px 0;}
 </head>
 <body>
 
-<h1>펫 능력치 시뮬레이터 (전수탐색 완전판)</h1>
+<h1>펫 능력치 시뮬레이터 (전수탐색 안정형)</h1>
 
 <div class="panel">
   <label>펫 이름</label>
-  <input id="petName" type="text" placeholder="예: 가가로스">
+  <input id="petName" type="text" placeholder="예: 루니">
   <button id="loadPet">불러오기</button><br>
 
   <div id="sDisplay" class="muted" style="margin-top:10px;"></div>
@@ -59,12 +59,10 @@ hr{border:none;border-top:1px solid var(--ring);margin:20px 0;}
 </div>
 
 <script>
-// ✅ JSON 자동 인식
 const DATA_URL = "./guaranteed_rank8.full.json";
 let petData = {};
 let currentPet = null;
 
-// JSON 로드
 fetch(DATA_URL)
   .then(res => res.text())
   .then(text => {
@@ -78,10 +76,17 @@ fetch(DATA_URL)
       `❌ JSON 불러오기 실패: ${err.message}`;
   });
 
-// 🎲 랜덤 정수
 function rand(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
 
-// 💡 능력치 자동 인식 (모든 구조 지원)
+// 다양한 구조 대응
+function normalizeObsEntry(entry){
+  if(!entry) return [0,0,0,0];
+  if(Array.isArray(entry)) return entry.map(v=>Number(v)||0);
+  if(typeof entry==="string") return entry.split(",").map(v=>Number(v.trim())||0);
+  if(typeof entry==="object") return Object.values(entry).map(v=>Number(v)||0);
+  return [0,0,0,0];
+}
+
 function getBaseStats(u){
   if (!u) return {hp:0, atk:0, def:0, agi:0};
   return {
@@ -92,7 +97,6 @@ function getBaseStats(u){
   };
 }
 
-// 📊 전수조합 확률 계산
 function calcOverallRate(petInfo) {
   const total = petInfo.count || 0;
   const rank8 = petInfo["obs-100_rank8"]?.length || petInfo["obs_100_rank8"]?.length || 0;
@@ -100,7 +104,6 @@ function calcOverallRate(petInfo) {
   return (rank8 / total * 100).toFixed(2);
 }
 
-// 🔍 펫 데이터 불러오기
 function loadPet(){
   const name=document.getElementById('petName').value.trim();
   const info=petData[name];
@@ -115,16 +118,16 @@ function loadPet(){
     return;
   }
 
-  // u가 없을 경우 obs의 첫 번째 조합으로 대체
+  // u가 없을 경우 obs 첫 항목 기반 자동 생성
   if ((!info["u"] || Object.keys(info["u"]).length === 0) && info["obs-100_rank8"]?.length) {
-    const f = info["obs-100_rank8"][0];
-    info["u"] = {"마력":f[0],"공격력":f[1],"정의":f[2],"악기":f[3]};
+    const first = normalizeObsEntry(info["obs-100_rank8"][0]);
+    info["u"] = {"마력":first[0],"공격력":first[1],"정의":first[2],"악기":first[3]};
   }
 
   currentPet={
     name:name,
     base:info["u"]||{},
-    obs:info["obs-100_rank8"] || info["obs_100_rank8"] || [],
+    obs:(info["obs-100_rank8"] || info["obs_100_rank8"] || []).map(normalizeObsEntry),
     count:info["count"]||0
   };
 
@@ -143,7 +146,6 @@ function loadPet(){
   document.getElementById('run5').disabled=false;
 }
 
-// 🚀 시뮬레이터 실행
 function simulate(count){
   if(!currentPet){alert("먼저 펫을 불러오세요.");return;}
   const s = getBaseStats(currentPet.base);
