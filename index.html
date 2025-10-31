@@ -8,7 +8,6 @@
   :root{
     --bg:#0b1220; --panel:#121a2b; --soft:#1c2538; --ring:#24324b;
     --text:#eaf2ff; --muted:#a9b5cc; --accent:#6aa0ff;
-    --ok:#36d17b; --warn:#ffbd4a; --bad:#ff6b81;
   }
   *{box-sizing:border-box;transition:all .15s ease-in-out;}
   body{
@@ -69,7 +68,7 @@
 <!-- 🎲 펫 능력치 시뮬레이터 -->
 <section id="pet">
   <div class="card">
-    <h2>펫 능력치 시뮬레이터</h2>
+    <h2>펫 능력치 시뮬레이터 (정수형)</h2>
     <label>펫 이름 <input id="petName" placeholder="예: 갈푸스"></label><br>
     <button id="petOnce">초기화 1회</button>
     <button id="petFive">초기화 5회</button>
@@ -79,12 +78,10 @@
 
 <script>
 // 🌙 탭 전환
-const tabs = document.querySelectorAll('.tab-btn');
-const sections = document.querySelectorAll('section');
-tabs.forEach(btn=>{
+document.querySelectorAll('.tab-btn').forEach(btn=>{
   btn.addEventListener('click',()=>{
-    tabs.forEach(b=>b.classList.remove('active'));
-    sections.forEach(s=>s.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('section').forEach(s=>s.classList.remove('active'));
     btn.classList.add('active');
     document.getElementById(btn.dataset.tab).classList.add('active');
   });
@@ -104,7 +101,7 @@ document.getElementById('run').onclick=()=>{
   document.getElementById('expResult').innerHTML=`남은 경험치 ${remain.toLocaleString()} / 예상 ${hours.toFixed(2)} 시간`;
 };
 
-// 🎲 펫 시뮬레이터
+// 🎲 정수형 펫 시뮬레이터
 let PETS={},RANK8={};
 async function loadData(){
   try{
@@ -115,33 +112,45 @@ async function loadData(){
 }
 loadData();
 
-function simulatePet(times){
-  const name=document.getElementById("petName").value.trim();
-  const pet=PETS[name],rank=RANK8[name];
-  const result=document.getElementById("petResult");
-  if(!pet||!rank){result.innerHTML=`❌ '${name}' 데이터 없음`;return;}
-  const base=pet.s0,grow=pet.sg,lv=pet.k??24;
-  const obs=rank.obs_100_rank8||[];
-  const total=obs.length||1;
-  let html=`<p>🎯 8등급 기준 표본: ${total}개</p>`;
+function randomInt(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
+
+function simulateIntStats(petName,times=1){
+  const pet=PETS[petName];
+  const rank=RANK8[petName];
+  const res=document.getElementById("petResult");
+  if(!pet||!rank){res.innerHTML=`❌ '${petName}' 데이터 없음`;return;}
+  const k=pet.k??24;
+  const u=pet.u;
+
+  let html=`<p>🎯 8등급 확률: ${(rank.count??0).toFixed(2)}%</p>`;
   for(let i=0;i<times;i++){
-    const r=()=>0.85+Math.random()*0.3;
-    const hp=+(base.hp+grow.hp*lv*r()).toFixed(2);
-    const atk=+(base.atk+grow.atk*lv*r()).toFixed(2);
-    const def=+(base.def+grow.def*lv*r()).toFixed(2);
-    const agi=+(base.agi+grow.agi*lv*r()).toFixed(2);
-    let match=0;
-    for(const [H,A,D,G] of obs){
-      const diff=Math.abs(hp-H)/H+Math.abs(atk-A)/A+Math.abs(def-D)/D+Math.abs(agi-G)/G;
-      if(diff<0.25)match++;
-    }
-    const prob=((match/total)*100).toFixed(2);
-    html+=`<div class="stat">#${i+1} → HP:${hp} / Atk:${atk} / Def:${def} / Agi:${agi}<br>확률: <span class="highlight">${prob}%</span></div>`;
+    // 오차(±2)와 분배치(총합 10)
+    const ar=randomInt(-2,2),dr=randomInt(-2,2),gr=randomInt(-2,2),hr=randomInt(-2,2);
+    const ab=randomInt(0,10);
+    const db=randomInt(0,10-ab);
+    const gb=randomInt(0,10-ab-db);
+    const hb=10-ab-db-gb;
+
+    const baseA=u.atk+ar+ab;
+    const baseD=u.def+dr+db;
+    const baseG=u.agi+gr+gb;
+    const baseH=u.hp +hr+hb;
+
+    const fac=k/100;
+    const iA=baseA*fac, iD=baseD*fac, iG=baseG*fac, iH=baseH*fac;
+
+    const calcAtk=Math.floor(iH*0.1+iA+iD*0.1+iG*0.05);
+    const calcDef=Math.floor(iH*0.1+iA*0.1+iD+iG*0.05);
+    const calcAgi=Math.floor(iG);
+    const calcHp =Math.floor(iH*4+iA+iD+iG);
+
+    html+=`<div class="stat">#${i+1} → HP:<b>${calcHp}</b> / Atk:<b>${calcAtk}</b> / Def:<b>${calcDef}</b> / Agi:<b>${calcAgi}</b></div>`;
   }
-  result.innerHTML=html;
+  res.innerHTML=html;
 }
-document.getElementById("petOnce").onclick=()=>simulatePet(1);
-document.getElementById("petFive").onclick=()=>simulatePet(5);
+
+document.getElementById("petOnce").onclick=()=>simulateIntStats(document.getElementById("petName").value.trim(),1);
+document.getElementById("petFive").onclick=()=>simulateIntStats(document.getElementById("petName").value.trim(),5);
 </script>
 </body>
 </html>
