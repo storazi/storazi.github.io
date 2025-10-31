@@ -50,43 +50,42 @@ h3{color:var(--accent);}
   <label>공격력(Atk)</label><input id="sAtk" type="number" value="13"><br>
   <label>방어력(Def)</label><input id="sDef" type="number" value="7"><br>
   <label>순발력(Agi)</label><input id="sAgi" type="number" value="6"><br>
-  <label>JSON 업로드</label><input id="jsonFile" type="file" accept=".json"><br>
   <button id="run1">초기화 1회</button>
   <button id="run5">초기화 5회</button>
 
   <hr>
+  <div id="loadStatus" class="muted">🔄 JSON 데이터 로딩 중...</div>
   <div id="sDisplay" class="muted"></div>
   <div id="baseRate" class="muted" style="margin-bottom:10px;"></div>
   <div id="comboList"></div>
 </div>
 
 <script>
-let petData=[];
+// ✅ GitHub JSON 자동 로드
+const DATA_URL = "https://raw.githubusercontent.com/storazi/storazi.github.io/main/data/guaranteed_rank8.full.json";
+let petData = [];
 
-// JSON 업로드
-document.getElementById('jsonFile').addEventListener('change', async e=>{
-  const file=e.target.files?.[0];
-  if(!file)return;
-  try{
-    const text=await file.text();
-    petData=JSON.parse(text);
-    alert(`✅ JSON 데이터 ${petData.length}건 불러옴`);
-  }catch(err){
-    alert('JSON 파싱 오류: '+err.message);
-  }
-});
+fetch(DATA_URL)
+  .then(res => res.json())
+  .then(json => {
+    petData = json;
+    document.getElementById('loadStatus').innerText = `✅ JSON 데이터 ${petData.length.toLocaleString()}건 로드 완료`;
+  })
+  .catch(err => {
+    document.getElementById('loadStatus').innerText = `❌ JSON 불러오기 실패: ${err.message}`;
+  });
 
-// 랜덤 정수 함수
+// 🎲 랜덤 정수
 function rand(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
 
-// 전체 확률 기준 계산
+// 📊 전체 확률
 function globalStats(data){
   let total=0,grade8=0;
   data.forEach(d=>{total+=d.total;grade8+=d.grade8;});
   return {total,grade8,rate:(grade8/total*100).toFixed(2)};
 }
 
-// 개별 확률 계산
+// 🎯 개별 조합 확률
 function calcRate(hp,atk,def,agi){
   const matched=petData.filter(p=>p.hp===hp&&p.atk===atk&&p.def===def&&p.agi===agi);
   if(!matched.length)return null;
@@ -95,9 +94,9 @@ function calcRate(hp,atk,def,agi){
   return (g8/total*100).toFixed(2);
 }
 
-// 시뮬레이터 실행
+// 🚀 시뮬레이터 실행
 function simulate(count){
-  if(!petData.length){alert('JSON 데이터를 먼저 업로드하세요.');return;}
+  if(!petData.length){alert('JSON 데이터가 아직 로드되지 않았습니다.');return;}
   const name=document.getElementById('petName').value||'이름 없는 펫';
   const sHp=+document.getElementById('sHp').value;
   const sAtk=+document.getElementById('sAtk').value;
