@@ -3,133 +3,187 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>펫 능력치 시뮬레이터 (정수형)</title>
+<title>StoneAge 통합 계산기</title>
 <style>
-:root{
-  --bg:#0b1220; --panel:#121a2b; --soft:#1c2538; --ring:#24324b;
-  --text:#eaf2ff; --muted:#a9b5cc; --accent:#6aa0ff; --ok:#36d17b;
-}
-body{
-  background:var(--bg);color:var(--text);
-  font-family:Pretendard,system-ui,sans-serif;
-  display:flex;flex-direction:column;align-items:center;margin:0;padding:20px;
-}
-.panel{
-  background:var(--panel);border:1px solid var(--ring);
-  border-radius:12px;padding:20px;margin-top:10px;width:90%;max-width:700px;
-}
-h1{color:var(--accent);margin-bottom:5px;}
-label{display:inline-block;width:110px;color:var(--muted);}
-input{
-  width:100px;padding:6px;background:var(--soft);
-  border:1px solid var(--ring);border-radius:6px;color:var(--text);
-}
-button{
-  margin:8px 6px 0 0;padding:8px 16px;background:var(--accent);
-  color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;
-}
-button:hover{filter:brightness(1.15);}
-hr{border:none;border-top:1px solid var(--ring);margin:20px 0;}
-.combo{
-  background:var(--panel);border:1px solid var(--ring);
-  border-radius:12px;padding:12px;margin-top:10px;
-}
-.combo span{display:inline-block;margin-right:8px;}
-h3{color:var(--accent);}
-.prob{color:var(--ok);font-weight:700;}
-.muted{color:var(--muted);}
+  :root{
+    --bg:#0b1220; --panel:#121a2b; --soft:#1c2538; --ring:#24324b;
+    --text:#eaf2ff; --muted:#a9b5cc; --accent:#6aa0ff;
+  }
+  *{box-sizing:border-box;transition:all .15s ease-in-out;}
+  body{
+    margin:0;background:var(--bg);color:var(--text);
+    font-family:Pretendard,system-ui,sans-serif;
+    display:flex;flex-direction:column;align-items:center;
+    min-height:100vh;padding:20px;
+  }
+  h1{margin-bottom:18px;}
+  .tabs{display:flex;gap:10px;margin-bottom:20px;}
+  .tab-btn{
+    background:var(--soft);border:1px solid var(--ring);
+    padding:10px 16px;border-radius:10px;color:var(--text);
+    cursor:pointer;font-weight:700;
+  }
+  .tab-btn.active{background:var(--accent);color:#fff;}
+  section{display:none;width:100%;max-width:1100px;}
+  section.active{display:block;}
+  .card{
+    background:linear-gradient(180deg,#121a2b 0%,#0e1626 100%);
+    border:1px solid var(--ring);border-radius:20px;
+    padding:24px;box-shadow:0 10px 25px rgba(0,0,0,.3);margin-bottom:20px;
+  }
+  input{
+    background:#0e1626;border:1px solid var(--ring);
+    color:var(--text);border-radius:10px;padding:10px;width:100%;
+  }
+  button{
+    background:linear-gradient(180deg,#6aa0ff,#3d76e6);
+    border:none;color:#fff;padding:10px 14px;border-radius:10px;
+    cursor:pointer;font-weight:700;margin:4px;
+  }
+  .stat{
+    background:var(--soft);
+    padding:12px;border-radius:12px;
+    margin-top:10px;line-height:1.6;
+    border:1px solid var(--ring);
+  }
+  .muted{color:var(--muted);}
+  .highlight{color:var(--accent);font-weight:700;}
 </style>
 </head>
 <body>
 
-<h1>펫 능력치 시뮬레이터 (정수형)</h1>
-
-<div class="panel">
-  <label>펫 이름</label><input id="petName" type="text" placeholder="예: 반기노"><br>
-  <label>체력(HP)</label><input id="sHp" type="number" value="50"><br>
-  <label>공격력(Atk)</label><input id="sAtk" type="number" value="13"><br>
-  <label>방어력(Def)</label><input id="sDef" type="number" value="7"><br>
-  <label>순발력(Agi)</label><input id="sAgi" type="number" value="6"><br>
-  <button id="run1">초기화 1회</button>
-  <button id="run5">초기화 5회</button>
-
-  <hr>
-  <div id="loadStatus" class="muted">🔄 JSON 데이터 로딩 중...</div>
-  <div id="sDisplay" class="muted"></div>
-  <div id="baseRate" class="muted" style="margin-bottom:10px;"></div>
-  <div id="comboList"></div>
+<h1>🪨 StoneAge 통합 계산기</h1>
+<div class="tabs">
+  <div class="tab-btn active" data-tab="exp">📘 경험치 계산기</div>
+  <div class="tab-btn" data-tab="pet">🎲 펫 능력치 시뮬레이터</div>
 </div>
 
+<!-- 📘 경험치 계산기 -->
+<section id="exp" class="active">
+  <div class="card">
+    <h2>레벨업 계산기</h2>
+    <label>현재 레벨 <input id="currentLevel" type="number"></label><br>
+    <label>현재 진행도(%) <input id="currentPercent" type="number"></label><br>
+    <label>목표 레벨 <input id="targetLevel" type="number"></label><br>
+    <label>시간당 획득 경험치 <input id="xpPerHour" type="number"></label><br>
+    <button id="run">계산</button>
+    <div id="expResult" class="stat"></div>
+  </div>
+</section>
+
+<!-- 🎲 펫 능력치 시뮬레이터 -->
+<section id="pet">
+  <div class="card">
+    <h2>펫 능력치 시뮬레이터 (정수형)</h2>
+    <label>펫 이름 <input id="petName" placeholder="예: 갈푸스"></label><br>
+    <button id="petOnce">초기화 1회</button>
+    <button id="petFive">초기화 5회</button>
+    <div id="petResult"></div>
+  </div>
+</section>
+
 <script>
-// ✅ GitHub JSON 자동 로드
-const DATA_URL = "https://raw.githubusercontent.com/storazi/storazi.github.io/main/data/guaranteed_rank8.full.json";
-let petData = [];
-
-fetch(DATA_URL)
-  .then(res => res.json())
-  .then(json => {
-    petData = json;
-    document.getElementById('loadStatus').innerText = `✅ JSON 데이터 ${petData.length.toLocaleString()}건 로드 완료`;
-  })
-  .catch(err => {
-    document.getElementById('loadStatus').innerText = `❌ JSON 불러오기 실패: ${err.message}`;
+// 🌙 탭 전환
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('section').forEach(s=>s.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab).classList.add('active');
   });
+});
 
-// 🎲 랜덤 정수
-function rand(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
+// 📘 경험치 계산기
+const EXP_TABLE={
+  0:0,1:2,2:6,3:17,4:37,5:67,6:111,7:169,8:247,9:344,10:464,
+  11:609,12:783,13:985,14:1221,15:1491,16:1799,17:2145,18:2535,19:2968,20:3448,
+  21:3977,22:4559,23:5193,24:5885,25:6635,26:7447,27:8321,28:9263,29:10272,30:11352
+};
+const getTotalExp=(s,t)=>{let sum=0;for(let lv=s;lv<t;lv++){if(EXP_TABLE[lv])sum+=EXP_TABLE[lv];}return sum;};
+document.getElementById('run').onclick=()=>{
+  const c=+document.getElementById('currentLevel').value;
+  const p=+document.getElementById('currentPercent').value||0;
+  const t=+document.getElementById('targetLevel').value;
+  const x=+document.getElementById('xpPerHour').value;
+  if(!c||!t||!x)return alert('입력 부족');
+  const remain=EXP_TABLE[c]*(1-p/100)+getTotalExp(c+1,t);
+  const hours=remain/x;
+  document.getElementById('expResult').innerHTML=
+    `남은 경험치: <b>${remain.toLocaleString()}</b><br>예상 시간: <b>${hours.toFixed(2)} 시간</b>`;
+};
 
-// 📊 전체 확률
-function globalStats(data){
-  let total=0,grade8=0;
-  data.forEach(d=>{total+=d.total;grade8+=d.grade8;});
-  return {total,grade8,rate:(grade8/total*100).toFixed(2)};
+// 🎲 정수형 펫 시뮬레이터
+let PETS={},RANK8={};
+async function loadData(){
+  try{
+    PETS=await fetch("pets.json").then(r=>r.json());
+    RANK8=await fetch("guaranteed_rank8.full.json").then(r=>r.json());
+    console.log("데이터 로드 완료");
+  }catch(e){console.error("데이터 불러오기 실패:",e);}
 }
+loadData();
 
-// 🎯 개별 조합 확률
-function calcRate(hp,atk,def,agi){
-  const matched=petData.filter(p=>p.hp===hp&&p.atk===atk&&p.def===def&&p.agi===agi);
-  if(!matched.length)return null;
-  const total=matched.reduce((a,b)=>a+b.total,0);
-  const g8=matched.reduce((a,b)=>a+b.grade8,0);
-  return (g8/total*100).toFixed(2);
-}
+function randomInt(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
 
-// 🚀 시뮬레이터 실행
-function simulate(count){
-  if(!petData.length){alert('JSON 데이터가 아직 로드되지 않았습니다.');return;}
-  const name=document.getElementById('petName').value||'이름 없는 펫';
-  const sHp=+document.getElementById('sHp').value;
-  const sAtk=+document.getElementById('sAtk').value;
-  const sDef=+document.getElementById('sDef').value;
-  const sAgi=+document.getElementById('sAgi').value;
+function simulateIntStats(petName,times=1){
+  const pet=PETS[petName];
+  const rank=RANK8[petName];
+  const res=document.getElementById("petResult");
 
-  const global=globalStats(petData);
-  document.getElementById('sDisplay').innerHTML=
-    `<b>${name}</b> S급 기준 능력치<br>체력:${sHp} / 공격력:${sAtk} / 방어력:${sDef} / 순발력:${sAgi}`;
-  document.getElementById('baseRate').innerHTML=
-    `🎯 8등급 기준 확률: <span class="prob">${global.rate}%</span>`;
+  if(!pet||!rank){res.innerHTML=`❌ '${petName}' 데이터 없음`;return;}
 
-  const list=document.getElementById('comboList');
-  list.innerHTML='';
+  const k=pet.k ?? 24;
+  const u=pet.u;
+  const rankRate=rank.count ?? 0;
+  const rankList=rank.data ?? rank.list ?? [];
 
-  for(let i=1;i<=count;i++){
-    const hp=sHp+rand(-3,3);
-    const atk=sAtk+rand(-2,2);
-    const def=sDef+rand(-2,2);
-    const agi=sAgi+rand(-2,2);
-    const rate=calcRate(hp,atk,def,agi);
-    const div=document.createElement('div');
-    div.className='combo';
-    div.innerHTML=`
-      <div>#${i}</div>
-      <div><span>체력:${hp}</span><span>공격력:${atk}</span><span>방어력:${def}</span><span>순발력:${agi}</span></div>
-      <div>해당 조합 8등급 확률: <span class="prob">${rate?rate:'0.00'}%</span></div>`;
-    list.appendChild(div);
+  let html=`<p class="muted">🎯 8등급 기준 확률: <b>${rankRate.toFixed(2)}%</b></p>`;
+  for(let i=0;i<times;i++){
+    // 오차 ±2 + 분배 10
+    const ar=randomInt(-2,2), dr=randomInt(-2,2), gr=randomInt(-2,2), hr=randomInt(-2,2);
+    const ab=randomInt(0,10);
+    const db=randomInt(0,10-ab);
+    const gb=randomInt(0,10-ab-db);
+    const hb=10-ab-db-gb;
+
+    const baseA=u.atk+ar+ab;
+    const baseD=u.def+dr+db;
+    const baseG=u.agi+gr+gb;
+    const baseH=u.hp+hr+hb;
+
+    const fac=k/100;
+    const iA=baseA*fac, iD=baseD*fac, iG=baseG*fac, iH=baseH*fac;
+
+    const 공격력=Math.floor(iH*0.1+iA+iD*0.1+iG*0.05);
+    const 방어력=Math.floor(iH*0.1+iA*0.1+iD+iG*0.05);
+    const 순발력=Math.floor(iG);
+    const 체력=Math.floor(iH*4+iA+iD+iG);
+
+    // 8등급 여부 판정
+    let matchRate=0;
+    if(Array.isArray(rankList)){
+      const match=rankList.find(r=>
+        Math.round(r.hp)===체력 &&
+        Math.round(r.atk)===공격력 &&
+        Math.round(r.def)===방어력 &&
+        Math.round(r.agi)===순발력
+      );
+      if(match) matchRate=rankRate;
+    }
+
+    html+=`
+      <div class="stat">
+        #${i+1}<br>
+        체력: <b>${체력}</b> / 공격력: <b>${공격력}</b> / 방어력: <b>${방어력}</b> / 순발력: <b>${순발력}</b><br>
+        <span class="muted">🔹 8등급 확률:</span> 
+        <span class="highlight">${matchRate.toFixed(2)}%</span>
+      </div>`;
   }
+  res.innerHTML=html;
 }
 
-document.getElementById('run1').addEventListener('click',()=>simulate(1));
-document.getElementById('run5').addEventListener('click',()=>simulate(5));
+document.getElementById("petOnce").onclick=()=>simulateIntStats(document.getElementById("petName").value.trim(),1);
+document.getElementById("petFive").onclick=()=>simulateIntStats(document.getElementById("petName").value.trim(),5);
 </script>
 </body>
 </html>
