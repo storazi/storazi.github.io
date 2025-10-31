@@ -2,46 +2,50 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<title>펫 8등급 전수확률 계산기</title>
+<title>펫 8등급 전수탐색 시뮬레이터</title>
 <style>
 body{
   background:#0b1220;color:#eaf2ff;font-family:Pretendard,system-ui,sans-serif;
   margin:0;padding:20px;display:flex;flex-direction:column;align-items:center;
 }
 .panel{background:#121a2b;border:1px solid #24324b;border-radius:12px;
-  padding:20px;width:90%;max-width:700px;margin-top:20px;}
+  padding:20px;width:90%;max-width:720px;margin-top:20px;}
 h1{color:#6aa0ff;margin-bottom:10px;}
 button{background:#6aa0ff;border:none;border-radius:8px;padding:8px 16px;
   color:white;cursor:pointer;margin-top:10px;}
 button:hover{filter:brightness(1.15);}
-table{border-collapse:collapse;width:100%;margin-top:10px;}
-th,td{border:1px solid #24324b;padding:6px;text-align:center;}
-th{background:#1c2538;color:#a9b5cc;}
-.result{margin-top:15px;}
 .ok{color:#36d17b;font-weight:bold;}
+.muted{color:#a9b5cc;}
+.combo{border:1px solid #24324b;background:#1c2538;border-radius:8px;
+  padding:8px;margin-top:8px;}
+.combo span{display:inline-block;margin-right:10px;}
 </style>
 </head>
 <body>
 
-<h1>펫 8등급 확률 시뮬레이터</h1>
+<h1>펫 8등급 전수탐색 시뮬레이터</h1>
 
 <div class="panel">
   <label>펫 이름: </label>
   <input id="petName" placeholder="예: 루니">
   <button id="load">불러오기</button>
 
-  <div id="baseStats" style="margin-top:10px;"></div>
+  <div id="info" style="margin-top:10px;"></div>
+  <div style="margin-top:8px;">
+    <button id="run1" disabled>초기화 1회</button>
+    <button id="run5" disabled>초기화 5회</button>
+  </div>
   <div id="simArea" style="margin-top:10px;"></div>
 </div>
 
 <script>
-let PET_DATA={};
+let PET_DATA={}, currentPet=null;
 
 fetch("guaranteed_rank8.full.json")
   .then(r=>r.text())
   .then(t=>{
     PET_DATA=JSON.parse(t.replace(/^\uFEFF/,""));
-    console.log("✅ JSON 로드 완료", Object.keys(PET_DATA).length,"pets");
+    console.log("✅ JSON 로드 완료", Object.keys(PET_DATA).length,"종");
   })
   .catch(e=>{
     alert("❌ JSON 불러오기 실패: "+e.message);
@@ -49,48 +53,70 @@ fetch("guaranteed_rank8.full.json")
 
 function rand(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
 
-function similarity(a,b){
-  let score=0;
-  for(let i=0;i<4;i++) if(Math.abs(a[i]-b[i])<=1) score++;
-  return score/4;
-}
-
 function loadPet(){
   const name=document.getElementById("petName").value.trim();
-  const data=PET_DATA[name];
-  if(!data){alert("해당 펫이 존재하지 않습니다.");return;}
-  const s=data.u;
-  const baseStats=document.getElementById("baseStats");
-  baseStats.innerHTML=`<b>${name}</b>의 S급 기준 능력치:<br>
-  HP: ${s.hp} / ATK: ${s.atk} / DEF: ${s.def} / AGI: ${s.agi}<br>
-  (표본 ${data.count}개)`;
+  const pet=PET_DATA[name];
+  const info=document.getElementById("info");
+  const simArea=document.getElementById("simArea");
+  simArea.innerHTML='';
 
-  const obs=data.obs_100_rank8||[];
-  if(obs.length===0){
-    document.getElementById("simArea").innerHTML="<i>데이터 없음</i>";
-    return;
+  if(!pet){info.innerHTML="❌ 해당 펫이 없습니다.";return;}
+
+  const obs=pet.obs_100_rank8||[];
+  const total=parseInt(pet.count)||0;
+  const rank8=obs.length;
+  const prob=(total>0? (rank8/total*100).toFixed(2):"0.00");
+
+  // S급 능력치
+  let base=pet.u;
+  if(!base && obs.length>0){
+    const f=obs[0];
+    base={hp:f[0],atk:f[1],def:f[2],agi:f[3]};
   }
 
-  // 전수조합 기반 확률: 전체 obs 중 랜덤조합이 8등급과 일치할 비율
-  const trials=[];
-  for(let i=0;i<5;i++){
-    const combo=obs[rand(0,obs.length-1)];
-    const match=obs.filter(o=>similarity(o,combo)>0.75).length;
-    const prob=(match/obs.length*100).toFixed(2);
-    trials.push({id:i+1,vals:combo,prob});
-  }
+  currentPet={name,base,obs,total,rank8,prob};
 
-  let html=`<table><tr><th>#</th><th>HP</th><th>ATK</th><th>DEF</th><th>AGI</th><th>8등급 일치확률</th></tr>`;
-  trials.forEach(t=>{
-    html+=`<tr><td>${t.id}</td><td>${t.vals[0]}</td><td>${t.vals[1]}</td>
-    <td>${t.vals[2]}</td><td>${t.vals[3]}</td>
-    <td class="ok">${t.prob}%</td></tr>`;
-  });
-  html+=`</table>`;
-  document.getElementById("simArea").innerHTML=html;
+  info.innerHTML=`
+  <b>${name}</b> S급 능력치:<br>
+  HP:${base.hp} / ATK:${base.atk} / DEF:${base.def} / AGI:${base.agi}<br><br>
+  전체 경우의 수: ${total}<br>
+  8등급 조합 수: ${rank8}<br>
+  🎯 전수탐색 확률: <span class="ok">${prob}%</span>`;
+
+  document.getElementById("run1").disabled=false;
+  document.getElementById("run5").disabled=false;
+}
+
+function simulate(n){
+  if(!currentPet){alert("먼저 펫을 불러오세요.");return;}
+  const s=currentPet.base;
+  const list=document.getElementById("simArea");
+  list.innerHTML='';
+
+  for(let i=1;i<=n;i++){
+    // 랜덤 능력치 ±오차
+    const hp=s.hp+rand(-3,3);
+    const atk=s.atk+rand(-2,2);
+    const def=s.def+rand(-2,2);
+    const agi=s.agi+rand(-2,2);
+
+    // 전수탐색 확률 기반 결과
+    const prob=currentPet.prob;
+
+    const div=document.createElement("div");
+    div.className="combo";
+    div.innerHTML=`
+      <div>#${i}</div>
+      <div><span>HP:${hp}</span><span>ATK:${atk}</span>
+      <span>DEF:${def}</span><span>AGI:${agi}</span></div>
+      <div>8등급 달성 확률: <span class="ok">${prob}%</span></div>`;
+    list.appendChild(div);
+  }
 }
 
 document.getElementById("load").addEventListener("click",loadPet);
+document.getElementById("run1").addEventListener("click",()=>simulate(1));
+document.getElementById("run5").addEventListener("click",()=>simulate(5));
 </script>
 
 </body>
