@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>펫 경험치 & 8등급 확률 계산기</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>펫 계산기 (경험치 + 초기화 시뮬레이터)</title>
 <style>
 :root{
   --bg:#0b1220; --panel:#121a2b; --soft:#1c2538; --ring:#24324b;
@@ -11,19 +11,27 @@
   --ok:#36d17b; --warn:#ffbd4a; --bad:#ff6b81;
 }
 body{
-  margin:0;background:var(--bg);color:var(--text);
-  font-family:system-ui,-apple-system,Segoe UI,Roboto,Pretendard,Apple SD Gothic Neo,sans-serif;
-  display:flex;flex-direction:column;align-items:center;padding:20px;
+  background:var(--bg);color:var(--text);
+  font-family:Pretendard,system-ui,sans-serif;
+  margin:0;padding:0;
+  display:flex;flex-direction:column;align-items:center;
 }
-h1,h2{color:var(--accent);margin:10px 0;}
+.tabs{display:flex;gap:8px;margin-top:20px;}
+.tab{
+  background:var(--panel);border:1px solid var(--ring);border-radius:8px;
+  padding:8px 20px;cursor:pointer;color:var(--muted);font-weight:600;
+}
+.tab.active{background:var(--accent);color:#fff;}
 .panel{
-  background:var(--panel);border:1px solid var(--ring);border-radius:12px;
-  padding:20px;margin:10px 0;width:90%;max-width:700px;
+  display:none;margin-top:15px;
+  background:var(--panel);border:1px solid var(--ring);
+  border-radius:12px;padding:20px;width:90%;max-width:700px;
 }
-label{display:inline-block;width:130px;color:var(--muted);}
+.panel.active{display:block;}
+label{display:inline-block;width:120px;color:var(--muted);}
 input{
   width:120px;padding:6px;background:var(--soft);border:1px solid var(--ring);
-  border-radius:6px;color:var(--text);margin:2px 0;
+  border-radius:6px;color:var(--text);margin:3px 0;
 }
 button{
   margin-top:10px;padding:8px 16px;background:var(--accent);
@@ -33,12 +41,11 @@ button:hover{filter:brightness(1.2);}
 .result{margin-top:10px;color:var(--ok);font-weight:600;}
 .combo-box{
   background:var(--panel);border:1px solid var(--ring);
-  border-radius:12px;padding:12px;margin-bottom:10px;
+  border-radius:12px;padding:10px;margin-top:10px;
 }
-.combo-box span{display:inline-block;margin-right:8px;}
+.combo-box span{display:inline-block;margin-right:6px;}
 .muted{color:var(--muted);}
 .prob{color:var(--ok);font-weight:600;}
-hr{border:none;border-top:1px solid var(--ring);margin:25px 0;width:90%;}
 .petname-input{
   width:250px;font-weight:600;font-size:16px;margin-bottom:10px;
 }
@@ -46,17 +53,16 @@ hr{border:none;border-top:1px solid var(--ring);margin:25px 0;width:90%;}
 </head>
 <body>
 
-<h1>🐾 펫 경험치 & 8등급 확률 계산기</h1>
-
-<!-- 펫 이름 입력 -->
-<div class="panel">
-  <h2>🔖 펫 이름 입력</h2>
-  <input id="petName" class="petname-input" placeholder="예: 포이비스" />
+<h1>🐾 펫 계산기</h1>
+<div class="tabs">
+  <div class="tab active" data-tab="exp">📘 경험치 계산기</div>
+  <div class="tab" data-tab="sim">🎲 펫 초기화 시뮬레이터</div>
 </div>
 
 <!-- 경험치 계산기 -->
-<div class="panel">
+<div id="exp" class="panel active">
   <h2>📘 경험치 계산기</h2>
+  <label>펫 이름</label><input id="petNameExp" placeholder="예: 포이비스"><br>
   <label>현재 레벨</label><input id="curLv" type="number" value="1"><br>
   <label>목표 레벨</label><input id="targetLv" type="number" value="30"><br>
   <label>전투당 경험치</label><input id="expPerBattle" type="number" value="120"><br>
@@ -65,97 +71,101 @@ hr{border:none;border-top:1px solid var(--ring);margin:25px 0;width:90%;}
   <div id="expResult" class="result"></div>
 </div>
 
-<hr>
-
-<!-- 8등급 확률 계산기 -->
-<div class="panel">
-  <h2>🎯 8등급 확률 계산기</h2>
-  <div id="probHeader" class="muted"></div>
+<!-- 펫 초기화 시뮬레이터 -->
+<div id="sim" class="panel">
+  <h2>🎯 펫 초기화 시뮬레이터</h2>
+  <label>펫 이름</label><input id="petNameSim" placeholder="예: 포이비스"><br>
+  <button id="generateBtn">랜덤 초기화</button>
+  <div id="simResult" class="result"></div>
   <div id="probOutput"></div>
 </div>
 
 <script>
-/* ────────────────────────────────
-   📘 경험치 계산 로직
-──────────────────────────────── */
+/* ───────────── 탭 전환 ───────────── */
+document.querySelectorAll('.tab').forEach(t=>{
+  t.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById(t.dataset.tab).classList.add('active');
+  });
+});
+
+/* ───────────── 경험치 계산기 ───────────── */
 function expForLevel(lv){ return Math.pow(lv,3)*10; }
 
-function calcExp(){
-  const curLv = parseInt(document.getElementById('curLv').value);
-  const targetLv = parseInt(document.getElementById('targetLv').value);
-  const expPerBattle = parseInt(document.getElementById('expPerBattle').value);
-  const battlesPerMin = parseInt(document.getElementById('battlesPerMin').value);
-  const petName = document.getElementById('petName').value || '이름 없는 펫';
-
-  if(targetLv <= curLv){
-    document.getElementById('expResult').innerText = '목표 레벨은 현재보다 높아야 합니다.';
-    return;
+document.getElementById('calcExpBtn').addEventListener('click', ()=>{
+  const name=document.getElementById('petNameExp').value||'이름 없는 펫';
+  const curLv=parseInt(document.getElementById('curLv').value);
+  const targetLv=parseInt(document.getElementById('targetLv').value);
+  const expPerBattle=parseInt(document.getElementById('expPerBattle').value);
+  const battlesPerMin=parseInt(document.getElementById('battlesPerMin').value);
+  if(targetLv<=curLv){
+    document.getElementById('expResult').innerText='목표 레벨은 현재보다 높아야 합니다.';return;
   }
+  const needExp=expForLevel(targetLv)-expForLevel(curLv);
+  const needBattles=Math.ceil(needExp/expPerBattle);
+  const needMinutes=needBattles/battlesPerMin;
+  const hours=Math.floor(needMinutes/60);
+  const minutes=Math.round(needMinutes%60);
+  document.getElementById('expResult').innerHTML=`
+  <b>${name}</b> Lv.${curLv} → Lv.${targetLv}<br>
+  필요 경험치: ${needExp.toLocaleString()}<br>
+  전투 수: ${needBattles.toLocaleString()}회<br>
+  예상 시간: ${hours}시간 ${minutes}분`;
+});
 
-  const needExp = expForLevel(targetLv) - expForLevel(curLv);
-  const needBattles = Math.ceil(needExp / expPerBattle);
-  const needMinutes = needBattles / battlesPerMin;
-  const hours = Math.floor(needMinutes / 60);
-  const minutes = Math.round(needMinutes % 60);
-
-  document.getElementById('expResult').innerHTML = `
-    <b>${petName}</b>이(가) Lv.${curLv} → Lv.${targetLv}로 성장하려면:<br>
-    필요 경험치: ${needExp.toLocaleString()}<br>
-    예상 전투 수: ${needBattles.toLocaleString()}회<br>
-    예상 소요 시간: ${hours}시간 ${minutes}분
-  `;
-}
-document.getElementById('calcExpBtn').addEventListener('click', calcExp);
-
-/* ────────────────────────────────
-   🎯 8등급 확률 계산 로직
-──────────────────────────────── */
-const combos = [
-  {hp:47, atk:12, def:7, agi:4, total:380, grade8:57},
-  {hp:45, atk:13, def:6, agi:5, total:410, grade8:46},
-  {hp:45, atk:12, def:7, agi:4, total:395, grade8:42},
-  {hp:47, atk:11, def:7, agi:5, total:365, grade8:39},
-  {hp:47, atk:13, def:7, agi:4, total:402, grade8:71},
+/* ───────────── 펫 초기화 시뮬레이터 ───────────── */
+const combos=[
+  {hp:47,atk:12,def:7,agi:4,total:380,grade8:57},
+  {hp:45,atk:13,def:6,agi:5,total:410,grade8:46},
+  {hp:45,atk:12,def:7,agi:4,total:395,grade8:42},
+  {hp:47,atk:11,def:7,agi:5,total:365,grade8:39},
+  {hp:47,atk:13,def:7,agi:4,total:402,grade8:71},
 ];
 
 function getGlobalStats(list){
-  let totalAll = 0, grade8All = 0;
-  list.forEach(d=>{
-    totalAll += d.total;
-    grade8All += d.grade8;
-  });
-  return { totalAll, grade8All };
+  let totalAll=0,grade8All=0;
+  list.forEach(d=>{totalAll+=d.total;grade8All+=d.grade8;});
+  return{totalAll,grade8All};
 }
 
 function calcComboRates(list){
-  const global = getGlobalStats(list);
+  const global=getGlobalStats(list);
   return list.map(c=>{
-    const localRate = c.total ? c.grade8 / c.total : 0;
-    const globalRate = global.totalAll ? c.grade8 / global.totalAll : 0;
-    return {
+    const localRate=c.total?c.grade8/c.total:0;
+    const globalRate=global.totalAll?c.grade8/global.totalAll:0;
+    return{
       ...c,
-      localRate: (localRate*100).toFixed(2)+'%',
-      globalRate: (globalRate*100).toFixed(3)+'%',
+      localRate:(localRate*100).toFixed(2)+'%',
+      globalRate:(globalRate*100).toFixed(3)+'%',
     };
   });
 }
 
-function renderProb(){
-  const petName = document.getElementById('petName').value || '이름 없는 펫';
-  const rows = calcComboRates(combos);
-  const global = getGlobalStats(combos);
-  const header = document.getElementById('probHeader');
-  const out = document.getElementById('probOutput');
+function randomInt(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
 
-  header.innerHTML = `
-    <b>${petName}</b> 기준<br>
-    전체 경우의 수: <b>${global.totalAll.toLocaleString()}</b> |
-    전체 8등급 케이스: <b>${global.grade8All.toLocaleString()}</b><br><br>
+function generatePet(){
+  const name=document.getElementById('petNameSim').value||'이름 없는 펫';
+  const hp=randomInt(40,55);
+  const atk=randomInt(10,14);
+  const def=randomInt(5,8);
+  const agi=randomInt(3,6);
+
+  document.getElementById('simResult').innerHTML=`
+    <b>${name}</b> 초기 능력치<br>
+    체력:${hp}, 공격력:${atk}, 방어력:${def}, 순발력:${agi}
   `;
 
-  out.innerHTML = '';
+  const rows=calcComboRates(combos);
+  const global=getGlobalStats(combos);
+  const out=document.getElementById('probOutput');
+  out.innerHTML=`
+    전체 경우의 수: ${global.totalAll.toLocaleString()} |
+    전체 8등급 케이스: ${global.grade8All.toLocaleString()}<br><br>
+  `;
   rows.forEach((r,i)=>{
-    out.innerHTML += `
+    out.innerHTML+=`
       <div class="combo-box">
         <div>#${i+1}</div>
         <div>
@@ -175,8 +185,7 @@ function renderProb(){
   });
 }
 
-renderProb();
-document.getElementById('petName').addEventListener('input', renderProb);
+document.getElementById('generateBtn').addEventListener('click', generatePet);
 </script>
 </body>
 </html>
