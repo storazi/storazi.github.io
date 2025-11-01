@@ -244,6 +244,21 @@ $('#reset').onclick=()=>{
 };
 
 });
+  <div id="visitCounter" style="margin-top:20px;color:#ffd447;font-weight:600;">
+  방문자 수 불러오는 중...
+</div>
+
+<script>
+fetch('https://api.countapi.xyz/hit/storazi.github.io/visits')
+  .then(res => res.json())
+  .then(data => {
+    document.getElementById('visitCounter').textContent =
+      '🔹 방문자 수: ' + data.value.toLocaleString() + '회';
+  })
+  .catch(() => {
+    document.getElementById('visitCounter').textContent = '방문자 수 로드 실패 😢';
+  });
+
 </script>
 </body>
 </html>
