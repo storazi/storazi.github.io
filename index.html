@@ -130,177 +130,111 @@
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+  let PETS=[], SPETS=[], currentBase=null;
+  const nameInput=document.getElementById("petName");
+  const sgradeBox=document.getElementById("sgrade");
+  const resultBox=document.getElementById("result");
 
-// 🧩 JSON 데이터 로드
-async function loadPetData() {
-  try {
-    const [petsRes, spetRes] = await Promise.all([
-      fetch("./data/pets.json"),
-      fetch("./data/spet.json")
-    ]);
-    const pets = await petsRes.json();
-    const spets = await spetRes.json();
-    console.log("✅ 데이터 로드 성공:", pets.length, spets.length);
-    return { pets, spets };
-  } catch (err) {
-    console.error("❌ 데이터 로드 실패:", err);
-    alert("데이터를 불러오지 못했습니다. (콘솔 확인)");
-    return { pets: [], spets: [] };
-  }
-}
-
-let PETS = [], SPETS = [], currentBase = null;
-const nameInput = document.getElementById("petName");
-const sgradeBox = document.getElementById("sgrade");
-const resultBox = document.getElementById("result");
-
-loadPetData().then(data => { PETS = data.pets; SPETS = data.spets; });
-
-// 🧭 탭 전환
-function showTab(id) {
-  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  document.querySelectorAll('.tab-buttons button').forEach(b => b.classList.remove('active'));
-  if (id === 'simTab') document.getElementById("tabSim").classList.add('active');
-  else document.getElementById("tabExp").classList.add('active');
-}
-document.getElementById("tabSim").addEventListener("click", () => showTab("simTab"));
-document.getElementById("tabExp").addEventListener("click", () => showTab("expTab"));
-
-// 🐾 이름 처리 함수 (한글/영문 대응)
-function safeName(obj) {
-  return (obj.name || obj.이름 || "").toString().replace(/\s+/g, "").toLowerCase();
-}
-
-// 🐾 펫 선택 및 표시
-nameInput.addEventListener("keydown", e => { if (e.key === "Enter") updatePet(); });
-nameInput.addEventListener("change", updatePet);
-
-function updatePet() {
-  const n = nameInput.value.trim().replace(/\s+/g, "").toLowerCase();
-
-  const cleanPETS = (PETS || []).filter(x => x && typeof x === "object");
-  const cleanSPETS = (SPETS || []).filter(x => x && typeof x === "object");
-
-  const p = cleanPETS.find(x => safeName(x) === n);
-  const s = cleanSPETS.find(x => safeName(x) === n);
-  resultBox.textContent = "";
-
-  if (!p || !s) {
-    sgradeBox.innerHTML = `<b style="color:var(--red)">⚠️ [${n}] 데이터를 찾을 수 없습니다.</b>`;
-    currentBase = null;
-    return;
+  async function loadPetData(){
+    try{
+      const [petsRes,spetRes]=await Promise.all([
+        fetch("./data/pets.json"),fetch("./data/spet.json")
+      ]);
+      const pets=await petsRes.json(), spets=await spetRes.json();
+      console.log("✅ 데이터 로드 성공:", pets.length, spets.length);
+      PETS=pets; SPETS=spets;
+    }catch(e){alert("데이터 로드 실패: 콘솔 확인"); console.error(e);}
   }
 
-  // ✅ S급 능력치 또는 초기치(stat)에서 값 추출
-  const sStats = s["초기치(stat)"] || s.stats || s || {};
-  const pStats = p["초기치(stat)"] || p.stats || p || {};
+  await loadPetData();
 
-  currentBase = {
-    name: p.name || p.이름,
-    hp: s.hp || s.Hp || s.HP || sStats["내구력(HP)"] || sStats["hp"] || 0,
-    atk: s.atk || s.Atk || s.ATK || sStats["공격력(Atk)"] || sStats["atk"] || 0,
-    def: s.def || s.Def || s.DEF || sStats["방어력(Def)"] || sStats["def"] || 0,
-    agi: s.agi || s.Agi || s.AGI || sStats["순발력(Agi)"] || sStats["agi"] || 0
+  // 탭 전환
+  const showTab=id=>{
+    document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.querySelectorAll('.tab-buttons button').forEach(b=>b.classList.remove('active'));
+    if(id==="simTab")document.getElementById("tabSim").classList.add('active');
+    else document.getElementById("tabExp").classList.add('active');
+  };
+  document.getElementById("tabSim").onclick=()=>showTab("simTab");
+  document.getElementById("tabExp").onclick=()=>showTab("expTab");
+
+  const safeName=obj=>{
+    if(!obj||typeof obj!=="object")return"";
+    return(String(obj.name||obj.이름||"").replace(/\s+/g,"").toLowerCase());
   };
 
-  sgradeBox.innerHTML = `<b>${currentBase.name} S급 기준</b><br>
+  nameInput.addEventListener("keydown",e=>{if(e.key==="Enter")updatePet();});
+  nameInput.addEventListener("change",updatePet);
+
+  function updatePet(){
+    const n=nameInput.value.trim().replace(/\s+/g,"").toLowerCase();
+    const p=PETS.find(x=>safeName(x)===n);
+    const s=SPETS.find(x=>safeName(x)===n);
+    resultBox.textContent="";
+
+    if(!p||!s){
+      sgradeBox.innerHTML=`<b style="color:var(--red)">⚠️ [${n}] 데이터를 찾을 수 없습니다.</b>`;
+      currentBase=null;return;
+    }
+
+    const sStat=s["초기치(stat)"]||s.stats||s;
+    const getVal=(obj,...keys)=>{for(const k of keys)if(obj&&obj[k]!==undefined)return obj[k];return 0;};
+
+    currentBase={
+      name:p.name||p.이름||"이름 없음",
+      hp:getVal(s,"hp","Hp","HP")||getVal(sStat,"내구력(HP)","HP","hp"),
+      atk:getVal(s,"atk","Atk","ATK")||getVal(sStat,"공격력(Atk)","Atk","atk"),
+      def:getVal(s,"def","Def","DEF")||getVal(sStat,"방어력(Def)","Def","def"),
+      agi:getVal(s,"agi","Agi","AGI")||getVal(sStat,"순발력(Agi)","Agi","agi")
+    };
+
+    sgradeBox.innerHTML=`<b>${currentBase.name} S급 기준</b><br>
     체력 <b>${currentBase.hp}</b> | 공격력 <b>${currentBase.atk}</b> | 방어력 <b>${currentBase.def}</b> | 순발력 <b>${currentBase.agi}</b>`;
-}
-
-
-  currentBase = {
-    name: p.name || p.이름,
-    hp: s.hp || s.체력 || s.HP,
-    atk: s.atk || s.공격력 || s.ATK,
-    def: s.def || s.방어력 || s.DEF,
-    agi: s.agi || s.순발력 || s.AGI
-  };
-
-  sgradeBox.innerHTML = `<b>${currentBase.name} S급 기준</b><br>
-    체력 <b>${currentBase.hp}</b> | 공격력 <b>${currentBase.atk}</b> | 방어력 <b>${currentBase.def}</b> | 순발력 <b>${currentBase.agi}</b>`;
-}
-
-// 🧬 시뮬레이터
-function oneRandomStats(b) {
-  const r = d => Math.floor(Math.random() * (d * 2 + 1)) - d;
-  return { HP: b.hp + r(3), Atk: b.atk + r(2), Def: b.def + r(2), Agi: b.agi + r(2) };
-}
-function fmt(v, b) {
-  const d = v - b;
-  if (d > 0) return `${v}<b style="color:var(--red)">(+${d})</b>`;
-  if (d < 0) return `${v}<b style="color:var(--blue)">(${d})</b>`;
-  return `${v}<b style="color:var(--muted)">(0)</b>`;
-}
-function simulate(t = 1) {
-  if (!currentBase) { alert("펫 이름을 먼저 입력하세요."); return; }
-  let o = "";
-  for (let i = 1; i <= t; i++) {
-    const x = oneRandomStats(currentBase);
-    o += `#${i} → 체력 ${fmt(x.HP, currentBase.hp)} | 공격력 ${fmt(x.Atk, currentBase.atk)} | 방어력 ${fmt(x.Def, currentBase.def)} | 순발력 ${fmt(x.Agi, currentBase.agi)}\n`;
   }
-  resultBox.innerHTML += o + "<br>";
-}
-function clearResults() { resultBox.innerHTML = ""; }
-document.getElementById("sim1").addEventListener("click", () => simulate(1));
-document.getElementById("sim5").addEventListener("click", () => simulate(5));
-document.getElementById("clear").addEventListener("click", clearResults);
 
-// 📘 경험치 계산기
-const $ = s => document.querySelector(s);
-const fmtNum = n => isFinite(n) ? Number(n).toLocaleString() : '-';
-const EXP_TABLE = {
-  0:0,1:2,2:6,3:17,4:37,5:67,6:111,7:169,8:247,9:344,10:464,11:609,12:783,13:985,
-  14:1221,15:1491,16:1799,17:2145,18:2535,19:2968,20:3448,21:3977,22:4559,23:5193,
-  24:5885,25:6635,26:7447,27:8321,28:9263,29:10272,30:11352,31:12506,32:13734,
-  33:15042,34:16429,35:17899,36:19454,37:21098,38:22830,39:24656,40:26576,
-  41:28594,42:30710,43:32930,44:35253,45:37683,46:40222,47:42874,48:45638,
-  49:48520,50:51520,51:54642,52:57886,53:61258,54:64757,55:68387,56:72150,
-  57:76050,58:80086,59:84264,60:106110,61:113412,62:121149,63:129352,64:138044,
-  65:147256,66:157019,67:167366,68:178334,69:189958,70:202282,71:215348,
-  72:229205,73:243901,74:259495,75:276041,76:293606,77:312258,78:332071,
-  79:353126,80:375511,81:399318,82:424655,83:451631,84:480370,85:511007,
-  86:543686,87:578571,88:616838,89:655680,90:698312,91:743970,92:795918,
-  93:842442,94:901869,95:962553,96:1026899,97:1098354,98:1174419,99:1256664,
-  100:1407463,101:1576358,102:1765521,103:1977384,104:2214670,105:2480430,
-  106:2778082,107:3111451,108:3484825,109:3903005,110:4371365,111:4895929,
-  112:5483440,113:6141453,114:6878428,115:7703839,116:8628300,117:9663695,
-  118:10823339,119:12122140,120:13576796,121:15206012,122:17030733,123:19074421,
-  124:21363352,125:23926954,126:26798189,127:30013971,128:33615648,129:37649526,
-  130:42167469,131:47227565,132:52894873,133:59242257,134:66351328,135:74313488,
-  136:83231106,137:93218839,138:104405100,139:116933712
-};
-function getTotalExp(s, t) {
-  let sum = 0; for (let lv = s; lv < t; lv++) if (EXP_TABLE[lv]) sum += EXP_TABLE[lv];
-  return sum;
-}
-$('#run').addEventListener('click', () => {
-  try {
-    const c = +$('#currentLevel').value,
-          cp = +($('#currentPercent').value) || 0,
-          t = +$('#targetLevel').value,
-          ph = +$('#xpPerHour').value;
-    if (!c || !t || !ph) throw new Error('입력이 부족합니다.');
-    if (t <= c) throw new Error('목표 레벨은 현재보다 커야 합니다.');
-    const rem1 = EXP_TABLE[c] * (1 - (cp / 100));
-    const rem2 = getTotalExp(c + 1, t);
-    const remain = rem1 + rem2;
-const hrs = remain / ph;
-const days = hrs / 24;
-const h = Math.floor(hrs), m = Math.round((hrs - h) * 60);
-$('#statRemain').textContent = fmtNum(remain.toFixed(0));
-$('#statHours').textContent = `${h}시간 ${m}분`;
-$('#statDays').textContent = days.toFixed(2) + ' 일';
-$('#results').hidden = false;
-} catch (e) { alert(e.message); }
-});
-$('#reset').addEventListener('click', () => {
-document.querySelectorAll('#expTab input').forEach(i => i.value = '');
-$('#results').hidden = true;
-});
+  function oneRandomStats(b){
+    const r=d=>Math.floor(Math.random()*(d*2+1))-d;
+    return{HP:b.hp+r(3),Atk:b.atk+r(2),Def:b.def+r(2),Agi:b.agi+r(2)};
+  }
+  function fmt(v,b){
+    const d=v-b;
+    if(d>0)return`${v}<b style="color:var(--red)">(+${d})</b>`;
+    if(d<0)return`${v}<b style="color:var(--blue)">(${d})</b>`;
+    return`${v}<b style="color:var(--muted)">(0)</b>`;
+  }
+  function simulate(t=1){
+    if(!currentBase){alert("펫 이름을 먼저 입력하세요.");return;}
+    let o="";
+    for(let i=1;i<=t;i++){
+      const x=oneRandomStats(currentBase);
+      o+=`#${i} → 체력 ${fmt(x.HP,currentBase.hp)} | 공격력 ${fmt(x.Atk,currentBase.atk)} | 방어력 ${fmt(x.Def,currentBase.def)} | 순발력 ${fmt(x.Agi,currentBase.agi)}\n`;
+    }
+    resultBox.innerHTML+=o+"<br>";
+  }
+  document.getElementById("sim1").onclick=()=>simulate(1);
+  document.getElementById("sim5").onclick=()=>simulate(5);
+  document.getElementById("clear").onclick=()=>resultBox.innerHTML="";
 
-}); // DOMContentLoaded 끝
+  // 📘 경험치 계산기
+  const $=s=>document.querySelector(s);
+  const fmtNum=n=>isFinite(n)?Number(n).toLocaleString():'-';
+  const EXP_TABLE={0:0,1:2,2:6,3:17,4:37,5:67,6:111,7:169,8:247,9:344,10:464,11:609,12:783,13:985,14:1221,15:1491,16:1799,17:2145,18:2535,19:2968,20:3448};
+  function getTotalExp(s,t){let sum=0;for(let lv=s;lv<t;lv++)if(EXP_TABLE[lv])sum+=EXP_TABLE[lv];return sum;}
+  $('#run').onclick=()=>{try{
+    const c=+$('#currentLevel').value,cp=+($('#currentPercent').value)||0,t=+$('#targetLevel').value,ph=+$('#xpPerHour').value;
+    if(!c||!t||!ph)throw new Error('입력이 부족합니다.');
+    if(t<=c)throw new Error('목표 레벨은 현재보다 커야 합니다.');
+    const rem1=EXP_TABLE[c]*(1-(cp/100)), rem2=getTotalExp(c+1,t), remain=rem1+rem2;
+    const hrs=remain/ph,days=hrs/24,h=Math.floor(hrs),m=Math.round((hrs-h)*60);
+    $('#statRemain').textContent=fmtNum(remain.toFixed(0));
+    $('#statHours').textContent=`${h}시간 ${m}분`;
+    $('#statDays').textContent=days.toFixed(2)+' 일';
+    $('#results').hidden=false;
+  }catch(e){alert(e.message);}};
+  $('#reset').onclick=()=>{document.querySelectorAll('#expTab input').forEach(i=>i.value='');$('#results').hidden=true;};
+});
 </script>
 </body>
 </html>
