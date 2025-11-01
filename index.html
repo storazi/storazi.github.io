@@ -179,8 +179,12 @@ nameInput.addEventListener("change", updatePet);
 
 function updatePet() {
   const n = nameInput.value.trim().replace(/\s+/g, "").toLowerCase();
-  const p = PETS.find(x => safeName(x) === n);
-  const s = SPETS.find(x => safeName(x) === n);
+
+  const cleanPETS = (PETS || []).filter(x => x && typeof x === "object");
+  const cleanSPETS = (SPETS || []).filter(x => x && typeof x === "object");
+
+  const p = cleanPETS.find(x => safeName(x) === n);
+  const s = cleanSPETS.find(x => safeName(x) === n);
   resultBox.textContent = "";
 
   if (!p || !s) {
@@ -188,6 +192,23 @@ function updatePet() {
     currentBase = null;
     return;
   }
+
+  // ✅ S급 능력치 또는 초기치(stat)에서 값 추출
+  const sStats = s["초기치(stat)"] || s.stats || s || {};
+  const pStats = p["초기치(stat)"] || p.stats || p || {};
+
+  currentBase = {
+    name: p.name || p.이름,
+    hp: s.hp || s.Hp || s.HP || sStats["내구력(HP)"] || sStats["hp"] || 0,
+    atk: s.atk || s.Atk || s.ATK || sStats["공격력(Atk)"] || sStats["atk"] || 0,
+    def: s.def || s.Def || s.DEF || sStats["방어력(Def)"] || sStats["def"] || 0,
+    agi: s.agi || s.Agi || s.AGI || sStats["순발력(Agi)"] || sStats["agi"] || 0
+  };
+
+  sgradeBox.innerHTML = `<b>${currentBase.name} S급 기준</b><br>
+    체력 <b>${currentBase.hp}</b> | 공격력 <b>${currentBase.atk}</b> | 방어력 <b>${currentBase.def}</b> | 순발력 <b>${currentBase.agi}</b>`;
+}
+
 
   currentBase = {
     name: p.name || p.이름,
