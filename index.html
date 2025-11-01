@@ -264,7 +264,7 @@ $('#run').addEventListener('click', () => {
     if (t <= c) throw new Error('목표 레벨은 현재보다 커야 합니다.');
     const rem1 = EXP_TABLE[c] * (1 - (cp / 100));
     const rem2 = getTotalExp(c + 1, t);
-    const remainconst remain = rem1 + rem2;
+    const remain = rem1 + rem2;
 const hrs = remain / ph;
 const days = hrs / 24;
 const h = Math.floor(hrs), m = Math.round((hrs - h) * 60);
