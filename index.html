@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>🐂 미궁 시뮬레이터 & 경험치 계산기</title>
 <style>
   :root {
@@ -10,98 +10,89 @@
     --text:#d8e0ff; --muted:#a9b5cc;
     --blue:#3ba4f7; --red:#ff6b81;
   }
-
   body {
     background:var(--bg); color:var(--text);
     font-family:"Pretendard",system-ui,-apple-system,Segoe UI,sans-serif;
     margin:0; display:flex; flex-direction:column; align-items:center;
     padding:24px;
   }
-
   h1 {
     color:var(--accent); font-size:1.6rem;
     margin-bottom:20px; text-align:center;
   }
-
-  /* ─── 탭 버튼 ─── */
+  /* 탭 버튼 */
   .tab-buttons {
     display:flex; justify-content:center; gap:10px; margin-bottom:20px;
   }
   .tab-buttons button {
-    background:var(--panel);
-    border:1px solid var(--accent);
+    background:var(--panel); border:1px solid var(--accent);
     color:var(--accent); font-weight:700;
-    padding:10px 20px;
-    border-radius:10px; cursor:pointer;
-    transition:all 0.2s ease;
+    padding:10px 20px; border-radius:10px;
+    cursor:pointer; transition:all 0.2s ease;
   }
-  .tab-buttons button.active {
-    background:var(--accent); color:#111;
-  }
-
+  .tab-buttons button.active { background:var(--accent); color:#111; }
   .tab-content { display:none; width:min(1100px,96%); }
   .tab-content.active { display:block; }
-
   .card {
     background:rgba(20,30,50,0.9);
     border:1px solid #24324b;
-    border-radius:16px;
-    padding:24px;
+    border-radius:16px; padding:24px;
     box-shadow:0 0 12px rgba(25,60,100,.25);
   }
 
-  /* 🟦 입력창 */
+  /* 입력창 */
   #petName {
-    width:min(400px,90%);
-    display:block;
-    margin:0 auto 16px auto;
-    padding:12px 14px 12px 38px;
-    border:1px solid #3ba4f7;
-    border-radius:10px;
+    width:min(400px,90%); display:block;
+    margin:0 auto 16px auto; padding:12px 14px 12px 38px;
+    border:1px solid #3ba4f7; border-radius:10px;
     background:rgba(15,25,45,0.9);
-    color:var(--text);
-    font-size:15px;
-    outline:none;
+    color:var(--text); font-size:15px; outline:none;
     background-image:url('data:image/svg+xml;utf8,<svg fill="%23a8c9ff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 2a8 8 0 105.293 14.293l4.707 4.707 1.414-1.414-4.707-4.707A8 8 0 0010 2zm0 2a6 6 0 110 12A6 6 0 0110 4z"/></svg>');
-    background-repeat:no-repeat;
-    background-position:10px center;
+    background-repeat:no-repeat; background-position:10px center;
     background-size:18px;
   }
-
-  #petName::placeholder {
-    color:#a8c9ff; opacity:0.8;
-  }
+  #petName::placeholder { color:#a8c9ff; opacity:0.8; }
 
   button.sim, .btn {
-    background:var(--accent); color:#111;
-    font-weight:700; border:none;
-    border-radius:10px;
-    padding:10px 16px;
-    cursor:pointer; margin:5px;
-    transition:all .15s ease-in-out;
+    background:var(--accent); color:#111; font-weight:700; border:none;
+    border-radius:10px; padding:10px 16px;
+    cursor:pointer; margin:5px; transition:all .15s ease-in-out;
   }
   button.sim:hover, .btn:hover { filter:brightness(1.1); }
 
   .panel {
-    background:rgba(15,25,45,0.85);
-    border-radius:10px;
-    padding:10px;
-    margin-top:10px;
-    font-size:14px;
-    line-height:1.6;
-    border:1px solid #24324b;
+    background:rgba(15,25,45,0.85); border-radius:10px; padding:10px;
+    margin-top:10px; font-size:14px; line-height:1.6; border:1px solid #24324b;
   }
-
   .result {
-    white-space:pre-line;
-    font-family:"JetBrains Mono",monospace;
-    background:rgba(15,25,45,0.9);
-    border:1px solid #24324b;
-    border-radius:10px;
-    padding:14px;
-    font-size:14px;
-    margin-top:15px;
+    white-space:pre-line; font-family:"JetBrains Mono",monospace;
+    background:rgba(15,25,45,0.9); border:1px solid #24324b;
+    border-radius:10px; padding:14px; font-size:14px; margin-top:15px;
   }
+  /* 경험치 계산기 */
+  .wrapper {
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+    gap:20px; width:100%; max-width:1100px;
+  }
+  .card.exp { background:rgba(20,30,50,0.9); }
+  .row { display:grid; gap:6px; margin:10px 0; }
+  label { color:var(--muted); font-weight:600; }
+  input[type="number"] {
+    width:100%; padding:10px 12px; border:1px solid #3ba4f7;
+    border-radius:10px; background:rgba(15,25,45,0.85);
+    color:var(--text); outline:none; font-size:15px;
+  }
+  .results {
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    gap:12px; margin-top:18px;
+  }
+  .stat {
+    background:rgba(15,25,45,0.9); border:1px solid #24324b;
+    border-radius:14px; padding:12px; text-align:center;
+  }
+  .stat small { display:block; color:var(--muted); }
+  .stat strong { display:block; margin-top:4px; font-size:16px; color:var(--accent); }
 </style>
 </head>
 <body>
@@ -126,7 +117,27 @@
   </div>
 </div>
 
+<!-- 📘 경험치 계산기 -->
+<div id="expTab" class="tab-content">
+  <div class="wrapper">
+    <div class="card exp">
+      <h2>레벨업 계산기</h2>
+      <div class="row"><label>현재 레벨</label><input id="currentLevel" type="number"></div>
+      <div class="row"><label>현재 진행도(%)</label><input id="currentPercent" type="number" placeholder="예: 45"></div>
+      <div class="row"><label>목표 레벨</label><input id="targetLevel" type="number"></div>
+      <div class="row"><label>시간당 획득 경험치</label><input id="xpPerHour" type="number"></div>
+      <div class="row"><button class="btn" id="run">계산</button><button class="btn" id="reset">초기화</button></div>
+      <div class="results" id="results" hidden>
+        <div class="stat"><small>남은 경험치</small><strong id="statRemain">-</strong></div>
+        <div class="stat"><small>예상 시간</small><strong id="statHours">-</strong></div>
+        <div class="stat"><small>예상 일수</small><strong id="statDays">-</strong></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
+// 탭 전환
 function showTab(id, btn){
   document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.tab-buttons button').forEach(b=>b.classList.remove('active'));
@@ -140,15 +151,13 @@ const petData = [
   {"이름":"불그리","초기치(stat)":{"내구력(HP)":20,"공격력(Atk)":3,"방어력(Def)":3,"순발력(Agi)":4}}
 ];
 
-function getPet(n){return petData.find(p=>p.이름===n);}
+function getPet(n){
+  const cleanName=n.trim().replace(/\s+/g,"").toLowerCase();
+  return petData.find(p=>p.이름.replace(/\s+/g,"").toLowerCase()===cleanName);
+}
 function oneRandomStats(b){
-  const r = (d) => Math.floor(Math.random()*(d*2+1))-d;
-  return {
-    HP:b.HP+r(3),
-    Atk:b.Atk+r(2),
-    Def:b.Def+r(2),
-    Agi:b.Agi+r(2)
-  };
+  const r=d=>Math.floor(Math.random()*(d*2+1))-d;
+  return{HP:b.HP+r(3),Atk:b.Atk+r(2),Def:b.Def+r(2),Agi:b.Agi+r(2)};
 }
 function fmt(v,b){
   const d=v-b;
@@ -161,7 +170,6 @@ const nameInput=document.getElementById("petName");
 const sgradeBox=document.getElementById("sgrade");
 const resultBox=document.getElementById("result");
 let currentBase=null;
-
 nameInput.addEventListener("keydown",(e)=>{if(e.key==="Enter")updatePet();});
 nameInput.addEventListener("change",updatePet);
 
@@ -169,18 +177,13 @@ function updatePet(){
   const n=nameInput.value.trim();
   const p=getPet(n);
   resultBox.textContent="";
-  if(!p){
-    currentBase=null;
-    sgradeBox.innerHTML=`<b style="color:var(--red)">⚠️ [${n}] 데이터를 찾을 수 없습니다.</b>`;
-    return;
-  }
+  if(!p){currentBase=null;sgradeBox.innerHTML=`<b style="color:var(--red)">⚠️ [${n}] 데이터를 찾을 수 없습니다.</b>`;return;}
   const s=p["초기치(stat)"];
   currentBase={HP:s["내구력(HP)"],Atk:s["공격력(Atk)"],Def:s["방어력(Def)"],Agi:s["순발력(Agi)"]};
   sgradeBox.innerHTML=`<b>${p.이름} S급 기준 능력치</b><br>체력 <b>${s["내구력(HP)"]}</b> | 공격력 <b>${s["공격력(Atk)"]}</b> | 방어력 <b>${s["방어력(Def)"]}</b> | 순발력 <b>${s["순발력(Agi)"]}</b>`;
 }
-
 function simulate(t=1){
-  if(!currentBase) return; // 경고창 제거 버전
+  if(!currentBase)return;
   let o="";
   for(let i=1;i<=t;i++){
     const x=oneRandomStats(currentBase);
@@ -188,8 +191,28 @@ function simulate(t=1){
   }
   resultBox.innerHTML+=o+"<br>";
 }
-
 function clearResults(){resultBox.innerHTML="";}
+
+// 📘 경험치 계산기
+const $=s=>document.querySelector(s);
+const fmtNum=n=>isFinite(n)?Number(n).toLocaleString():'-';
+const EXP_TABLE={1:2,2:6,3:17,4:37,5:67,6:111,7:169,8:247,9:344,10:464,11:609,12:783,13:985,14:1221,15:1491};
+function getTotalExp(s,t){let sum=0;for(let lv=s;lv<t;lv++){if(EXP_TABLE[lv])sum+=EXP_TABLE[lv];else break;}return sum;}
+$('#run').addEventListener('click',()=>{
+  try{
+    const c=+$('#currentLevel').value,cp=+($('#currentPercent').value)||0,t=+$('#targetLevel').value,ph=+$('#xpPerHour').value;
+    if(!c||!t||!ph) throw new Error('입력이 부족합니다.');
+    if(t<=c) throw new Error('목표 레벨은 현재보다 커야 합니다.');
+    const rem1=EXP_TABLE[c]*(1-(cp/100)),rem2=getTotalExp(c+1,t);
+    const remain=rem1+rem2;const hrs=remain/ph;const days=hrs/24;
+    const h=Math.floor(hrs),m=Math.round((hrs-h)*60);
+    $('#statRemain').textContent=fmtNum(remain.toFixed(0));
+    $('#statHours').textContent=`${h}시간 ${m}분`;
+    $('#statDays').textContent=days.toFixed(2)+' 일';
+    $('#results').hidden=false;
+  }catch(e){alert(e.message);}
+});
+$('#reset').addEventListener('click',()=>{document.querySelectorAll('#expTab input').forEach(i=>i.value='');$('#results').hidden=true;});
 </script>
 </body>
 </html>
