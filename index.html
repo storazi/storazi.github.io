@@ -5,86 +5,35 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>🐂 미궁 시뮬레이터 & 경험치 계산기</title>
 <style>
-  body {
-    background:#0b1426; color:#eaf2ff;
-    font-family:"Pretendard",sans-serif;
-    margin:0; padding:24px; text-align:center;
-  }
-  h1 { color:#ffd447; margin-bottom:20px; }
-
-  .tab-buttons { display:flex; justify-content:center; gap:10px; margin-bottom:20px; }
-  .tab-buttons button {
-    background:rgba(15,25,45,0.9); border:1px solid #ffd447; color:#ffd447;
-    font-weight:700; border-radius:10px; padding:10px 20px; cursor:pointer;
-    transition:all .2s ease;
-  }
-  .tab-buttons button.active { background:#ffd447; color:#111; }
-
-  .tab-content { display:none; }
-  .tab-content.active { display:block; }
-
-  input {
-    background:rgba(15,25,45,0.9); color:#fff; border:1px solid #3ba4f7;
-    padding:10px 14px; border-radius:8px; width:260px; margin-bottom:10px;
-  }
-  button {
-    background:#ffd447; color:#111; font-weight:700; border:none;
-    border-radius:8px; padding:10px 14px; cursor:pointer; margin:4px;
-    transition:all .2s ease;
-  }
-  button:hover { filter:brightness(1.1); }
-
-  .panel {
-    margin-top:10px; background:rgba(15,25,45,0.9);
-    border:1px solid #24324b; border-radius:10px; padding:10px;
-  }
-  .result {
-    margin-top:15px; white-space:pre-line; text-align:left;
-    display:inline-block; background:rgba(15,25,45,0.85);
-    border-radius:10px; padding:14px; border:1px solid #24324b;
-    font-family:"JetBrains Mono",monospace;
-  }
-
-  #costDisplay { margin-top:10px; color:#ffd447; font-weight:700; }
-
+  body {background:#0b1426;color:#eaf2ff;font-family:"Pretendard",sans-serif;margin:0;padding:24px;text-align:center;}
+  h1 {color:#ffd447;margin-bottom:20px;}
+  .tab-buttons{display:flex;justify-content:center;gap:10px;margin-bottom:20px;}
+  .tab-buttons button{background:rgba(15,25,45,0.9);border:1px solid #ffd447;color:#ffd447;font-weight:700;border-radius:10px;padding:10px 20px;cursor:pointer;transition:all .2s ease;}
+  .tab-buttons button.active{background:#ffd447;color:#111;}
+  .tab-content{display:none;}
+  .tab-content.active{display:block;}
+  input{background:rgba(15,25,45,0.9);color:#fff;border:1px solid #3ba4f7;padding:10px 14px;border-radius:8px;width:260px;margin-bottom:10px;}
+  button{background:#ffd447;color:#111;font-weight:700;border:none;border-radius:8px;padding:10px 14px;cursor:pointer;margin:4px;transition:all .2s ease;}
+  button:hover{filter:brightness(1.1);}
+  .panel{margin-top:10px;background:rgba(15,25,45,0.9);border:1px solid #24324b;border-radius:10px;padding:10px;}
+  .result{margin-top:15px;white-space:pre-line;text-align:left;display:inline-block;background:rgba(15,25,45,0.85);border-radius:10px;padding:14px;border:1px solid #24324b;font-family:"JetBrains Mono",monospace;}
+  #costDisplay{margin-top:10px;color:#ffd447;font-weight:700;}
+  .plus{color:#ff6b81;font-weight:700;}
+  .minus{color:#3ba4f7;font-weight:700;}
+  .zero{color:#a9b5cc;}
   /* 경험치 계산기 */
-  .wrapper { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:20px; max-width:900px; margin:auto; }
-  .card {
-    background:rgba(20,30,50,0.9);
-    border:1px solid #24324b; border-radius:16px; padding:24px;
-    box-shadow:0 0 12px rgba(25,60,100,.25);
-  }
-  label { color:#a9b5cc; font-weight:600; }
-  .row { display:grid; gap:6px; margin:10px 0; }
-  input[type="number"] {
-    width:100%; padding:10px 12px; border:1px solid #3ba4f7;
-    border-radius:10px; background:rgba(15,25,45,0.85);
-    color:#fff; outline:none; font-size:15px;
-  }
-  .row.buttons {
-    display:flex; justify-content:space-between; gap:10px; margin-top:12px;
-  }
-  .row.buttons button {
-    flex:1; width:48%; padding:10px 0; border-radius:8px; font-weight:700;
-  }
-  .results {
-    display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-    gap:12px; margin-top:18px;
-  }
-  .stat {
-    background:rgba(15,25,45,0.9); border:1px solid #24324b;
-    border-radius:14px; padding:12px; text-align:center;
-  }
-  .stat small { display:block; color:#a9b5cc; }
-  .stat strong { display:block; margin-top:4px; font-size:16px; color:#ffd447; }
-
-  /* 방문자 수 */
-  #visitCounter { margin-top:30px; font-weight:600; color:#ffd447; }
-
-  /* + - 색상 */
-  .plus { color:#ff6b81; font-weight:700; }
-  .minus { color:#3ba4f7; font-weight:700; }
-  .zero { color:#a9b5cc; }
+  .wrapper{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px;max-width:900px;margin:auto;}
+  .card{background:rgba(20,30,50,0.9);border:1px solid #24324b;border-radius:16px;padding:24px;box-shadow:0 0 12px rgba(25,60,100,.25);}
+  label{color:#a9b5cc;font-weight:600;}
+  .row{display:grid;gap:6px;margin:10px 0;}
+  input[type="number"]{width:100%;padding:10px 12px;border:1px solid #3ba4f7;border-radius:10px;background:rgba(15,25,45,0.85);color:#fff;outline:none;font-size:15px;}
+  .row.buttons{display:flex;justify-content:space-between;gap:10px;margin-top:12px;}
+  .row.buttons button{flex:1;width:48%;padding:10px 0;border-radius:8px;font-weight:700;}
+  .results{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:18px;}
+  .stat{background:rgba(15,25,45,0.9);border:1px solid #24324b;border-radius:14px;padding:12px;text-align:center;}
+  .stat small{display:block;color:#a9b5cc;}
+  .stat strong{display:block;margin-top:4px;font-size:16px;color:#ffd447;}
+  #visitCounter{margin-top:30px;font-weight:600;color:#ffd447;}
 </style>
 </head>
 <body>
@@ -130,24 +79,24 @@
   </div>
 </div>
 
-<!-- 🔢 방문자 카운터 -->
+<!-- 방문자 카운터 -->
 <div id="visitCounter">방문자 수 불러오는 중...</div>
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-
-  // ✅ 방문자 카운터
+  /* ✅ 방문자 카운터: countapi.store 사용 */
   const pageKey = window.location.pathname.replace(/\W+/g, "_");
-  fetch(`https://api.countapi.xyz/hit/storazi.github.io${pageKey}/visits`)
+  fetch(`https://api.countapi.store/hit/storazi.github.io${pageKey}/visits`)
     .then(res => res.json())
     .then(d => {
-      document.getElementById("visitCounter").textContent = `🔹 방문자 수: ${d.value.toLocaleString()}회`;
+      document.getElementById("visitCounter").textContent =
+        `🔹 방문자 수: ${d.value?.toLocaleString() ?? "???"}회`;
     })
     .catch(() => {
       document.getElementById("visitCounter").textContent = "방문자 수 로드 실패 😢";
     });
 
-  // ✅ 탭 전환
+  /* ✅ 탭 전환 */
   const showTab = id => {
     document.querySelectorAll(".tab-content").forEach(t=>t.classList.remove("active"));
     document.querySelectorAll(".tab-buttons button").forEach(b=>b.classList.remove("active"));
@@ -157,18 +106,31 @@ document.addEventListener("DOMContentLoaded", () => {
   tabSim.onclick=()=>showTab("simTab");
   tabExp.onclick=()=>showTab("expTab");
 
-  // ✅ 펫 데이터 (예시)
-  const SPETS=[{
-    이름:"쿠쿠",
-    "초기치(stat)":{"내구력(HP)":34,"공격력(Atk)":6,"방어력(Def)":4,"순발력(Agi)":8}
-  }];
+  /* ✅ 펫 데이터 로드 (깃허브 Pages 자동 경로) */
+  async function loadPetData(){
+    const base = `${window.location.origin}/data/`;
+    try{
+      const [pets,spet]=await Promise.all([
+        fetch(base+"pets.json").then(r=>r.json()),
+        fetch(base+"spet.json").then(r=>r.json())
+      ]);
+      console.log("✅ JSON 로드 완료:",pets.length,"/",spet.length);
+      return {pets,spet};
+    }catch(e){
+      console.error("❌ JSON 불러오기 실패:",e);
+      alert("펫 데이터를 불러오지 못했습니다.\n/data/pets.json 과 /data/spet.json 위치를 확인하세요.");
+      return {pets:[],spet:[]};
+    }
+  }
 
+  let PETS=[],SPETS=[],currentBase=null;
   const sgradeBox=document.getElementById("sgrade");
   const nameInput=document.getElementById("petName");
   const resultBox=document.getElementById("result");
   const costDisplay=document.getElementById("costDisplay");
   let totalCost=0;
-  let currentBase=null;
+
+  loadPetData().then(d=>{PETS=d.pets;SPETS=d.spet;});
 
   const safeName=o=>(o.name||o.이름||"").toLowerCase().trim();
   nameInput.onkeydown=e=>{if(e.key==="Enter")updatePet();};
@@ -177,17 +139,10 @@ document.addEventListener("DOMContentLoaded", () => {
   function updatePet(){
     const n=nameInput.value.trim().toLowerCase();
     const s=SPETS.find(x=>safeName(x)===n);
-    if(!s){ sgradeBox.innerHTML=`<b style="color:#ff6b81">⚠️ [${n}] 데이터 없음</b>`; currentBase=null; return; }
+    if(!s){sgradeBox.innerHTML=`<b style="color:#ff6b81">⚠️ [${n}] 데이터 없음</b>`;currentBase=null;return;}
     const stat=s["초기치(stat)"];
-    currentBase={
-      name:s.이름,
-      hp:stat["내구력(HP)"],
-      atk:stat["공격력(Atk)"],
-      def:stat["방어력(Def)"],
-      agi:stat["순발력(Agi)"]
-    };
-    sgradeBox.innerHTML=`<b>${currentBase.name} S급 기준</b><br>
-    체력 <b>${currentBase.hp}</b> | 공격력 <b>${currentBase.atk}</b> | 방어력 <b>${currentBase.def}</b> | 순발력 <b>${currentBase.agi}</b>`;
+    currentBase={name:s.이름,hp:stat["내구력(HP)"],atk:stat["공격력(Atk)"],def:stat["방어력(Def)"],agi:stat["순발력(Agi)"]};
+    sgradeBox.innerHTML=`<b>${currentBase.name} S급 기준</b><br>체력 <b>${currentBase.hp}</b> | 공격력 <b>${currentBase.atk}</b> | 방어력 <b>${currentBase.def}</b> | 순발력 <b>${currentBase.agi}</b>`;
   }
 
   function rand(){return Math.floor(Math.random()*5)-2;}
@@ -200,37 +155,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function simulate(t=1){
     if(!currentBase){alert("펫 이름을 먼저 입력하세요.");return;}
-    resultBox.innerHTML=""; // 이전 결과 제거
+    resultBox.innerHTML="";
     let o=`\n<b>${currentBase.name} 시뮬레이션</b>\n────────────────────\n`;
     for(let i=1;i<=t;i++){
-      const x={
-        HP:currentBase.hp+rand(),
-        Atk:currentBase.atk+rand(),
-        Def:currentBase.def+rand(),
-        Agi:currentBase.agi+rand()
-      };
+      const x={HP:currentBase.hp+rand(),Atk:currentBase.atk+rand(),Def:currentBase.def+rand(),Agi:currentBase.agi+rand()};
       o+=`<b>${i}회차</b> → 체력 ${fmt(x.HP,currentBase.hp)} | 공격력 ${fmt(x.Atk,currentBase.atk)} | 방어력 ${fmt(x.Def,currentBase.def)} | 순발력 ${fmt(x.Agi,currentBase.agi)}\n`;
     }
     resultBox.innerHTML=o;
   }
 
-  sim1.onclick=()=>{
-    simulate(1);
-    totalCost+=1000;
-    costDisplay.textContent=`💰 총 소모: ${totalCost.toLocaleString()}원`;
-  };
-  sim5.onclick=()=>{
-    simulate(5);
-    totalCost+=5000;
-    costDisplay.textContent=`💰 총 소모: ${totalCost.toLocaleString()}원`;
-  };
-  clear.onclick=()=>{
-    resultBox.innerHTML="";
-    totalCost=0;
-    costDisplay.textContent="💰 총 소모: 0원";
-  };
+  sim1.onclick=()=>{simulate(1);totalCost+=1000;costDisplay.textContent=`💰 총 소모: ${totalCost.toLocaleString()}원`;};
+  sim5.onclick=()=>{simulate(5);totalCost+=5000;costDisplay.textContent=`💰 총 소모: ${totalCost.toLocaleString()}원`;};
+  clear.onclick=()=>{resultBox.innerHTML="";totalCost=0;costDisplay.textContent="💰 총 소모: 0원";};
 
-  // ✅ 경험치 계산기
+  /* ✅ 경험치 계산기 */
   const $=s=>document.querySelector(s);
   const fmtNum=n=>isFinite(n)?Number(n).toLocaleString():"-";
   const EXP_TABLE={1:2,2:6,3:17,4:37,5:67,6:111,7:169,8:247,9:344,10:464,11:609,12:783,13:985,
@@ -238,7 +176,6 @@ document.addEventListener("DOMContentLoaded", () => {
   25:6635,26:7447,27:8321,28:9263,29:10272,30:11352,31:12506,32:13734,33:15042,34:16429,
   35:17899,36:19454,37:21098,38:22830,39:24656,40:26576};
   const getTotalExp=(s,t)=>{let sum=0;for(let lv=s;lv<t;lv++)if(EXP_TABLE[lv])sum+=EXP_TABLE[lv];return sum;};
-
   $("#run").onclick=()=>{
     try{
       const c=+$("#currentLevel").value,cp=+($("#currentPercent").value)||0,t=+$("#targetLevel").value,ph=+$("#xpPerHour").value;
