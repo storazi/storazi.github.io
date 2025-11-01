@@ -275,14 +275,19 @@ const petData = [
 
 function getPet(n){return petData.find(p=>p.이름===n);}
 function oneRandomStats(b){
-  const r=()=>Math.random()*0.30-0.15;
-  return{
-    HP:Math.round(b.HP*(1+r())),
-    Atk:Math.round(b.Atk*(1+r())),
-    Def:Math.round(b.Def*(1+r())),
-    Agi:Math.round(b.Agi*(1+r()))
+  const s = b;
+  const randRange = (base, diff) => {
+    const delta = Math.floor(Math.random() * (diff * 2 + 1)) - diff;
+    return base + delta;
+  };
+  return {
+    HP: randRange(s.HP, 3),
+    Atk: randRange(s.Atk, 2),
+    Def: randRange(s.Def, 2),
+    Agi: randRange(s.Agi, 2)
   };
 }
+
 function fmt(v,b){
   const d=v-b;
   if(d>0)return`${v}<b style="color:var(--red)">(+${d})</b>`;
