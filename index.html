@@ -34,7 +34,7 @@
 <h1>🐂 미궁 펫 계수 시뮬레이터</h1>
 
 <input id="petName" placeholder="🔍 펫 이름 입력">
-<div id="sgrade" class="panel">펫을 선택하면 계수가 표시됩니다.</div>
+<div id="sgrade" class="panel">펫을 선택하면 S급 기준 능력치가 표시됩니다.</div>
 <div style="margin-top:10px;">
   <button id="sim1">🎲 초기화 1회</button>
   <button id="sim5">🎲 초기화 5회</button>
@@ -60,6 +60,7 @@ const nameInput = document.getElementById("petName");
 const sgradeBox = document.getElementById("sgrade");
 const resultBox = document.getElementById("result");
 let currentPet = null;
+let sGradeBase = null;
 
 // ========== 이름 검색 ==========
 function safeName(x){return (x.name||x.이름||"").toString().replace(/\s+/g,"").toLowerCase();}
@@ -81,9 +82,11 @@ function updatePet(){
     agi:p.agi||p.AGI||p["순발력계수"]||p["순발력"]||20
   };
 
-  sgradeBox.innerHTML=`<b>${currentPet.name}</b><br>
-  초기치계수 ${currentPet.initnum}<br>
-  체력계수 ${currentPet.hp} | 공격계수 ${currentPet.atk} | 방어계수 ${currentPet.def} | 순발계수 ${currentPet.agi}`;
+  // S급 기준 능력치 계산
+  sGradeBase = calcSGrade(currentPet);
+
+  sgradeBox.innerHTML=`<b>${currentPet.name} S급 기준</b><br>
+  체력 <b>${sGradeBase.hp}</b> | 공격력 <b>${sGradeBase.atk}</b> | 방어력 <b>${sGradeBase.def}</b> | 순발력 <b>${sGradeBase.agi}</b>`;
 }
 
 // ========== 계수 기반 초기화 시뮬레이터 ==========
@@ -117,19 +120,57 @@ function oneRandomStatsByCoefficient(pet){
   const showAgi = raw.agi;
 
   return {
-    체력:Math.floor(showHP),
-    공격력:Math.floor(showAtk),
-    방어력:Math.floor(showDef),
-    순발력:Math.floor(showAgi)
+    hp:Math.floor(showHP),
+    atk:Math.floor(showAtk),
+    def:Math.floor(showDef),
+    agi:Math.floor(showAgi)
   };
 }
 
+// S급 기준 계산 함수
+function calcSGrade(pet){
+  const init = pet.initnum;
+  const base = pet;
+  const calc = (v)=>init*(v/100);
+
+  const raw = {
+    hp:calc(base.hp),
+    atk:calc(base.atk),
+    def:calc(base.def),
+    agi:calc(base.agi)
+  };
+
+  const showHP = raw.hp*4 + raw.atk + raw.def + raw.agi;
+  const showAtk = raw.hp*0.1 + raw.atk + raw.def*0.1 + raw.agi*0.05;
+  const showDef = raw.hp*0.1 + raw.atk*0.1 + raw.def + raw.agi*0.05;
+  const showAgi = raw.agi;
+
+  return {
+    hp:Math.floor(showHP),
+    atk:Math.floor(showAtk),
+    def:Math.floor(showDef),
+    agi:Math.floor(showAgi)
+  };
+}
+
+// 결과 포맷팅
+function fmtWithDiff(val, base){
+  const diff = val - base;
+  if(diff > 0) return `${val}<b style="color:#ff6b81;">(+${diff})</b>`;
+  if(diff < 0) return `${val}<b style="color:#3ba4f7;">(${diff})</b>`;
+  return `${val}<b style="color:#a9b5cc;">(0)</b>`;
+}
+
 function simulate(t=1){
-  if(!currentPet){alert("펫 이름을 먼저 입력하세요.");return;}
+  if(!currentPet || !sGradeBase){alert("펫 이름을 먼저 입력하세요.");return;}
   let out="";
   for(let i=1;i<=t;i++){
     const x=oneRandomStatsByCoefficient(currentPet);
-    out += `<b>${i}회차 →</b> 체력 ${x.체력} | 공격력 ${x.공격력} | 방어력 ${x.방어력} | 순발력 ${x.순발력}<br>`;
+    out += `<b>${i}회차 →</b> `
+          + `체력 ${fmtWithDiff(x.hp,sGradeBase.hp)} | `
+          + `공격력 ${fmtWithDiff(x.atk,sGradeBase.atk)} | `
+          + `방어력 ${fmtWithDiff(x.def,sGradeBase.def)} | `
+          + `순발력 ${fmtWithDiff(x.agi,sGradeBase.agi)}<br>`;
   }
   resultBox.innerHTML += out + "<br>";
 }
