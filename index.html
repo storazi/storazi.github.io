@@ -157,10 +157,11 @@ function updatePet(){
     initnum:p.initnum||26,
     hp:p.hp, atk:p.atk, def:p.def, agi:p.agi
   };
-  sGradeBase={hp:s.hp, atk:s.atk, def:s.def, agi:s.agi};
+  const stat=s["초기치(stat)"];
+  sGradeBase={hp:stat["내구력(HP)"],atk:stat["공격력(Atk)"],def:stat["방어력(Def)"],agi:stat["순발력(Agi)"]};
 
   sgradeBox.innerHTML=`<b>${currentPet.name} S급 기준</b><br>
-  체력 <b>${s.hp}</b> | 공격력 <b>${s.atk}</b> | 방어력 <b>${s.def}</b> | 순발력 <b>${s.agi}</b>`;
+  체력 <b>${sGradeBase.hp}</b> | 공격력 <b>${sGradeBase.atk}</b> | 방어력 <b>${sGradeBase.def}</b> | 순발력 <b>${sGradeBase.agi}</b>`;
 }
 
 function oneRandomStatsByCoefficient(pet){
@@ -199,7 +200,7 @@ document.getElementById("clear").onclick=()=>resultBox.innerHTML="";
 // 📘 경험치 계산기
 const $=s=>document.querySelector(s);
 const fmtNum=n=>isFinite(n)?Number(n).toLocaleString():'-';
-const EXP_TABLE={1:2,2:6,3:17,4:37,5:67,6:111,7:169,8:247,9:344,10:464,11:609,12:783,13:985,14:1221,15:1491,16:1799,17:2145,18:2535,19:2968,20:3448,21:3977,22:4559,23:5193,24:5885,25:6635,26:7447,27:8321,28:9263,29:10272,30:11352,31:12506,32:13734,33:15042,34:16429,35:17899,36:19454,37:21098,38:22830,39:24656,40:26576,41:28594,42:30710,43:32930,44:35253,45:37683,46:40222,47:42874,48:45638,49:48520,50:51520};
+const EXP_TABLE={1:2,2:6,3:17,4:37,5:67,6:111,7:169,8:247,9:344,10:464,11:609,12:783,13:985,14:1221,15:1491,16:1799,17:2145,18:2535,19:2968,20:3448,21:3977,22:4559,23:5193,24:5885,25:6635,26:7447,27:8321,28:9263,29:10272,30:11352};
 function getTotalExp(s,t){let sum=0;for(let lv=s;lv<t;lv++)if(EXP_TABLE[lv])sum+=EXP_TABLE[lv];return sum;}
 $('#run').onclick=()=>{
   try{
