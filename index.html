@@ -3,246 +3,140 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>🐂 미궁 시뮬레이터 & 경험치 계산기</title>
+<title>🐂 미궁 펫 계수 시뮬레이터</title>
 <style>
-  :root {
-    --bg:#0b1426; --panel:#121a2b; --accent:#ffd447;
-    --text:#d8e0ff; --muted:#a9b5cc;
-    --blue:#3ba4f7; --red:#ff6b81;
-  }
   body {
-    background:var(--bg); color:var(--text);
-    font-family:"Pretendard",system-ui,-apple-system,Segoe UI,sans-serif;
-    margin:0; display:flex; flex-direction:column; align-items:center;
-    padding:24px;
+    background:#0b1426; color:#eaf2ff; font-family:"Pretendard",sans-serif;
+    margin:0; padding:24px; text-align:center;
   }
-  h1 { color:var(--accent); font-size:1.6rem; margin-bottom:20px; text-align:center; }
-
-  .tab-buttons { display:flex; justify-content:center; gap:10px; margin-bottom:20px; }
-  .tab-buttons button {
-    background:var(--panel); border:1px solid var(--accent);
-    color:var(--accent); font-weight:700; padding:10px 20px;
-    border-radius:10px; cursor:pointer; transition:all 0.2s ease;
+  h1 { color:#ffd447; margin-bottom:20px; }
+  input {
+    background:rgba(15,25,45,0.9); color:#fff; border:1px solid #3ba4f7;
+    padding:10px 14px; border-radius:8px; width:260px; margin-bottom:10px;
   }
-  .tab-buttons button.active { background:var(--accent); color:#111; }
-  .tab-content { display:none; width:min(1100px,96%); }
-  .tab-content.active { display:block; }
-
-  .card {
-    background:rgba(20,30,50,0.9);
-    border:1px solid #24324b;
-    border-radius:16px; padding:24px;
-    box-shadow:0 0 12px rgba(25,60,100,.25);
+  button {
+    background:#ffd447; color:#111; font-weight:700; border:none;
+    border-radius:8px; padding:10px 14px; cursor:pointer; margin:4px;
   }
-
-  #petName {
-    width:min(400px,90%);
-    display:block;
-    margin:0 auto 16px auto;
-    padding:12px 14px 12px 38px;
-    border:1px solid #3ba4f7; border-radius:10px;
-    background:rgba(15,25,45,0.9);
-    color:var(--text); font-size:15px; outline:none;
-    background-image:url('data:image/svg+xml;utf8,<svg fill="%23a8c9ff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 2a8 8 0 105.293 14.293l4.707 4.707 1.414-1.414-4.707-4.707A8 8 0 0010 2zm0 2a6 6 0 110 12A6 6 0 0110 4z"/></svg>');
-    background-repeat:no-repeat; background-position:10px center; background-size:18px;
-  }
-  #petName::placeholder { color:#a8c9ff; opacity:0.8; }
-
-  button.sim, .btn {
-    background:var(--accent); color:#111; font-weight:700; border:none;
-    border-radius:10px; padding:10px 16px;
-    cursor:pointer; margin:5px; transition:all .15s ease-in-out;
-  }
-  button.sim:hover, .btn:hover { filter:brightness(1.1); }
-
   .panel {
-    background:rgba(15,25,45,0.85); border-radius:10px; padding:10px;
-    margin-top:10px; font-size:14px; line-height:1.6; border:1px solid #24324b;
+    margin-top:10px; background:rgba(15,25,45,0.9);
+    border:1px solid #24324b; border-radius:10px; padding:10px;
   }
   .result {
-    white-space:pre-line; font-family:"JetBrains Mono",monospace;
-    background:rgba(15,25,45,0.9); border:1px solid #24324b;
-    border-radius:10px; padding:14px; font-size:14px; margin-top:15px;
+    margin-top:15px; white-space:pre-line; text-align:left;
+    display:inline-block; background:rgba(15,25,45,0.85);
+    border-radius:10px; padding:14px; border:1px solid #24324b;
+    font-family:"JetBrains Mono",monospace;
   }
-  .wrapper {
-    display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
-    gap:20px; width:100%; max-width:1100px;
-  }
-  .card.exp { background:rgba(20,30,50,0.9); }
-  .row { display:grid; gap:6px; margin:10px 0; }
-  label { color:var(--muted); font-weight:600; }
-  input[type="number"] {
-    width:100%; padding:10px 12px; border:1px solid #3ba4f7;
-    border-radius:10px; background:rgba(15,25,45,0.85);
-    color:var(--text); outline:none; font-size:15px;
-  }
-  .results {
-    display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-    gap:12px; margin-top:18px;
-  }
-  .stat {
-    background:rgba(15,25,45,0.9); border:1px solid #24324b;
-    border-radius:14px; padding:12px; text-align:center;
-  }
-  .stat small { display:block; color:var(--muted); }
-  .stat strong { display:block; margin-top:4px; font-size:16px; color:var(--accent); }
 </style>
 </head>
 <body>
-<h1>🐂 미궁 시뮬레이터 & 경험치 계산기</h1>
+<h1>🐂 미궁 펫 계수 시뮬레이터</h1>
 
-<div class="tab-buttons">
-  <button class="active" id="tabSim">🐾 초기화 시뮬레이터</button>
-  <button id="tabExp">📘 경험치 계산기</button>
+<input id="petName" placeholder="🔍 펫 이름 입력">
+<div id="sgrade" class="panel">펫을 선택하면 계수가 표시됩니다.</div>
+<div style="margin-top:10px;">
+  <button id="sim1">🎲 초기화 1회</button>
+  <button id="sim5">🎲 초기화 5회</button>
+  <button id="clear">🧹 결과 지우기</button>
 </div>
-
-<!-- 🐾 시뮬레이터 -->
-<div id="simTab" class="tab-content active">
-  <div class="card">
-    <input id="petName" placeholder="🔍 펫 이름을 입력하세요">
-    <div id="sgrade" class="panel">펫을 선택하면 S급 기준이 표시됩니다.</div>
-    <div style="text-align:center; margin-top:10px;">
-      <button class="sim" id="sim1">🔁 초기화 1회</button>
-      <button class="sim" id="sim5">💫 초기화 5회</button>
-      <button class="sim" id="clear">🧹 결과 지우기</button>
-    </div>
-    <div id="result" class="result"></div>
-  </div>
-</div>
-
-<!-- 📘 경험치 계산기 -->
-<div id="expTab" class="tab-content">
-  <div class="wrapper">
-    <div class="card exp">
-      <h2>레벨업 계산기</h2>
-      <div class="row"><label>현재 레벨</label><input id="currentLevel" type="number"></div>
-      <div class="row"><label>현재 진행도(%)</label><input id="currentPercent" type="number" placeholder="예: 45"></div>
-      <div class="row"><label>목표 레벨</label><input id="targetLevel" type="number"></div>
-      <div class="row"><label>시간당 획득 경험치</label><input id="xpPerHour" type="number"></div>
-      <div class="row">
-        <button class="btn" id="run">계산</button>
-        <button class="btn" id="reset">초기화</button>
-      </div>
-      <div class="results" id="results" hidden>
-        <div class="stat"><small>남은 경험치</small><strong id="statRemain">-</strong></div>
-        <div class="stat"><small>예상 시간</small><strong id="statHours">-</strong></div>
-        <div class="stat"><small>예상 일수</small><strong id="statDays">-</strong></div>
-      </div>
-    </div>
-  </div>
-</div>
+<div id="result" class="result"></div>
 
 <script>
-document.addEventListener("DOMContentLoaded", async () => {
-  let PETS = [], SPETS = [], currentBase = null;
-  const nameInput = document.getElementById("petName");
-  const sgradeBox = document.getElementById("sgrade");
-  const resultBox = document.getElementById("result");
-
-  async function loadPetData() {
-    try {
-      const [petsRes, spetRes] = await Promise.all([
-        fetch("./data/pets.json"),
-        fetch("./data/spet.json")
-      ]);
-      const pets = await petsRes.json();
-      const spets = await spetRes.json();
-      console.log("✅ 데이터 로드 성공:", pets.length, spets.length);
-      PETS = pets; SPETS = spets;
-    } catch (e) {
-      alert("데이터 로드 실패: 콘솔 확인");
-      console.error(e);
-    }
+// ========== 데이터 로드 ==========
+let PETS = [];
+async function loadPetData() {
+  try {
+    const res = await fetch("./data/pets.json");
+    PETS = await res.json();
+    console.log("✅ pets.json 로드:", PETS.length);
+  } catch(e) {
+    alert("❌ pets.json을 불러오지 못했습니다.");
   }
+}
+loadPetData();
 
-  await loadPetData();
+const nameInput = document.getElementById("petName");
+const sgradeBox = document.getElementById("sgrade");
+const resultBox = document.getElementById("result");
+let currentPet = null;
 
-  const showTab = id => {
-    document.querySelectorAll(".tab-content").forEach(t => t.classList.remove("active"));
-    document.getElementById(id).classList.add("active");
-    document.querySelectorAll(".tab-buttons button").forEach(b => b.classList.remove("active"));
-    if (id === "simTab") document.getElementById("tabSim").classList.add("active");
-    else document.getElementById("tabExp").classList.add("active");
+// ========== 이름 검색 ==========
+function safeName(x){return (x.name||x.이름||"").toString().replace(/\s+/g,"").toLowerCase();}
+
+nameInput.addEventListener("change", updatePet);
+nameInput.addEventListener("keydown", e=>{if(e.key==="Enter")updatePet();});
+
+function updatePet(){
+  const n = nameInput.value.trim().replace(/\s+/g,"").toLowerCase();
+  const p = PETS.find(x=>safeName(x)===n);
+  if(!p){ sgradeBox.innerHTML=`<b style="color:#ff6b81">⚠️ [${n}] 데이터 없음</b>`; currentPet=null; return; }
+
+  currentPet = {
+    name:p.name||p.이름,
+    initnum:p.initnum||p["초기치계수"]||26,
+    hp:p.hp||p.HP||p["체력계수"]||p["체력"]||24,
+    atk:p.atk||p.ATK||p["공격력계수"]||p["공격력"]||38,
+    def:p.def||p.DEF||p["방어력계수"]||p["방어력"]||16,
+    agi:p.agi||p.AGI||p["순발력계수"]||p["순발력"]||20
   };
 
-  document.getElementById("tabSim").onclick = () => showTab("simTab");
-  document.getElementById("tabExp").onclick = () => showTab("expTab");
-
-  const safeName = obj => {
-    if (!obj || typeof obj !== "object") return "";
-    return String(obj.name || obj.이름 || "").replace(/\s+/g, "").toLowerCase();
-  };
-
-  nameInput.addEventListener("keydown", e => { if (e.key === "Enter") updatePet(); });
-  nameInput.addEventListener("change", updatePet);
-
-  function updatePet() {
-    const n = nameInput.value.trim().replace(/\s+/g, "").toLowerCase();
-    const p = PETS.find(x => safeName(x) === n);
-    const s = SPETS.find(x => safeName(x) === n);
-    resultBox.textContent = "";
-
-    if (!p || !s) {
-      sgradeBox.innerHTML = `<b style="color:var(--red)">⚠️ [${n}] 데이터를 찾을 수 없습니다.</b>`;
-      currentBase = null;
-      return;
-    }
-
-    const sStat = s["초기치(stat)"] || s.stats || s;
-    const getVal = (obj, ...keys) => {
-      for (const k of keys) if (obj && obj[k] !== undefined) return obj[k];
-      return 0;
-    };
-
-    currentBase = {
-      name: p.name || p.이름 || "이름 없음",
-      hp: getVal(s, "hp", "Hp", "HP") || getVal(sStat, "내구력(HP)", "HP", "hp"),
-      atk: getVal(s, "atk", "Atk", "ATK") || getVal(sStat, "공격력(Atk)", "Atk", "atk"),
-      def: getVal(s, "def", "Def", "DEF") || getVal(sStat, "방어력(Def)", "Def", "def"),
-      agi: getVal(s, "agi", "Agi", "AGI") || getVal(sStat, "순발력(Agi)", "Agi", "agi")
-    };
-
-    sgradeBox.innerHTML = `<b>${currentBase.name} S급 기준</b><br>
-      체력 <b>${currentBase.hp}</b> | 공격력 <b>${currentBase.atk}</b> | 방어력 <b>${currentBase.def}</b> | 순발력 <b>${currentBase.agi}</b>`;
-  }
-
-  function oneRandomStats(b) {
-    const r = d => Math.floor(Math.random() * (d * 2 + 1)) - d;
-    return { HP: b.hp + r(3), Atk: b.atk + r(2), Def: b.def + r(2), Agi: b.agi + r(2) };
-  }
-
-  function fmt(v, b) {
-    const d = v - b;
-    if (d > 0) return `${v}<b style="color:var(--red)">(+${d})</b>`;
-    if (d < 0) return `${v}<b style="color:var(--blue)">(${d})</b>`;
-    return `${v}<b style="color:var(--muted)">(0)</b>`;
-  }
-
-  function simulate(t = 1) {
-  if (!currentBase) {
-    alert("펫 이름을 먼저 입력하세요.");
-    return;
-  }
-
-  let o = "";
-  for (let i = 1; i <= t; i++) {
-    const x = oneRandomStats(currentBase);
-    o += `<b>${i}회차 →</b> `
-       + `체력 ${fmt(x.HP, currentBase.hp)} | `
-       + `공격력 ${fmt(x.Atk, currentBase.atk)} | `
-       + `방어력 ${fmt(x.Def, currentBase.def)} | `
-       + `순발력 ${fmt(x.Agi, currentBase.agi)}<br>`;
-  }
-  // ✅ 1~5회차 묶음 출력 후 줄바꿈 1줄 추가
-  resultBox.innerHTML += o + "<br>";
+  sgradeBox.innerHTML=`<b>${currentPet.name}</b><br>
+  초기치계수 ${currentPet.initnum}<br>
+  체력계수 ${currentPet.hp} | 공격계수 ${currentPet.atk} | 방어계수 ${currentPet.def} | 순발계수 ${currentPet.agi}`;
 }
 
+// ========== 계수 기반 초기화 시뮬레이터 ==========
+function oneRandomStatsByCoefficient(pet){
+  const r = ()=>Math.floor(Math.random()*5)-2; // -2~+2
+  let base = {
+    hp:pet.hp+r(),
+    atk:pet.atk+r(),
+    def:pet.def+r(),
+    agi:pet.agi+r()
+  };
 
-  document.getElementById("sim1").onclick = () => simulate(1);
-  document.getElementById("sim5").onclick = () => simulate(5);
-  document.getElementById("clear").onclick = () => resultBox.innerHTML = "";
+  // 10포인트 무작위 분배
+  let dist=[0,0,0,0];
+  for(let i=0;i<10;i++) dist[Math.floor(Math.random()*4)]++;
 
-});
+  const init = pet.initnum;
+  const calc = (v,d)=>init*((v+d)/100);
+
+  const raw = {
+    hp:calc(base.hp,dist[0]),
+    atk:calc(base.atk,dist[1]),
+    def:calc(base.def,dist[2]),
+    agi:calc(base.agi,dist[3])
+  };
+
+  // 표기치 반영
+  const showHP = raw.hp*4 + raw.atk + raw.def + raw.agi;
+  const showAtk = raw.hp*0.1 + raw.atk + raw.def*0.1 + raw.agi*0.05;
+  const showDef = raw.hp*0.1 + raw.atk*0.1 + raw.def + raw.agi*0.05;
+  const showAgi = raw.agi;
+
+  return {
+    체력:Math.floor(showHP),
+    공격력:Math.floor(showAtk),
+    방어력:Math.floor(showDef),
+    순발력:Math.floor(showAgi)
+  };
+}
+
+function simulate(t=1){
+  if(!currentPet){alert("펫 이름을 먼저 입력하세요.");return;}
+  let out="";
+  for(let i=1;i<=t;i++){
+    const x=oneRandomStatsByCoefficient(currentPet);
+    out += `<b>${i}회차 →</b> 체력 ${x.체력} | 공격력 ${x.공격력} | 방어력 ${x.방어력} | 순발력 ${x.순발력}<br>`;
+  }
+  resultBox.innerHTML += out + "<br>";
+}
+
+document.getElementById("sim1").onclick=()=>simulate(1);
+document.getElementById("sim5").onclick=()=>simulate(5);
+document.getElementById("clear").onclick=()=>resultBox.innerHTML="";
 </script>
 </body>
 </html>
