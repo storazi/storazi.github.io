@@ -1,4 +1,4 @@
-pet_data = [
+[
     {
         "name": "우리",
         "initnum": 10,
@@ -2390,4 +2390,5 @@ pet_data = [
     "def": 17,
     "agi": 29
   }
+
 ]
