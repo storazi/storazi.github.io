@@ -4,59 +4,54 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>🐂 미궁 시뮬레이터 & 경험치 계산기</title>
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="./style.css">
 </head>
 <body>
 <h1>🐂 미궁 시뮬레이터 & 경험치 계산기</h1>
 
-
 <div class="tab-buttons">
-<button id="tabSim" class="active">🐾 초기치 시뮬레이터</button>
-<button id="tabExp">📘 경험치 계산기</button>
+  <button id="tabSim" class="active">🐾 초기치 시뮬레이터</button>
+  <button id="tabExp">📘 경험치 계산기</button>
 </div>
-
 
 <!-- 🐾 시뮬레이터 -->
 <div id="simTab" class="tab-content active">
-<input id="petName" placeholder="🔍 펫 이름 입력" />
-<div id="sgrade" class="panel">펫을 선택하면 S급 기준 능력치가 표시됩니다.</div>
-<div style="margin-top:10px;">
-<button id="sim1">🎲 초기화 1회</button>
-<button id="sim5">🎲 초기화 5회</button>
-<button id="clear">🧹 결과 지우기</button>
+  <input id="petName" placeholder="🔍 펫 이름 입력" />
+  <div id="sgrade" class="panel">펫을 선택하면 S급 기준 능력치가 표시됩니다.</div>
+  <div style="margin-top:10px;">
+    <button id="sim1">🎲 초기화 1회</button>
+    <button id="sim5">🎲 초기화 5회</button>
+    <button id="clear">🧹 결과 지우기</button>
+  </div>
+  <div id="costDisplay">💰 총 소모: 0원</div>
+  <div id="result" class="result"></div>
 </div>
-<div id="costDisplay">💰 총 소모: 0원</div>
-<div id="result" class="result"></div>
-</div>
-
 
 <!-- 📘 경험치 계산기 -->
 <div id="expTab" class="tab-content">
-<div class="wrapper">
-<div class="card">
-<h2>📘 레벨업 경험치 계산기</h2>
-<div class="row"><label>현재 레벨</label><input id="currentLevel" type="number" /></div>
-<div class="row"><label>현재 진행도(%)</label><input id="currentPercent" type="number" placeholder="예: 45" /></div>
-<div class="row"><label>목표 레벨</label><input id="targetLevel" type="number" /></div>
-<div class="row"><label>시간당 획득 경험치</label><input id="xpPerHour" type="number" /></div>
-<div class="row buttons">
-<button id="run">계산</button>
-<button id="reset">초기화</button>
-</div>
-<div class="results" id="results" hidden>
-<div class="stat"><small>남은 경험치</small><strong id="statRemain">-</strong></div>
-<div class="stat"><small>예상 시간</small><strong id="statHours">-</strong></div>
-<div class="stat"><small>예상 일수</small><strong id="statDays">-</strong></div>
-</div>
-</div>
-</div>
+  <div class="wrapper">
+    <div class="card">
+      <h2>📘 레벨업 경험치 계산기</h2>
+      <div class="row"><label>현재 레벨</label><input id="currentLevel" type="number" /></div>
+      <div class="row"><label>현재 진행도(%)</label><input id="currentPercent" type="number" placeholder="예: 45" /></div>
+      <div class="row"><label>목표 레벨</label><input id="targetLevel" type="number" /></div>
+      <div class="row"><label>시간당 획득 경험치</label><input id="xpPerHour" type="number" /></div>
+      <div class="row buttons">
+        <button id="run">계산</button>
+        <button id="reset">초기화</button>
+      </div>
+      <div class="results" id="results" hidden>
+        <div class="stat"><small>남은 경험치</small><strong id="statRemain">-</strong></div>
+        <div class="stat"><small>예상 시간</small><strong id="statHours">-</strong></div>
+        <div class="stat"><small>예상 일수</small><strong id="statDays">-</strong></div>
+      </div>
+    </div>
+  </div>
 </div>
 
-
-<!-- 방문자 카운터 -->
 <div id="visitCounter">방문자 수 불러오는 중...</div>
 
-
-<script src="dist/app.bundle.min.js"></script>
+<!-- ✅ 빌드 후 dist 폴더 안의 난독화된 JS 불러오기 -->
+<script src="./dist/app.bundle.min.js"></script>
 </body>
 </html>
