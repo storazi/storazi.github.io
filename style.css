@@ -1,16 +1,17 @@
 :root {
-  --ny-bg-left: #0d1424;
-  --ny-bg-chat: #0b1b3a;
-  --ny-panel: #142b52;
-  --ny-border: #1f2940;
-  --ny-text-light: #ffffff;
-  --ny-text-muted: #cfd9ef;
-  --ny-yellow: #ffd447;
-  --ny-yellow-strong: #ffbe0b;
-  --ny-blue: #1b3a69;
+  /* 🎨 NavyYellow 컬러 팔레트 */
+  --ny-bg-left: #0d1424;        /* 전체 배경 */
+  --ny-bg-chat: #0b1b3a;        /* 메인 패널 */
+  --ny-panel: #142b52;          /* 패널 내부 */
+  --ny-border: #1f2940;         /* 경계선 */
+  --ny-text-light: #ffffff;     /* 기본 텍스트 */
+  --ny-text-muted: #cfd9ef;     /* 보조 텍스트 */
+  --ny-yellow: #ffd447;         /* 포인트 컬러 */
+  --ny-yellow-strong: #ffbe0b;  /* hover 포인트 */
+  --ny-blue: #1b3a69;           /* 버튼 기본 */
 }
 
-/* 전체 배경 */
+/* 🩵 전체 기본 */
 body {
   margin:0;
   background:var(--ny-bg-left);
@@ -19,14 +20,13 @@ body {
   text-align:center;
   padding:24px;
 }
-
-/* 헤더 */
 h1 {
   color:var(--ny-yellow);
   margin-bottom:20px;
+  font-weight:700;
 }
 
-/* 탭 버튼 */
+/* 🧭 탭 버튼 */
 .tab-buttons {
   display:flex;
   justify-content:center;
@@ -41,19 +41,24 @@ h1 {
   padding:10px 18px;
   border-radius:10px;
   cursor:pointer;
+  transition:all 0.15s ease-in-out;
 }
 .tab-buttons button.active {
   background:var(--ny-yellow);
   color:#000;
 }
+.tab-buttons button:hover {
+  background:var(--ny-yellow-strong);
+  color:#000;
+}
 
-/* 탭 내용 */
+/* 🧩 탭 내용 */
 .tab-content {
   display:none;
   background:var(--ny-bg-chat);
   padding:20px;
   border-radius:14px;
-  max-width:650px;
+  max-width:720px;
   margin:0 auto;
   box-shadow:0 0 12px rgba(0,0,0,0.3);
 }
@@ -61,7 +66,7 @@ h1 {
   display:block;
 }
 
-/* 입력창, 버튼 */
+/* 📘 공통 입력창 / 버튼 */
 input, textarea {
   background:rgba(255,255,255,0.08);
   border:1px solid rgba(255,255,255,0.15);
@@ -84,7 +89,7 @@ button:hover {
   color:#000;
 }
 
-/* 카드 */
+/* 📗 카드형 계산기 */
 .card {
   background:var(--ny-panel);
   padding:20px;
@@ -105,33 +110,40 @@ button:hover {
   width:55%;
 }
 
-/* 강화 시뮬 */
+/* 🪄 강화 시뮬레이터 레이아웃 */
 .enh-container {
   display:flex;
   justify-content:center;
 }
 .enh-main {
   display:flex;
-  gap:24px;
-  flex-wrap:wrap;
   justify-content:center;
+  align-items:flex-start;
+  gap:24px;
+  flex-wrap:nowrap; /* 한 줄 정렬 */
 }
-.enh-left, .enh-right {
+@media (max-width:900px){
+  .enh-main { flex-wrap:wrap; }
+}
+
+/* 🧱 강화 시뮬 각 섹션 */
+.enh-left, .enh-center, .enh-right {
   background:var(--ny-panel);
-  padding:12px;
-  border-radius:10px;
-  width:180px;
+  padding:16px;
+  border-radius:12px;
+  min-height:360px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.25);
 }
-.enh-center {
-  background:var(--ny-panel);
-  padding:20px;
-  border-radius:10px;
-  width:320px;
-}
+.enh-left { width:200px; }
+.enh-center { width:320px; }
+.enh-right { width:200px; }
+
+/* 강화 버튼 */
 .enh-left button, .enh-right button, .enh-center button {
   margin:4px;
   background:rgba(255,255,255,0.08);
   border:1px solid rgba(255,255,255,0.12);
+  padding:6px 10px;
 }
 .enh-left button.selected,
 .enh-right button.selected {
@@ -139,18 +151,28 @@ button:hover {
   color:#000;
   font-weight:700;
 }
+
+/* 🔢 상태 / 로그 / 비용 */
+#level {
+  font-weight:700;
+  color:var(--ny-text-light);
+  margin-bottom:8px;
+}
 #totalCost {
   margin-top:8px;
   color:var(--ny-yellow);
   font-weight:bold;
+  font-size:1.05em;
 }
 .status {
   color:var(--ny-text-muted);
   font-size:0.9em;
   margin-top:10px;
 }
+
+/* 로그 박스 */
 .log-box {
-  background:rgba(0,0,0,0.2);
+  background:rgba(0,0,0,0.25);
   border-radius:8px;
   padding:8px;
   margin-top:10px;
@@ -163,3 +185,33 @@ button:hover {
 .log-entry.fail { color:#ffbd4a; }
 .log-entry.destroy { color:#ff6b81; }
 .log-entry.info { color:#6aa0ff; }
+
+/* 📄 출력창 */
+#enhanceOutput {
+  width:100%;
+  height:140px;
+  padding:8px 10px;
+  border-radius:8px;
+  border:1px solid rgba(255,255,255,0.1);
+  background:rgba(0,0,0,0.35);
+  color:inherit;
+  resize:none;
+  overflow-y:auto;
+  font-family:monospace;
+  font-size:0.95em;
+}
+
+/* 🧮 방문자 카운터 */
+#visitCounter {
+  margin-top:20px;
+  font-size:0.9em;
+  color:var(--ny-text-muted);
+}
+
+/* ✨ 추가 시각효과 */
+button.selected {
+  box-shadow:0 0 8px rgba(255,212,71,0.8);
+}
+button:hover {
+  box-shadow:0 0 8px rgba(255,212,71,0.5);
+}
