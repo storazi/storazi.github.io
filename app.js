@@ -312,4 +312,6 @@ function initEnhanceSimulator(){
   if(b6) b6.onclick=()=>simulateTarget(6);
   if(b8) b8.onclick=()=>simulateTarget(8);
   if(b10) b10.onclick=()=>simulateTarget(10);
-}
+  }
+
+} // ← document.addEventListener 닫힘
