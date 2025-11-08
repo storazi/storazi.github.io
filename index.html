@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -11,108 +10,112 @@
 <body>
   <h1>🐂 미궁 시뮬레이터 & 경험치 계산기 & 강화 시뮬레이터</h1>
 
+  <!-- 🧭 탭 버튼 -->
   <div class="tab-buttons">
     <button id="tabSim" class="active">🐾 초기치 시뮬레이터</button>
     <button id="tabExp">📘 경험치 계산기</button>
     <button id="tabEnhance">🪄 강화 시뮬레이터</button>
   </div>
 
-<!-- 🐾 초기치 시뮬레이터 -->
-<div id="simTab" class="tab-content active">
-  <input id="petName" placeholder="🔍 펫 이름 입력" />
-  <div id="sgrade" class="panel">펫을 선택하면 S급 기준 능력치가 표시됩니다.</div>
-  <div style="margin-top:10px;">
-    <button id="sim1">🎲 초기화 1회</button>
-    <button id="sim5">🎲 초기화 5회</button>
-    <button id="clear">🧹 결과 지우기</button>
+  <!-- 🐾 초기치 시뮬레이터 -->
+  <div id="simTab" class="tab-content active">
+    <input id="petName" placeholder="🔍 펫 이름 입력" />
+    <div id="sgrade" class="panel">펫을 선택하면 S급 기준 능력치가 표시됩니다.</div>
+    <div style="margin-top:10px;">
+      <button id="sim1">🎲 초기화 1회</button>
+      <button id="sim5">🎲 초기화 5회</button>
+      <button id="clear">🧹 결과 지우기</button>
+    </div>
+    <div id="costDisplay">💰 총 소모: 0원</div>
+    <div id="result" class="result"></div>
   </div>
-  <div id="costDisplay">💰 총 소모: 0원</div>
-  <div id="result" class="result"></div>
-</div>
 
-<!-- 📘 경험치 계산기 -->
-<div id="expTab" class="tab-content">
-  <div class="wrapper">
-    <div class="card">
-      <h2>📘 레벨업 경험치 계산기</h2>
-      <div class="row"><label>현재 레벨</label><input id="currentLevel" type="number" /></div>
-      <div class="row"><label>현재 진행도(%)</label><input id="currentPercent" type="number" placeholder="예: 45" /></div>
-      <div class="row"><label>목표 레벨</label><input id="targetLevel" type="number" /></div>
-      <div class="row"><label>시간당 획득 경험치</label><input id="xpPerHour" type="number" /></div>
-      <div class="row buttons">
-        <button id="run">계산</button>
-        <button id="reset">초기화</button>
-      </div>
-      <div class="results" id="results" hidden>
-        <div class="stat"><small>남은 경험치</small><strong id="statRemain">-</strong></div>
-        <div class="stat"><small>예상 시간</small><strong id="statHours">-</strong></div>
-        <div class="stat"><small>예상 일수</small><strong id="statDays">-</strong></div>
+  <!-- 📘 경험치 계산기 -->
+  <div id="expTab" class="tab-content">
+    <div class="wrapper">
+      <div class="card">
+        <h2>📘 레벨업 경험치 계산기</h2>
+        <div class="row"><label>현재 레벨</label><input id="currentLevel" type="number" /></div>
+        <div class="row"><label>현재 진행도(%)</label><input id="currentPercent" type="number" placeholder="예: 45" /></div>
+        <div class="row"><label>목표 레벨</label><input id="targetLevel" type="number" /></div>
+        <div class="row"><label>시간당 획득 경험치</label><input id="xpPerHour" type="number" /></div>
+        <div class="row buttons">
+          <button id="run">계산</button>
+          <button id="reset">초기화</button>
+        </div>
+        <div class="results" id="results" hidden>
+          <div class="stat"><small>남은 경험치</small><strong id="statRemain">-</strong></div>
+          <div class="stat"><small>예상 시간</small><strong id="statHours">-</strong></div>
+          <div class="stat"><small>예상 일수</small><strong id="statDays">-</strong></div>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
-<!-- 🪄 강화 시뮬레이터 -->
-<div id="enhanceTab" class="tab-content">
-  <div class="enh-container">
-    <div class="enh-main">
-      <div class="enh-left">
-        <h3>⚔️ 장비 선택</h3>
-        <button class="equip selected" data-type="weapon">무기</button>
-        <button class="equip" data-type="armor">방어구</button>
-      </div>
+  <!-- 🪄 강화 시뮬레이터 -->
+  <div id="enhanceTab" class="tab-content">
+    <div class="enh-container">
+      <div class="enh-main">
 
-      <div class="enh-center">
-        <div id="level">현재 강화 단계: +0</div>
-        <div id="resultEnh">준비 중...</div>
-
-        <!-- ✅ 결과 출력창 (자동 결과 표시용) -->
-        <div style="margin-top:12px;">
-          <textarea id="enhanceOutput" readonly
-            style="width:100%;height:120px;padding:8px 10px;
-            border-radius:8px;border:1px solid rgba(255,255,255,0.1);
-            background:rgba(0,0,0,0.35);color:inherit;resize:none;overflow-y:auto;">
-          </textarea>
+        <!-- 왼쪽: 장비 선택 -->
+        <div class="enh-left">
+          <h3>⚔️ 장비 선택</h3>
+          <button class="equip selected" data-type="weapon">무기</button>
+          <button class="equip" data-type="armor">방어구</button>
         </div>
 
-        <div style="margin-top:15px;">
-          <button id="upgradeBtn">강화하기</button>
-          <button id="resetBtn">초기화</button>
+        <!-- 중앙: 강화 진행 -->
+        <div class="enh-center">
+          <div id="level">현재 강화 단계: +0</div>
+
+          <!-- ✅ 출력창만 사용 -->
+          <div style="margin-top:12px;">
+            <textarea id="enhanceOutput" readonly
+              style="width:100%;height:140px;padding:8px 10px;
+              border-radius:8px;border:1px solid rgba(255,255,255,0.1);
+              background:rgba(0,0,0,0.35);color:inherit;resize:none;overflow-y:auto;">
+            </textarea>
+          </div>
+
+          <div style="margin-top:15px;">
+            <button id="upgradeBtn">강화하기</button>
+            <button id="resetBtn">초기화</button>
+          </div>
+
+          <div style="margin-top:10px;">
+            <button id="sim6">+6까지</button>
+            <button id="sim8">+8까지</button>
+            <button id="sim10">+10까지</button>
+          </div>
+
+          <div class="status" id="status"></div>
+          <div class="log-box" id="logBox"></div>
         </div>
 
-        <div style="margin-top:10px;">
-          <!-- ✅ 목표 강화 시뮬 버튼 -->
-          <button id="sim6">+6까지</button>
-          <button id="sim8">+8까지</button>
-          <button id="sim10">+10까지</button>
+        <!-- 오른쪽: 큐브 / 보조제 -->
+        <div class="enh-right">
+          <h3>🧊 큐브 선택</h3>
+          <button class="cube selected" data-rate="0" data-mult="1">일반 큐브 (+0%)</button><br>
+          <button class="cube" data-rate="0.05" data-mult="2">고급 큐브 (+5%)</button>
+
+          <h3 style="margin-top:20px;">💎 보조제 선택</h3>
+          <button class="booster selected" data-bonus="0">없음</button>
+          <button class="booster" data-bonus="0.05">+5%</button>
+          <button class="booster" data-bonus="0.10">+10%</button>
+          <button class="booster" data-bonus="0.15">+15%</button>
+          <button class="booster" data-bonus="0.20">+20%</button>
+
+          <h3 style="margin-top:20px;">💰 누적 소모 스톤</h3>
+          <div id="totalCost">0 S</div>
         </div>
 
-        <div class="status" id="status"></div>
-        <div class="log-box" id="logBox"></div>
-      </div>
-
-      <div class="enh-right">
-        <h3>🧊 큐브 선택</h3>
-        <button class="cube selected" data-rate="0" data-mult="1">일반 큐브 (+0%)</button><br>
-        <button class="cube" data-rate="0.05" data-mult="2">고급 큐브 (+5%)</button>
-
-        <h3 style="margin-top:20px;">💎 보조제 선택</h3>
-        <button class="booster selected" data-bonus="0">없음</button>
-        <button class="booster" data-bonus="0.05">+5%</button>
-        <button class="booster" data-bonus="0.10">+10%</button>
-        <button class="booster" data-bonus="0.15">+15%</button>
-        <button class="booster" data-bonus="0.20">+20%</button>
-
-        <h3 style="margin-top:20px;">💰 누적 소모 스톤</h3>
-        <div id="totalCost">0 S</div>
       </div>
     </div>
   </div>
-</div>
 
-<div id="visitCounter">방문자 수 불러오는 중...</div>
+  <div id="visitCounter">방문자 수 불러오는 중...</div>
 
-<script src="./dist/app.bundle.min.js"></script>
+  <!-- ✅ app.js (또는 빌드된 dist 파일) -->
+  <script src="./app.js"></script>
 </body>
 </html>
-
