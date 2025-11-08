@@ -1,95 +1,159 @@
+:root {
+  --bg: #0b1220;
+  --panel: #121a2b;
+  --soft: #1c2538;
+  --ring: #24324b;
+  --text: #eaf2ff;
+  --muted: #a9b5cc;
+  --accent: #ffd447;
+  --ok: #36d17b;
+  --warn: #ffbd4a;
+  --bad: #ff6b81;
+}
+
+* {
+  box-sizing: border-box;
+  transition: all 0.15s ease-in-out;
+}
+
 body {
-  background:#0b1220;
-  color:#eaf2ff;
-  font-family:"Pretendard",sans-serif;
-  margin:0;
-  padding:20px;
-  text-align:center;
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Pretendard", sans-serif;
+  text-align: center;
+  padding: 20px;
+}
+
+/* 제목 */
+h1 {
+  color: var(--accent);
+  font-weight: 700;
+  margin-bottom: 16px;
 }
 
 /* 탭 버튼 */
 .tab-buttons {
-  display:flex;
-  justify-content:center;
-  gap:8px;
-  margin-bottom:20px;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 20px;
 }
+
 .tab-buttons button {
-  background:#1b2439;
-  color:#fff;
-  border:1px solid #2a3552;
-  padding:8px 14px;
-  border-radius:6px;
-  cursor:pointer;
+  background: var(--panel);
+  border: 1px solid var(--ring);
+  color: var(--text);
+  padding: 10px 18px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
 }
+
 .tab-buttons button.active {
-  background:#4e56c0;
+  background: var(--accent);
+  color: #000;
 }
 
 /* 탭 내용 */
 .tab-content {
-  display:none;
-  background:#11182a;
-  border-radius:10px;
-  padding:20px;
+  display: none;
+  background: var(--panel);
+  border-radius: 8px;
+  padding: 20px;
+  max-width: 600px;
+  margin: 0 auto;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.4);
 }
-.tab-content.active { display:block; }
 
-/* 강화 시뮬레이터 */
-.enh-container {
-  display:flex;
-  justify-content:center;
-  gap:20px;
+.tab-content.active {
+  display: block;
 }
-.enh-main {
-  display:flex;
-  gap:20px;
+
+/* 입력창 + 버튼 */
+input, select {
+  background: var(--soft);
+  border: 1px solid var(--ring);
+  color: var(--text);
+  border-radius: 5px;
+  padding: 8px;
+  font-size: 14px;
+  width: 100%;
+  margin: 6px 0;
 }
-.enh-left, .enh-right {
-  flex:1;
-  text-align:left;
-}
-.enh-center {
-  flex:2;
-  text-align:center;
-  background:rgba(255,255,255,0.05);
-  border-radius:16px;
-  padding:20px;
-  border:1px solid rgba(255,255,255,0.1);
-}
+
 button {
-  background:#24304d;
-  border:1px solid #394765;
-  color:#eaf2ff;
-  border-radius:8px;
-  padding:8px 12px;
-  cursor:pointer;
-}
-button:hover {
-  background:#4e56c0;
-}
-.selected {
-  background:#4e56c0 !important;
+  background: var(--accent);
+  border: none;
+  color: #000;
+  font-weight: 700;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
 }
 
-/* 로그박스 + 스크롤 */
-.log-box{
-  background:rgba(255,255,255,0.04);
-  border-radius:10px;
-  margin-top:12px;
-  padding:10px;
-  height:180px;
-  max-height:40vh;
-  overflow-y:auto;
-  scrollbar-width:thin;
-  font-size:0.9em;
+button:hover {
+  background: #ffdf5a;
 }
-.log-box::-webkit-scrollbar{ width:8px; }
-.log-box::-webkit-scrollbar-thumb{
-  background: rgba(155,93,224,0.25);
-  border-radius:6px;
+
+/* 출력창 */
+textarea {
+  background: var(--soft);
+  border: 1px solid var(--ring);
+  color: var(--text);
+  border-radius: 6px;
+  width: 100%;
+  height: 200px;
+  resize: none;
+  padding: 10px;
+  font-family: "Consolas", monospace;
+  text-align: center;
+  font-weight: 700;
 }
-.log-entry.success{ color:#7fffd4; }
-.log-entry.fail{ color:#ff6b81; }
-.log-entry.destroy{ color:#ff3c3c; }
-.log-entry.info{ color:#cfd8ff; }
+
+/* 강조 텍스트 */
+.plus { color: var(--ok); font-weight: 700; }
+.minus { color: var(--bad); font-weight: 700; }
+.zero { color: var(--muted); }
+
+/* 하단 영역 */
+#costDisplay, #visitCounter, #status {
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* 강화 시뮬레이터 전용 */
+.cube, .booster, .equip {
+  background: var(--soft);
+  border: 1px solid var(--ring);
+  color: var(--text);
+  border-radius: 6px;
+  padding: 6px 12px;
+  margin: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.cube.selected, .booster.selected, .equip.selected {
+  background: var(--accent);
+  color: #000;
+  font-weight: 700;
+}
+
+#enhanceOutput {
+  text-align: center;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.5;
+}
+
+/* 모바일 대응 */
+@media (max-width: 480px) {
+  .tab-content {
+    padding: 14px;
+  }
+  input, button, textarea {
+    font-size: 13px;
+  }
+}
