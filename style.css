@@ -1,95 +1,123 @@
-body {
-  background:#0b1220;
-  color:#eaf2ff;
-  font-family:"Pretendard",sans-serif;
+:root {
+  --bg:#0b1220;
+  --panel:#121a2b;
+  --soft:#1a2235;
+  --ring:#24324b;
+  --text:#eaf2ff;
+  --muted:#a9b5cc;
+  --accent:#6aa0ff;
+  --ok:#36d17b;
+  --warn:#ffbd4a;
+  --bad:#ff6b81;
+}
+
+/* 기본 스타일 */
+*{box-sizing:border-box;transition:all .15s ease-in-out;}
+body{
   margin:0;
-  padding:20px;
+  background:var(--bg);
+  color:var(--text);
+  font-family:"Pretendard",sans-serif;
   text-align:center;
+  padding:24px;
 }
 
 /* 탭 버튼 */
 .tab-buttons {
   display:flex;
   justify-content:center;
-  gap:8px;
+  gap:10px;
   margin-bottom:20px;
 }
 .tab-buttons button {
-  background:#1b2439;
-  color:#fff;
-  border:1px solid #2a3552;
-  padding:8px 14px;
-  border-radius:6px;
+  background:var(--panel);
+  border:1px solid var(--ring);
+  color:var(--text);
+  padding:10px 16px;
+  border-radius:10px;
   cursor:pointer;
 }
 .tab-buttons button.active {
-  background:#4e56c0;
+  background:var(--accent);
+  color:#fff;
 }
 
-/* 탭 내용 */
+/* 탭 컨텐츠 */
 .tab-content {
   display:none;
-  background:#11182a;
-  border-radius:10px;
+  background:var(--panel);
   padding:20px;
+  border-radius:14px;
+  max-width:600px;
+  margin:0 auto;
 }
-.tab-content.active { display:block; }
+.tab-content.active {
+  display:block;
+}
 
-/* 강화 시뮬레이터 */
-.enh-container {
-  display:flex;
-  justify-content:center;
-  gap:20px;
+/* 카드형 계산기 */
+.card {
+  background:var(--soft);
+  padding:20px;
+  border-radius:12px;
+  box-shadow:0 2px 8px rgba(0,0,0,.3);
 }
-.enh-main {
-  display:flex;
-  gap:20px;
-}
-.enh-left, .enh-right {
-  flex:1;
-  text-align:left;
+.row {display:flex;justify-content:space-between;align-items:center;margin:8px 0;}
+.row label {width:40%;text-align:left;}
+.row input {width:55%;padding:6px 10px;border:1px solid var(--ring);border-radius:6px;background:var(--bg);color:var(--text);}
+.row.buttons button {width:48%;}
+
+/* 강화 시뮬 */
+.enh-container {display:flex;justify-content:center;}
+.enh-main {display:flex;gap:30px;flex-wrap:wrap;justify-content:center;}
+.enh-left,.enh-right {
+  background:var(--soft);
+  padding:12px;
+  border-radius:10px;
+  width:180px;
 }
 .enh-center {
-  flex:2;
-  text-align:center;
-  background:rgba(255,255,255,0.05);
-  border-radius:16px;
+  background:var(--soft);
   padding:20px;
-  border:1px solid rgba(255,255,255,0.1);
+  border-radius:10px;
+  width:300px;
 }
-button {
-  background:#24304d;
-  border:1px solid #394765;
-  color:#eaf2ff;
+.enh-left button, .enh-right button, .enh-center button {
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.1);
+  color:var(--text);
   border-radius:8px;
-  padding:8px 12px;
+  padding:6px 10px;
+  margin:4px;
   cursor:pointer;
 }
-button:hover {
-  background:#4e56c0;
+.enh-left button.selected,
+.enh-right button.selected {
+  background:var(--accent);
+  color:#fff;
 }
-.selected {
-  background:#4e56c0 !important;
+#totalCost {
+  font-weight:bold;
+  color:var(--warn);
+  font-size:1.1em;
+  margin-top:5px;
 }
-
-/* 로그박스 + 스크롤 */
-.log-box{
-  background:rgba(255,255,255,0.04);
-  border-radius:10px;
-  margin-top:12px;
-  padding:10px;
-  height:180px;
-  max-height:40vh;
-  overflow-y:auto;
-  scrollbar-width:thin;
+.status {
+  margin-top:10px;
   font-size:0.9em;
+  color:var(--muted);
 }
-.log-box::-webkit-scrollbar{ width:8px; }
-.log-box::-webkit-scrollbar-thumb{
-  background: rgba(155,93,224,0.25);
-  border-radius:6px;
+.log-box {
+  margin-top:10px;
+  max-height:160px;
+  overflow-y:auto;
+  text-align:left;
+  font-size:0.9em;
+  background:rgba(0,0,0,0.2);
+  border-radius:8px;
+  padding:8px;
 }
-.log-entry.success{ color:#7fffd4; }
-.log-entry.fail{ color:#ff6b81; }
-.log-entry.destroy{ color:#ff3c3c; }
-.log-entry.info{ color:#cfd8ff; }
+.log-entry.success {color:var(--ok);}
+.log-entry.fail {color:var(--warn);}
+.log-entry.destroy {color:var(--bad);}
+.log-entry.info {color:var(--accent);}
