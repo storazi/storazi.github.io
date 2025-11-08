@@ -43,7 +43,6 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
-
 /* =========================
    🐾 초기치 시뮬레이터
 ========================= */
@@ -116,7 +115,6 @@ function initPetSimulator(){
 }
 
 
-
 /* =========================
    📘 경험치 계산기
 ========================= */
@@ -128,16 +126,7 @@ function initExpCalculator(){
     37:21098,38:22830,39:24656,40:26576,41:28594,42:30710,43:32930,44:35253,45:37683,46:40222,
     47:42874,48:45638,49:48520,50:51520,51:54642,52:57886,53:61258,54:64757,55:68387,56:72150,
     57:76050,58:80086,59:84264,60:106110,61:113412,62:121149,63:129352,64:138044,65:147256,
-    66:157019,67:167366,68:178334,69:189958,70:202282,71:215348,72:229205,73:243901,74:259495,
-    75:276041,76:293606,77:312258,78:332071,79:353126,80:375511,81:399318,82:424655,83:451631,
-    84:480370,85:511007,86:543686,87:578571,88:616838,89:655680,90:698312,91:743970,92:795918,
-    93:842442,94:901869,95:962553,96:1026899,97:1098354,98:1174419,99:1256664,100:1407463,
-    101:1576358,102:1765521,103:1977384,104:2214670,105:2480430,106:2778082,107:3111451,
-    108:3484825,109:3903005,110:4371365,111:4895929,112:5483440,113:6141453,114:6878428,
-    115:7703839,116:8628300,117:9663695,118:10823339,119:12122140,120:13576796,121:15206012,
-    122:17030733,123:19074421,124:21363352,125:23926954,126:26798189,127:30013971,128:33615648,
-    129:37649526,130:42167469,131:47227565,132:52894873,133:59242257,134:66351328,135:74313488,
-    136:83231106,137:93218839,138:104405100,139:116933712
+    66:157019,67:167366,68:178334,69:189958,70:202282
   };
 
   function getTotalExp(s,t){
@@ -175,6 +164,7 @@ function initExpCalculator(){
       }
     };
   }
+
   if (resetBtn){
     resetBtn.onclick = () => {
       document.querySelectorAll('#expTab input').forEach(i => i.value = '');
@@ -182,7 +172,6 @@ function initExpCalculator(){
     };
   }
 }
-
 
 
 /* =========================
@@ -213,6 +202,8 @@ function initEnhanceSimulator(){
   const statusEl=document.getElementById('status');
   const outputBox=document.getElementById('enhanceOutput');
 
+  const getEquipName = () => currentEquip === "weapon" ? "무기" : "방어구";
+
   const addLog=(text)=>{
     if(outputBox){
       if(!outputBox.value) outputBox.value = text;
@@ -228,7 +219,7 @@ function initEnhanceSimulator(){
     if(statusEl) statusEl.textContent="";
     if(totalCostEl) totalCostEl.textContent="0 S";
     if(outputBox) outputBox.value="";
-    if(bySwitch) addLog(`장비 변경됨: ${currentEquip==='weapon'?'⚔️ 무기':'🛡 방어구'}`);
+    if(bySwitch) addLog(`장비 변경됨: ${getEquipName()}`);
   }
 
   function upgradeOnce(){
@@ -242,12 +233,12 @@ function initEnhanceSimulator(){
 
     if(roll<=successRate){
       level++;
-      addLog(`[${currentEquip}] +${level-1} ▶ +${level} 강화 성공`);
+      addLog(`⚔️ ${getEquipName()} +${level-1} ▶ +${level} 강화 성공`);
     }else if(roll<=successRate+(1-successRate)*destroyRate){
       level=0;
-      addLog(`[${currentEquip}] 강화 실패 → 장비 파괴`);
+      addLog(`🛡 ${getEquipName()} 강화 실패 → 장비 파괴`);
     }else{
-      addLog(`[${currentEquip}] +${level} 강화 실패`);
+      addLog(`💥 ${getEquipName()} +${level} 강화 실패`);
     }
 
     if(levelEl) levelEl.textContent=`현재 강화 단계: +${level}`;
@@ -272,7 +263,7 @@ function initEnhanceSimulator(){
     }
 
     const end=performance.now();
-    const line = `🎯 +${target}까지 누적 소모: ${totalSpent.toLocaleString()} S (⏱ ${(end-start).toFixed(1)}ms)`;
+    const line = `🎯 ${getEquipName()} +${target}까지 누적 소모: ${totalSpent.toLocaleString()} S (⏱ ${(end-start).toFixed(1)}ms)`;
     if(outputBox){
       const lines = outputBox.value.split("\n").filter(l=>!l.includes(`+${target}까지 누적`));
       lines.push(line);
@@ -280,4 +271,45 @@ function initEnhanceSimulator(){
       outputBox.scrollTop = outputBox.scrollHeight;
     }
     if(resultEl) resultEl.textContent = "";
-    if(totalCostEl) totalCostEl.textContent = totalSpent.toLocaleString
+    if(totalCostEl) totalCostEl.textContent = totalSpent.toLocaleString()+" S";
+  }
+
+  // 버튼 연결
+  document.querySelectorAll('.cube').forEach(btn=>{
+    btn.onclick=()=>{
+      document.querySelectorAll('.cube').forEach(b=>b.classList.remove('selected'));
+      btn.classList.add('selected');
+      selectedCube.rate=parseFloat(btn.dataset.rate);
+      selectedCube.mult=parseFloat(btn.dataset.mult);
+    };
+  });
+
+  document.querySelectorAll('.booster').forEach(btn=>{
+    btn.onclick=()=>{
+      document.querySelectorAll('.booster').forEach(b=>b.classList.remove('selected'));
+      btn.classList.add('selected');
+      selectedBooster=parseFloat(btn.dataset.bonus);
+    };
+  });
+
+  document.querySelectorAll('.equip').forEach(btn=>{
+    btn.onclick=()=>{
+      document.querySelectorAll('.equip').forEach(b=>b.classList.remove('selected'));
+      btn.classList.add('selected');
+      currentEquip=btn.dataset.type;
+      resetAll(true);
+    };
+  });
+
+  const btnUp=document.getElementById('upgradeBtn');
+  const btnRs=document.getElementById('resetBtn');
+  const b6=document.getElementById('sim6');
+  const b8=document.getElementById('sim8');
+  const b10=document.getElementById('sim10');
+
+  if(btnUp) btnUp.onclick=()=>upgradeOnce();
+  if(btnRs) btnRs.onclick=()=>resetAll(false);
+  if(b6) b6.onclick=()=>simulateTarget(6);
+  if(b8) b8.onclick=()=>simulateTarget(8);
+  if(b10) b10.onclick=()=>simulateTarget(10);
+}
