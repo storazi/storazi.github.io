@@ -1,35 +1,95 @@
 body {
-  background:#0b1426;
+  background:#0b1220;
   color:#eaf2ff;
   font-family:"Pretendard",sans-serif;
   margin:0;
-  padding:24px;
+  padding:20px;
   text-align:center;
 }
-h1 {color:#ffd447;margin-bottom:20px;}
-.tab-buttons{display:flex;justify-content:center;gap:10px;margin-bottom:20px;}
-.tab-buttons button{background:rgba(15,25,45,0.9);border:1px solid #ffd447;color:#ffd447;font-weight:700;border-radius:10px;padding:10px 20px;cursor:pointer;transition:all .2s ease;}
-.tab-buttons button.active{background:#ffd447;color:#111;}
-.tab-content{display:none;}
-.tab-content.active{display:block;}
-input{background:rgba(15,25,45,0.9);color:#fff;border:1px solid #3ba4f7;padding:10px 14px;border-radius:8px;width:260px;margin-bottom:10px;}
-button{background:#ffd447;color:#111;font-weight:700;border:none;border-radius:8px;padding:10px 14px;cursor:pointer;margin:4px;transition:all .2s ease;}
-button:hover{filter:brightness(1.1);}
-.panel{margin-top:10px;background:rgba(15,25,45,0.9);border:1px solid #24324b;border-radius:10px;padding:10px;}
-.result{margin-top:15px;white-space:pre-line;text-align:left;display:inline-block;background:rgba(15,25,45,0.85);border-radius:10px;padding:14px;border:1px solid #24324b;font-family:"JetBrains Mono",monospace;}
-#costDisplay{margin-top:10px;color:#ffd447;font-weight:700;}
-.plus{color:#ff6b81;font-weight:700;}
-.minus{color:#3ba4f7;font-weight:700;}
-.zero{color:#a9b5cc;}
-.wrapper{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px;max-width:900px;margin:auto;}
-.card{background:rgba(20,30,50,0.9);border:1px solid #24324b;border-radius:16px;padding:24px;box-shadow:0 0 12px rgba(25,60,100,.25);}
-label{color:#a9b5cc;font-weight:600;}
-.row{display:grid;gap:6px;margin:10px 0;}
-input[type="number"]{width:100%;padding:10px 12px;border:1px solid #3ba4f7;border-radius:10px;background:rgba(15,25,45,0.85);color:#fff;outline:none;font-size:15px;}
-.row.buttons{display:flex;justify-content:space-between;gap:10px;margin-top:12px;}
-.row.buttons button{flex:1;width:48%;padding:10px 0;border-radius:8px;font-weight:700;}
-.results{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:18px;}
-.stat{background:rgba(15,25,45,0.9);border:1px solid #24324b;border-radius:14px;padding:12px;text-align:center;}
-.stat small{display:block;color:#a9b5cc;}
-.stat strong{display:block;margin-top:4px;font-size:16px;color:#ffd447;}
-#visitCounter{margin-top:30px;font-weight:600;color:#ffd447;}
+
+/* 탭 버튼 */
+.tab-buttons {
+  display:flex;
+  justify-content:center;
+  gap:8px;
+  margin-bottom:20px;
+}
+.tab-buttons button {
+  background:#1b2439;
+  color:#fff;
+  border:1px solid #2a3552;
+  padding:8px 14px;
+  border-radius:6px;
+  cursor:pointer;
+}
+.tab-buttons button.active {
+  background:#4e56c0;
+}
+
+/* 탭 내용 */
+.tab-content {
+  display:none;
+  background:#11182a;
+  border-radius:10px;
+  padding:20px;
+}
+.tab-content.active { display:block; }
+
+/* 강화 시뮬레이터 */
+.enh-container {
+  display:flex;
+  justify-content:center;
+  gap:20px;
+}
+.enh-main {
+  display:flex;
+  gap:20px;
+}
+.enh-left, .enh-right {
+  flex:1;
+  text-align:left;
+}
+.enh-center {
+  flex:2;
+  text-align:center;
+  background:rgba(255,255,255,0.05);
+  border-radius:16px;
+  padding:20px;
+  border:1px solid rgba(255,255,255,0.1);
+}
+button {
+  background:#24304d;
+  border:1px solid #394765;
+  color:#eaf2ff;
+  border-radius:8px;
+  padding:8px 12px;
+  cursor:pointer;
+}
+button:hover {
+  background:#4e56c0;
+}
+.selected {
+  background:#4e56c0 !important;
+}
+
+/* 로그박스 + 스크롤 */
+.log-box{
+  background:rgba(255,255,255,0.04);
+  border-radius:10px;
+  margin-top:12px;
+  padding:10px;
+  height:180px;
+  max-height:40vh;
+  overflow-y:auto;
+  scrollbar-width:thin;
+  font-size:0.9em;
+}
+.log-box::-webkit-scrollbar{ width:8px; }
+.log-box::-webkit-scrollbar-thumb{
+  background: rgba(155,93,224,0.25);
+  border-radius:6px;
+}
+.log-entry.success{ color:#7fffd4; }
+.log-entry.fail{ color:#ff6b81; }
+.log-entry.destroy{ color:#ff3c3c; }
+.log-entry.info{ color:#cfd8ff; }
