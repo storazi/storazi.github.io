@@ -11,6 +11,7 @@
   --bad: #ff6b81;
 }
 
+/* 기본 설정 */
 * {
   box-sizing: border-box;
   transition: all 0.15s ease-in-out;
@@ -21,67 +22,88 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: "Pretendard", sans-serif;
-  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  height: 100vh;
   padding: 20px;
 }
 
-/* 제목 */
-h1 {
-  color: var(--accent);
-  font-weight: 700;
-  margin-bottom: 16px;
+/* 메인 레이아웃 */
+.container {
+  display: flex;
+  width: 100%;
+  max-width: 1100px;
+  gap: 20px;
 }
 
-/* 탭 버튼 */
-.tab-buttons {
+/* 📂 왼쪽 사이드바 */
+.sidebar {
+  background: var(--panel);
+  border: 1px solid var(--ring);
+  border-radius: 10px;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  padding: 10px;
   gap: 8px;
+  width: 220px;
+  height: fit-content;
+  box-shadow: 0 0 10px rgba(0,0,0,0.4);
+}
+
+.sidebar button {
+  background: transparent;
+  border: 1px solid var(--ring);
+  color: var(--text);
+  border-radius: 6px;
+  padding: 10px;
+  cursor: pointer;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.sidebar button:hover {
+  background: rgba(255, 212, 71, 0.15);
+  border-color: var(--accent);
+}
+
+.sidebar button.active {
+  background: var(--accent);
+  color: #000;
+  font-weight: 700;
+}
+
+/* 📈 오른쪽 콘텐츠 */
+.content {
+  flex: 1;
+  background: var(--panel);
+  border: 1px solid var(--ring);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 0 12px rgba(0,0,0,0.4);
+  overflow-y: auto;
+}
+
+h2 {
+  color: var(--accent);
+  margin-top: 0;
   margin-bottom: 20px;
 }
 
-.tab-buttons button {
-  background: var(--panel);
-  border: 1px solid var(--ring);
-  color: var(--text);
-  padding: 10px 18px;
-  font-weight: 600;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.tab-buttons button.active {
-  background: var(--accent);
-  color: #000;
-}
-
-/* 탭 내용 */
-.tab-content {
-  display: none;
-  background: var(--panel);
-  border-radius: 8px;
-  padding: 20px;
-  max-width: 600px;
-  margin: 0 auto;
-  box-shadow: 0 0 12px rgba(0, 0, 0, 0.4);
-}
-
-.tab-content.active {
-  display: block;
-}
-
-/* 입력창 + 버튼 */
-input, select {
+/* 공통 입력창 */
+input {
   background: var(--soft);
   border: 1px solid var(--ring);
   color: var(--text);
-  border-radius: 5px;
-  padding: 8px;
+  border-radius: 6px;
+  padding: 8px 10px;
   font-size: 14px;
   width: 100%;
-  margin: 6px 0;
+  margin-bottom: 8px;
 }
 
+/* 공통 버튼 */
 button {
   background: var(--accent);
   border: none;
@@ -90,70 +112,161 @@ button {
   padding: 8px 14px;
   border-radius: 6px;
   cursor: pointer;
+  font-size: 14px;
 }
 
 button:hover {
-  background: #ffdf5a;
+  background: #ffe060;
 }
 
-/* 출력창 */
+/* 비활성 스타일 */
+button.selected {
+  background: var(--accent);
+  color: #000;
+  font-weight: 700;
+}
+
+/* 텍스트 출력창 */
 textarea {
   background: var(--soft);
   border: 1px solid var(--ring);
   color: var(--text);
   border-radius: 6px;
   width: 100%;
-  height: 200px;
+  height: 180px;
   resize: none;
   padding: 10px;
   font-family: "Consolas", monospace;
-  text-align: center;
   font-weight: 700;
+  margin-top: 8px;
+  margin-bottom: 8px;
 }
 
-/* 강조 텍스트 */
+/* 강조 색상 */
 .plus { color: var(--ok); font-weight: 700; }
 .minus { color: var(--bad); font-weight: 700; }
 .zero { color: var(--muted); }
 
-/* 하단 영역 */
+/* 상태 텍스트 */
 #costDisplay, #visitCounter, #status {
-  margin-top: 12px;
+  margin-top: 10px;
   color: var(--muted);
   font-size: 14px;
 }
 
-/* 강화 시뮬레이터 전용 */
-.cube, .booster, .equip {
+/* 강화 시뮬레이터 구성 */
+.equip-group, .cube-group, .booster-group {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.equip, .cube, .booster {
   background: var(--soft);
   border: 1px solid var(--ring);
   color: var(--text);
   border-radius: 6px;
   padding: 6px 12px;
-  margin: 4px;
   cursor: pointer;
   font-size: 14px;
 }
 
-.cube.selected, .booster.selected, .equip.selected {
+.equip.selected, .cube.selected, .booster.selected {
   background: var(--accent);
   color: #000;
   font-weight: 700;
 }
 
-#enhanceOutput {
-  text-align: center;
-  font-weight: 700;
+/* 자동 강화 버튼 영역 */
+#sim6, #sim8, #sim10 {
+  background: var(--soft);
+  border: 1px solid var(--ring);
   color: var(--text);
+  font-weight: 600;
+  border-radius: 6px;
+  padding: 6px 12px;
+  cursor: pointer;
+  margin: 2px;
+}
+
+#sim6:hover, #sim8:hover, #sim10:hover {
+  background: var(--accent);
+  color: #000;
+}
+
+/* 성장률 계산기 */
+#growthResult {
+  background: var(--soft);
+  border: 1px solid var(--ring);
+  border-radius: 6px;
+  padding: 10px;
+  margin-top: 10px;
   line-height: 1.5;
 }
 
-/* 모바일 대응 */
-@media (max-width: 480px) {
-  .tab-content {
-    padding: 14px;
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
   }
-  input, button, textarea {
-    font-size: 13px;
+  .sidebar {
+    flex-direction: row;
+    justify-content: center;
+    width: 100%;
+  }
+  .sidebar button {
+    flex: 1;
+    text-align: center;
+  }
+  .content {
+    width: 100%;
   }
 }
+
+/* =========================
+   📑 탭 전환 표시 제어
+========================= */
+.tab-content {
+  display: none; /* 기본은 안 보이게 */
+}
+
+.tab-content.active {
+  display: block; /* 활성 탭만 표시 */
+}
+
+/* 📊 성장률 비교표 */
+.growthCompare {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+  background: var(--soft);
+  border: 1px solid var(--ring);
+  border-radius: 8px;
+  overflow: hidden;
+  text-align: center;
+}
+
+.growthCompare th, .growthCompare td {
+  border: 1px solid var(--ring);
+  padding: 8px;
+  font-size: 14px;
+}
+
+.growthCompare th {
+  background: rgba(255, 212, 71, 0.15);
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.growthCompare td:first-child {
+  text-align: left;
+  padding-left: 10px;
+  font-weight: 600;
+}
+
+.growthCompare .plus { color: var(--ok); }
+.growthCompare .minus { color: var(--bad); }
+.growthCompare .zero { color: var(--muted); }
+

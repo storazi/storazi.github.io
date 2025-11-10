@@ -168,43 +168,246 @@ function initExpCalculator(){
   }
 }
 
-
 /* =========================
-   🪄 강화 시뮬레이터
+   🪄 강화 시뮬레이터 (레어 큐브 + 자동강화 6·8·10)
 ========================= */
-// (생략 — 기존 동일)
+function initEnhanceSimulator() {
+  const upgradeData = [
+    { level: 1, success: 1.00, break: 0.00, cost: 35000 },
+    { level: 2, success: 0.80, break: 0.00, cost: 59800 },
+    { level: 3, success: 0.60, break: 0.00, cost: 106400 },
+    { level: 4, success: 0.50, break: 1.00, cost: 152710 },
+    { level: 5, success: 0.40, break: 1.00, cost: 273630 },
+    { level: 6, success: 0.40, break: 1.00, cost: 468530 },
+    { level: 7, success: 0.30, break: 1.00, cost: 552800 },
+    { level: 8, success: 0.20, break: 1.00, cost: 698470 },
+    { level: 9, success: 0.20, break: 1.00, cost: 857200 },
+    { level: 10, success: 0.10, break: 1.00, cost: 1195390 }
+  ];
+
+  let level = 0;
+  let totalCost = 0;
+  let selectedCube = { rate: 0, mult: 1, isRare: false };
+  let selectedBooster = 0;
+  let currentEquip = "weapon";
+
+  const levelEl = document.getElementById("level");
+  const totalCostEl = document.getElementById("totalCost");
+  const statusEl = document.getElementById("status");
+  const outputBox = document.getElementById("enhanceOutput");
+
+  const getEquipName = () => (currentEquip === "weapon" ? "무기" : "방어구");
+
+  function addLog(text) {
+    if (outputBox) {
+      outputBox.value += (outputBox.value ? "\n" : "") + text;
+      outputBox.scrollTop = outputBox.scrollHeight;
+    }
+  }
+
+  function resetAll(bySwitch) {
+    level = 0;
+    totalCost = 0;
+    if (levelEl) levelEl.textContent = "현재 강화 단계: +0";
+    if (statusEl) statusEl.textContent = "";
+    if (totalCostEl) totalCostEl.textContent = "0 S";
+    if (outputBox) outputBox.value = "";
+    if (bySwitch) addLog(`장비 변경됨: ${getEquipName()}`);
+  }
+
+  function upgradeOnce() {
+    if (level >= 10) return;
+    const data = upgradeData[level];
+    const successRate = Math.min(1, data.success + selectedCube.rate + selectedBooster);
+
+    // ✅ 레어 큐브면 비용 2배
+    const cubeMultiplier = selectedCube.isRare ? 2 : selectedCube.mult;
+    const cost = data.cost * cubeMultiplier;
+    totalCost += cost;
+    const roll = Math.random();
+
+    if (roll <= successRate) {
+      level++;
+      addLog(`⚔️ ${getEquipName()} +${level - 1} ▶ +${level} 강화 성공`);
+    } else {
+      if (level >= 4) {
+        level = 0;
+        addLog(`💥 ${getEquipName()} 강화 실패 → 장비 파괴`);
+      } else {
+        addLog(`💢 ${getEquipName()} +${level} 강화 실패`);
+      }
+    }
+
+    if (levelEl) levelEl.textContent = `현재 강화 단계: +${level}`;
+    if (totalCostEl) totalCostEl.textContent = totalCost.toLocaleString() + " S";
+    if (statusEl)
+      statusEl.textContent = `성공확률 ${(successRate * 100).toFixed(1)}% | 소모 ${cost.toLocaleString()} S`;
+  }
+
+  // ⚙️ 자동 강화 (목표 단계까지)
+  async function autoEnhance(target) {
+    if (level >= target) return;
+    addLog(`🪄 자동 강화 시작 (+${target} 목표)`);
+    while (level < target && level < 10) {
+      upgradeOnce();
+      await new Promise(r => setTimeout(r, 150)); // 살짝 텀
+    }
+    addLog(`✅ 자동 강화 종료 (현재 +${level})`);
+  }
+
+  // 💎 큐브 선택 (일반 / 레어)
+  document.querySelectorAll(".cube").forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll(".cube").forEach(b => b.classList.remove("selected"));
+      btn.classList.add("selected");
+      selectedCube.rate = parseFloat(btn.dataset.rate);
+      selectedCube.mult = parseFloat(btn.dataset.mult);
+      selectedCube.isRare = btn.dataset.rare === "true";
+      updateStatusPreview();
+    };
+  });
+
+  // ✨ 보조제 선택 (없음 ~ +20%)
+  document.querySelectorAll(".booster").forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll(".booster").forEach(b => b.classList.remove("selected"));
+      btn.classList.add("selected");
+      selectedBooster = parseFloat(btn.dataset.bonus);
+      updateStatusPreview();
+    };
+  });
+
+  // ⚔️ 장비 선택
+  document.querySelectorAll(".equip").forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll(".equip").forEach(b => b.classList.remove("selected"));
+      btn.classList.add("selected");
+      currentEquip = btn.dataset.type;
+      resetAll(true);
+    };
+  });
+
+  // 🪄 버튼 동작
+  document.getElementById("upgradeBtn").onclick = () => upgradeOnce();
+  document.getElementById("resetBtn").onclick = () => resetAll(false);
+  document.getElementById("sim6").onclick = () => autoEnhance(6);
+  document.getElementById("sim8").onclick = () => autoEnhance(8);
+  document.getElementById("sim10").onclick = () => autoEnhance(10);
+
+  // 💡 상태 미리보기
+  function updateStatusPreview() {
+    const base = upgradeData[level] || upgradeData[0];
+    const previewRate = Math.min(1, base.success + selectedCube.rate + selectedBooster);
+    const costPreview = base.cost * (selectedCube.isRare ? 2 : selectedCube.mult);
+    if (statusEl)
+      statusEl.textContent = `💡 예상 성공확률 ${(previewRate * 100).toFixed(1)}% | 예상 소모 ${costPreview.toLocaleString()} S`;
+  }
+
+  updateStatusPreview();
+}
 
 
 /* =========================
    📊 성장률 계산기
 ========================= */
-async function initGrowthCalculator(){
-  let SPETS=[];
+async function initGrowthCalculator() {
+  let SPETS = [];
   try {
-    const res = await fetch("https://raw.githubusercontent.com/atorazi/storazi.github.io/main/data/spet.json");
+    const res = await fetch("https://raw.githubusercontent.com/atorazi/291/main/data/spet.json");
     SPETS = await res.json();
-  } catch(e){
+  } catch (e) {
     console.error("성장률 데이터 불러오기 실패:", e);
   }
 
-  const nameInput=document.getElementById("growthName");
-  const resultBox=document.getElementById("growthResult");
-  const runBtn=document.getElementById("growthRun");
-  if (!runBtn) return;
+  const nameInput = document.getElementById("growthName");
+  const resultBox = document.getElementById("growthResult");
+  const runBtn = document.getElementById("growthRun");
 
-  runBtn.onclick=()=>{
-    const name=nameInput.value.trim().toLowerCase();
-    if(!name){ resultBox.innerHTML="⚠️ 펫 이름을 입력하세요."; return; }
+  runBtn.onclick = () => {
+    const name = nameInput.value.trim().toLowerCase();
+    const level = parseFloat(document.getElementById("growthLevel").value);
+    const hp = parseFloat(document.getElementById("growthHP").value);
+    const atk = parseFloat(document.getElementById("growthAtk").value);
+    const def = parseFloat(document.getElementById("growthDef").value);
+    const agi = parseFloat(document.getElementById("growthAgi").value);
 
-    const f=SPETS.find(x=>x.이름?.toLowerCase()===name || x.name?.toLowerCase()===name);
-    if(!f){ resultBox.innerHTML=`❌ [${name}] 데이터를 찾을 수 없습니다.`; return; }
+    if (!name) {
+      resultBox.innerHTML = "⚠️ 펫 이름을 입력하세요.";
+      return;
+    }
 
-    const up=f["성장률(up)"]||{};
-    resultBox.innerHTML=
-      `<b>${f.이름||f.name} 성장률</b><br>
-       체력(HP): ${up["내구력(HP)"]?.toFixed(2)||"-"}<br>
-       공격력(Atk): ${up["공격력(Atk)"]?.toFixed(2)||"-"}<br>
-       방어력(Def): ${up["방어력(Def)"]?.toFixed(2)||"-"}<br>
-       순발력(Agi): ${up["순발력(Agi)"]?.toFixed(2)||"-"}`;
+    const f = SPETS.find(x => x.이름?.toLowerCase() === name || x.name?.toLowerCase() === name);
+    if (!f) {
+      resultBox.innerHTML = `❌ [${name}] 데이터를 찾을 수 없습니다.`;
+      return;
+    }
+
+    const init = f["초기치(stat)"];
+    const up = f["성장률(up)"];
+
+    // 내 성장률 계산
+    function calc(my, base) {
+      return level > 1 ? (my - base) / (level - 1) : 0;
+    }
+
+    const myUp = {
+      HP: calc(hp, init["내구력(HP)"]),
+      Atk: calc(atk, init["공격력(Atk)"]),
+      Def: calc(def, init["방어력(Def)"]),
+      Agi: calc(agi, init["순발력(Agi)"])
+    };
+
+    function fmt(num) {
+      return isFinite(num) ? num.toFixed(7) : "-";
+    }
+
+    function diff(my, s) {
+      const d = my - s;
+      const c = d > 0 ? "plus" : d < 0 ? "minus" : "zero";
+      return `<span class="${c}">${d > 0 ? "+" : ""}${d.toFixed(7)}</span>`;
+    }
+
+    resultBox.innerHTML = `
+      <table class="growthCompare">
+        <thead>
+          <tr>
+            <th>구분</th>
+            <th>체력(HP)</th>
+            <th>공격력(Atk)</th>
+            <th>방어력(Def)</th>
+            <th>순발력(Agi)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><b>S급 기준치</b></td>
+            <td>${init["내구력(HP)"]}</td>
+            <td>${init["공격력(Atk)"]}</td>
+            <td>${init["방어력(Def)"]}</td>
+            <td>${init["순발력(Agi)"]}</td>
+          </tr>
+          <tr>
+            <td><b>S급 성장률</b></td>
+            <td>${fmt(up["내구력(HP)"])}</td>
+            <td>${fmt(up["공격력(Atk)"])}</td>
+            <td>${fmt(up["방어력(Def)"])}</td>
+            <td>${fmt(up["순발력(Agi)"])}</td>
+          </tr>
+          <tr>
+            <td><b>내 성장률</b></td>
+            <td>${fmt(myUp.HP)}</td>
+            <td>${fmt(myUp.Atk)}</td>
+            <td>${fmt(myUp.Def)}</td>
+            <td>${fmt(myUp.Agi)}</td>
+          </tr>
+          <tr>
+            <td><b>차이</b></td>
+            <td>${diff(myUp.HP, up["내구력(HP)"])}</td>
+            <td>${diff(myUp.Atk, up["공격력(Atk)"])}</td>
+            <td>${diff(myUp.Def, up["방어력(Def)"])}</td>
+            <td>${diff(myUp.Agi, up["순발력(Agi)"])}</td>
+          </tr>
+        </tbody>
+      </table>`;
   };
 }
