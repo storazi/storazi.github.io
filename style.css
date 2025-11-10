@@ -1,90 +1,89 @@
 :root {
-  --ny-bg-left: #0d1424;         /* 좌측 / 전체 배경 */
-  --ny-bg-chat: #0b1b3a;         /* 메인 패널 */
-  --ny-msg-self: #142b52;        /* 내 영역 (버튼, 활성탭 등) */
-  --ny-msg-other: #1b3a69;       /* 상대 영역 (비활성 탭 등) */
-  --ny-input-bg: #ffd447;        /* 포인트: 노랑 */
-  --ny-input-hover: #ffdf5a;     /* 포인트 hover */
-  --ny-text-light: #ffffff;      /* 기본 텍스트 (흰색) */
-  --ny-muted: #b4bfd4;           /* 보조 텍스트 */
-  --ny-ring: #26385c;            /* 경계선 */
+  --bg: #0b1220;
+  --panel: #121a2b;
+  --soft: #1c2538;
+  --ring: #24324b;
+  --text: #eaf2ff;
+  --muted: #a9b5cc;
+  --accent: #ffd447;
+  --ok: #36d17b;
+  --warn: #ffbd4a;
+  --bad: #ff6b81;
 }
 
-/* 공통 초기화 */
 * {
   box-sizing: border-box;
-  transition: all .15s ease-in-out;
+  transition: all 0.15s ease-in-out;
 }
 
 body {
   margin: 0;
-  background: var(--ny-bg-left);
-  color: var(--ny-text-light);
+  background: var(--bg);
+  color: var(--text);
   font-family: "Pretendard", sans-serif;
   text-align: center;
   padding: 20px;
 }
 
-/* 타이틀 */
+/* 제목 */
 h1 {
-  color: var(--ny-input-bg);
+  color: var(--accent);
   font-weight: 700;
-  font-size: 22px;
-  margin-bottom: 18px;
+  margin-bottom: 16px;
 }
 
 /* 탭 버튼 */
 .tab-buttons {
   display: flex;
   justify-content: center;
-  gap: 10px;
-  margin-bottom: 18px;
+  gap: 8px;
+  margin-bottom: 20px;
 }
 
 .tab-buttons button {
-  background: var(--ny-msg-other);
-  border: 1px solid var(--ny-ring);
-  color: var(--ny-text-light);
-  padding: 10px 16px;
-  border-radius: 8px;
+  background: var(--panel);
+  border: 1px solid var(--ring);
+  color: var(--text);
+  padding: 10px 18px;
   font-weight: 600;
+  border-radius: 6px;
   cursor: pointer;
 }
 
 .tab-buttons button.active {
-  background: var(--ny-input-bg);
+  background: var(--accent);
   color: #000;
 }
 
 /* 탭 내용 */
 .tab-content {
   display: none;
-  background: var(--ny-bg-chat);
-  border-radius: 10px;
+  background: var(--panel);
+  border-radius: 8px;
   padding: 20px;
-  max-width: 640px;
+  max-width: 600px;
   margin: 0 auto;
-  box-shadow: 0 0 14px rgba(0,0,0,0.4);
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.4);
 }
 
 .tab-content.active {
   display: block;
 }
 
-/* 입력 및 버튼 */
+/* 입력창 + 버튼 */
 input, select {
-  background: var(--ny-msg-self);
-  border: 1px solid var(--ny-ring);
-  color: var(--ny-text-light);
-  border-radius: 6px;
+  background: var(--soft);
+  border: 1px solid var(--ring);
+  color: var(--text);
+  border-radius: 5px;
   padding: 8px;
+  font-size: 14px;
   width: 100%;
   margin: 6px 0;
-  font-size: 14px;
 }
 
 button {
-  background: var(--ny-input-bg);
+  background: var(--accent);
   border: none;
   color: #000;
   font-weight: 700;
@@ -94,42 +93,41 @@ button {
 }
 
 button:hover {
-  background: var(--ny-input-hover);
+  background: #ffdf5a;
 }
 
-/* 결과 표시 */
-.result, textarea {
-  background: var(--ny-msg-self);
-  border: 1px solid var(--ny-ring);
-  color: var(--ny-text-light);
+/* 출력창 */
+textarea {
+  background: var(--soft);
+  border: 1px solid var(--ring);
+  color: var(--text);
   border-radius: 6px;
   width: 100%;
-  margin-top: 12px;
+  height: 200px;
+  resize: none;
   padding: 10px;
   font-family: "Consolas", monospace;
   text-align: center;
   font-weight: 700;
-  resize: none;
-  line-height: 1.5;
 }
 
-/* 강조색 */
-.plus { color: #36d17b; font-weight: 700; }
-.minus { color: #ff6b81; font-weight: 700; }
-.zero { color: var(--ny-muted); }
+/* 강조 텍스트 */
+.plus { color: var(--ok); font-weight: 700; }
+.minus { color: var(--bad); font-weight: 700; }
+.zero { color: var(--muted); }
 
-/* 하단 안내 */
+/* 하단 영역 */
 #costDisplay, #visitCounter, #status {
-  margin-top: 10px;
-  color: var(--ny-muted);
+  margin-top: 12px;
+  color: var(--muted);
   font-size: 14px;
 }
 
-/* 강화 UI 전용 */
+/* 강화 시뮬레이터 전용 */
 .cube, .booster, .equip {
-  background: var(--ny-msg-other);
-  border: 1px solid var(--ny-ring);
-  color: var(--ny-text-light);
+  background: var(--soft);
+  border: 1px solid var(--ring);
+  color: var(--text);
   border-radius: 6px;
   padding: 6px 12px;
   margin: 4px;
@@ -138,21 +136,24 @@ button:hover {
 }
 
 .cube.selected, .booster.selected, .equip.selected {
-  background: var(--ny-input-bg);
+  background: var(--accent);
   color: #000;
   font-weight: 700;
 }
 
-/* 강화 결과창 중앙정렬 */
 #enhanceOutput {
   text-align: center;
   font-weight: 700;
-  color: var(--ny-text-light);
-  line-height: 1.6;
+  color: var(--text);
+  line-height: 1.5;
 }
 
 /* 모바일 대응 */
 @media (max-width: 480px) {
-  .tab-content { padding: 14px; }
-  input, button, textarea { font-size: 13px; }
+  .tab-content {
+    padding: 14px;
+  }
+  input, button, textarea {
+    font-size: 13px;
+  }
 }
