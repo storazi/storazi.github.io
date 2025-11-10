@@ -1,1 +1,1 @@
-# storazi.github.io
+# 배끼기 전에 물어봐라 좀.
