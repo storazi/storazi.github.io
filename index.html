@@ -1,3 +1,8 @@
+<!--
+SPDX-FileCopyrightText: © 2025 atorazi <atorazi@github.io>
+SPDX-License-Identifier: MIT
+-->
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -6,11 +11,13 @@
   <title>🐂 미궁 시뮬레이터</title>
   <link rel="stylesheet" href="./style.css">
 </head>
+
 <body>
   <div class="container">
     <!-- 📂 왼쪽 탭 -->
     <nav class="sidebar">
-      <button id="tabSim" class="active">🐾 초기치 시뮬레이터</button>
+      <button id="tabHome" class="active">🏠 홈</button>
+      <button id="tabSim">🐾 초기치 시뮬레이터</button>
       <button id="tabExp">📘 경험치 계산기</button>
       <button id="tabEnhance">🪄 강화 시뮬레이터</button>
       <button id="tabGrowth">📊 성장률 계산기</button>
@@ -19,8 +26,30 @@
     <!-- 📈 오른쪽 콘텐츠 -->
     <main class="content">
 
+      <!-- 🏠 홈 소개 -->
+      <section id="homeTab" class="tab-content active">
+        <h2>🐂 미궁 시뮬레이터</h2>
+        <p>
+          환영합니다! 🌀<br><br>
+          이 페이지는 <b>스톤에이지 노바 서버</b>의 <b>미궁 부족</b>을 위한<br>
+          <mark>시뮬레이터 & 성장 계산 도구</mark>입니다.
+        </p>
+
+        <ul>
+          <li>🐾 <b>초기치 시뮬레이터</b> – 랜덤 초기 능력치 시뮬레이터</li>
+          <li>📘 <b>경험치 계산기</b> – 레벨별 필요 경험치 및 예상 시간 계산</li>
+          <li>🪄 <b>강화 시뮬레이터</b> – 무기/방어구 강화 확률 및 비용 시뮬레이션</li>
+          <li>📊 <b>성장률 계산기</b> – 실제 성장률과 S급 기준 비교</li>
+        </ul>
+
+        <p style="margin-top:20px; font-size:14px; color:#9aa;">
+          제작: <b>atorazi</b> ｜ 
+          <a href="https://github.com/atorazi" target="_blank" style="color:#ffd447;">GitHub 바로가기</a>
+        </p>
+      </section>
+
       <!-- 🐾 초기치 시뮬레이터 -->
-      <section id="simTab" class="tab-content active">
+      <section id="simTab" class="tab-content">
         <h2>🐾 초기치 시뮬레이터</h2>
         <input id="petName" placeholder="펫 이름 입력">
         <div id="sgrade"></div>
@@ -31,7 +60,6 @@
           <button id="sim5">5회 시뮬레이션</button>
           <button id="clear">초기화</button>
         </div>
-
         <div id="costDisplay">💰 총 소모: 0원</div>
       </section>
 
@@ -64,16 +92,18 @@
 
         <!-- 💎 큐브 선택 -->
         <h3>🧊 큐브 선택</h3>
-        <button class="cube selected" data-rate="0" data-mult="1" data-rare="false">일반 큐브 (+0%)</button><br>
-        <button class="cube" data-rate="0.05" data-mult="1" data-rare="true">레어 큐브 (+5%)</button>
+        <button class="cube selected" data-rate="0" data-mult="1" data-rare="false">일반 큐브 (+0%)</button>
+        <button class="cube" data-rate="0.05" data-mult="2" data-rare="true">레어 큐브 (+5%)</button>
 
         <!-- ✨ 보조제 선택 -->
         <h3 style="margin-top:20px;">💎 보조제 선택</h3>
-        <button class="booster selected" data-bonus="0">없음</button>
-        <button class="booster" data-bonus="0.05">+5%</button>
-        <button class="booster" data-bonus="0.10">+10%</button>
-        <button class="booster" data-bonus="0.15">+15%</button>
-        <button class="booster" data-bonus="0.20">+20%</button>
+        <div class="booster-line">
+          <button class="booster selected" data-bonus="0">없음</button>
+          <button class="booster" data-bonus="0.05">+5%</button>
+          <button class="booster" data-bonus="0.10">+10%</button>
+          <button class="booster" data-bonus="0.15">+15%</button>
+          <button class="booster" data-bonus="0.20">+20%</button>
+        </div>
 
         <!-- 💰 누적 비용 -->
         <h3 style="margin-top:20px;">💰 누적 소모 스톤</h3>
@@ -98,25 +128,28 @@
         <textarea id="enhanceOutput" rows="10" readonly></textarea>
       </section>
 
-<!-- 📊 성장률 계산기 -->
-<section id="growthTab" class="tab-content">
-  <h2>📊 성장률 계산기</h2>
-
-  <input id="growthName" placeholder="펫 이름 입력">
-  <input id="growthLevel" placeholder="현재 레벨 (예: 30)">
-  <input id="growthHP" placeholder="체력(HP)">
-  <input id="growthAtk" placeholder="공격력(Atk)">
-  <input id="growthDef" placeholder="방어력(Def)">
-  <input id="growthAgi" placeholder="순발력(Agi)">
-  <button id="growthRun">성장률 조회</button>
-
-  <div id="growthResult" class="growth-table"></div>
-</section>
-
-
+      <!-- 📊 성장률 계산기 -->
+      <section id="growthTab" class="tab-content">
+        <h2>📊 성장률 계산기</h2>
+        <input id="growthName" placeholder="펫 이름 입력">
+        <input id="growthLevel" placeholder="현재 레벨 (예: 30)">
+        <input id="growthHP" placeholder="체력(HP)">
+        <input id="growthAtk" placeholder="공격력(Atk)">
+        <input id="growthDef" placeholder="방어력(Def)">
+        <input id="growthAgi" placeholder="순발력(Agi)">
+        <button id="growthRun">성장률 조회</button>
+        <div id="growthResult" class="growth-table"></div>
+      </section>
 
     </main>
   </div>
+
+  <!-- ⚖️ 저작권 푸터 -->
+  <footer>
+    © 2025 <b>atorazi</b>. All rights reserved.<br>
+    Licensed under the <b>MIT License</b>.<br>
+    <span style="font-size:12px; color:#888;">SPDX-License-Identifier: MIT</span>
+  </footer>
 
   <script src="./app.js"></script>
 </body>

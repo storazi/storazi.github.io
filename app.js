@@ -1,32 +1,53 @@
+/*
+SPDX-FileCopyrightText: © 2025 atorazi <atorazi@github.io>
+SPDX-License-Identifier: MIT
+*/
+
 /* =========================
    🧭 공통 초기 설정 + 탭 전환
 ========================= */
 document.addEventListener("DOMContentLoaded", () => {
-
   function showTab(id) {
-    document.querySelectorAll(".tab-content").forEach(t => t.classList.remove("active"));
-    document.querySelectorAll(".tab-buttons button").forEach(b => b.classList.remove("active"));
-    const el = document.getElementById(id);
-    if (el) el.classList.add("active");
-    const btn = document.getElementById(
-      id === "simTab" ? "tabSim" :
-      id === "expTab" ? "tabExp" :
-      id === "enhanceTab" ? "tabEnhance" :
-      "tabGrowth"
-    );
-    if (btn) btn.classList.add("active");
+    const allTabs = document.querySelectorAll(".tab-content");
+    const allButtons = document.querySelectorAll(".sidebar button");
+
+    // 모든 탭 숨기기
+    allTabs.forEach(tab => {
+      tab.classList.remove("active");
+      tab.style.display = "none";
+    });
+
+    // 모든 버튼 비활성화
+    allButtons.forEach(btn => btn.classList.remove("active"));
+
+    // 선택된 탭과 버튼 찾기
+    const selectedTab = document.getElementById(id);
+    const base = id.replace(/Tab$/, ""); // "home", "sim", ...
+    const btnId = "tab" + base.charAt(0).toUpperCase() + base.slice(1);
+    const selectedBtn = document.getElementById(btnId);
+
+    // 선택 탭 표시
+    if (selectedTab) {
+      selectedTab.style.display = "block";
+      setTimeout(() => selectedTab.classList.add("active"), 10);
+    }
+
+    if (selectedBtn) selectedBtn.classList.add("active");
   }
 
-  ["Sim","Exp","Enhance","Growth"].forEach(tab=>{
-    const btn=document.getElementById("tab"+tab);
-    if(btn) btn.onclick=()=>showTab(tab.toLowerCase()+"Tab");
+  // 탭 버튼 이벤트 연결
+  ["Home","Sim","Exp","Enhance","Growth"].forEach(name => {
+    const btn = document.getElementById("tab" + name);
+    if (btn) {
+      btn.addEventListener("click", () => showTab(name.toLowerCase() + "Tab"));
+    }
   });
 
-  /* 실행 */
-  initPetSimulator();
-  initExpCalculator();
-  initEnhanceSimulator();
-  initGrowthCalculator();
+  // 각 기능 초기화
+  if (typeof initPetSimulator === "function") initPetSimulator();
+  if (typeof initExpCalculator === "function") initExpCalculator();
+  if (typeof initEnhanceSimulator === "function") initEnhanceSimulator();
+  if (typeof initGrowthCalculator === "function") initGrowthCalculator();
 });
 
 

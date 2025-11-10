@@ -1,3 +1,11 @@
+/*
+SPDX-FileCopyrightText: © 2025 atorazi <atorazi@github.io>
+SPDX-License-Identifier: MIT
+*/
+
+/* =========================
+   🎨 색상 변수
+========================= */
 :root {
   --bg: #0b1220;
   --panel: #121a2b;
@@ -11,7 +19,9 @@
   --bad: #ff6b81;
 }
 
-/* 기본 설정 */
+/* =========================
+   📋 기본 설정
+========================= */
 * {
   box-sizing: border-box;
   transition: all 0.15s ease-in-out;
@@ -29,7 +39,9 @@ body {
   padding: 20px;
 }
 
-/* 메인 레이아웃 */
+/* =========================
+   🧱 메인 레이아웃
+========================= */
 .container {
   display: flex;
   width: 100%;
@@ -61,11 +73,12 @@ body {
   text-align: left;
   font-size: 14px;
   font-weight: 600;
+  transition: all 0.2s ease;
 }
 
 .sidebar button:hover {
-  background: rgba(255, 212, 71, 0.15);
-  border-color: var(--accent);
+  background: rgba(255, 212, 71, 0.2);
+  color: var(--accent);
 }
 
 .sidebar button.active {
@@ -74,7 +87,9 @@ body {
   font-weight: 700;
 }
 
-/* 📈 오른쪽 콘텐츠 */
+/* =========================
+   📈 오른쪽 콘텐츠
+========================= */
 .content {
   flex: 1;
   background: var(--panel);
@@ -91,7 +106,9 @@ h2 {
   margin-bottom: 20px;
 }
 
-/* 공통 입력창 */
+/* =========================
+   🧩 공통 입력창 & 버튼
+========================= */
 input {
   background: var(--soft);
   border: 1px solid var(--ring);
@@ -103,7 +120,6 @@ input {
   margin-bottom: 8px;
 }
 
-/* 공통 버튼 */
 button {
   background: var(--accent);
   border: none;
@@ -119,14 +135,15 @@ button:hover {
   background: #ffe060;
 }
 
-/* 비활성 스타일 */
 button.selected {
   background: var(--accent);
   color: #000;
   font-weight: 700;
 }
 
-/* 텍스트 출력창 */
+/* =========================
+   📝 출력창
+========================= */
 textarea {
   background: var(--soft);
   border: 1px solid var(--ring);
@@ -147,14 +164,16 @@ textarea {
 .minus { color: var(--bad); font-weight: 700; }
 .zero { color: var(--muted); }
 
-/* 상태 텍스트 */
+/* 상태 표시 */
 #costDisplay, #visitCounter, #status {
   margin-top: 10px;
   color: var(--muted);
   font-size: 14px;
 }
 
-/* 강화 시뮬레이터 구성 */
+/* =========================
+   🪄 강화 시뮬레이터
+========================= */
 .equip-group, .cube-group, .booster-group {
   display: flex;
   justify-content: center;
@@ -179,7 +198,7 @@ textarea {
   font-weight: 700;
 }
 
-/* 자동 강화 버튼 영역 */
+/* 자동 강화 버튼 */
 #sim6, #sim8, #sim10 {
   background: var(--soft);
   border: 1px solid var(--ring);
@@ -196,7 +215,9 @@ textarea {
   color: #000;
 }
 
-/* 성장률 계산기 */
+/* =========================
+   📊 성장률 계산기
+========================= */
 #growthResult {
   background: var(--soft);
   border: 1px solid var(--ring);
@@ -206,37 +227,6 @@ textarea {
   line-height: 1.5;
 }
 
-/* 반응형 디자인 */
-@media (max-width: 768px) {
-  .container {
-    flex-direction: column;
-  }
-  .sidebar {
-    flex-direction: row;
-    justify-content: center;
-    width: 100%;
-  }
-  .sidebar button {
-    flex: 1;
-    text-align: center;
-  }
-  .content {
-    width: 100%;
-  }
-}
-
-/* =========================
-   📑 탭 전환 표시 제어
-========================= */
-.tab-content {
-  display: none; /* 기본은 안 보이게 */
-}
-
-.tab-content.active {
-  display: block; /* 활성 탭만 표시 */
-}
-
-/* 📊 성장률 비교표 */
 .growthCompare {
   width: 100%;
   border-collapse: collapse;
@@ -270,3 +260,51 @@ textarea {
 .growthCompare .minus { color: var(--bad); }
 .growthCompare .zero { color: var(--muted); }
 
+/* =========================
+   📑 탭 전환 애니메이션
+========================= */
+.tab-content {
+  display: none;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.tab-content.active {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* =========================
+   📱 반응형
+========================= */
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+  }
+  .sidebar {
+    flex-direction: row;
+    justify-content: center;
+    width: 100%;
+  }
+  .sidebar button {
+    flex: 1;
+    text-align: center;
+  }
+  .content {
+    width: 100%;
+  }
+}
+
+/* =========================
+   ⚖️ 푸터
+========================= */
+footer {
+  text-align: center;
+  font-size: 13px;
+  color: #a9b5cc;
+  padding: 10px 0;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  margin-top: 40px;
+}
