@@ -301,10 +301,27 @@ textarea {
    ⚖️ 푸터
 ========================= */
 footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
   text-align: center;
-  font-size: 13px;
-  color: #a9b5cc;
-  padding: 10px 0;
-  border-top: 1px solid rgba(255,255,255,0.1);
-  margin-top: 40px;
+  font-size: 0.85rem;
+  color: #c9d4e5;
+  background: rgba(13, 20, 36, 0.9); /* 어두운 남색 투명 배경 */
+  padding: 8px 0 10px;
+  border-top: 1px solid rgba(255, 212, 71, 0.25); /* 노란색 포인트 선 */
+  z-index: 999;
+  backdrop-filter: blur(6px); /* 약간의 블러 효과 */
+}
+
+footer a {
+  color: #ffd447;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+footer a:hover {
+  text-decoration: underline;
+  color: #ffdf70;
 }
