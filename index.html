@@ -41,7 +41,7 @@ SPDX-License-Identifier: MIT
           <li>📘 <b>경험치 계산기</b> – 레벨별 필요 경험치 및 예상 시간 계산</li>
           <li>🪄 <b>강화 시뮬레이터</b> – 무기/방어구 강화 확률 및 비용 시뮬레이션</li>
           <li>📊 <b>성장률 계산기</b> – 실제 성장률과 S급 기준 비교</li>
-          <li>🎨 <b>디스코드 ANSI 텍스트</b> – 컬러 텍스트 생성기 (새 기능)</li>
+          <li>🎨 <b>디스코드 텍스트 생성기</b> – ANSI 컬러코드 텍스트 제작</li>
         </ul>
 
         <p style="margin-top:20px; font-size:14px; color:#9aa;">
@@ -52,8 +52,12 @@ SPDX-License-Identifier: MIT
 
       <!-- 🎨 디스코드 ANSI 텍스트 생성기 -->
       <section id="ansiTab" class="tab-content">
-        <h2>🎨 디스코드 ANSI 컬러 텍스트 생성기</h2>
-        <iframe src="./ansi.html" width="100%" height="850" style="border:none; border-radius:12px; background:#2F3136;"></iframe>
+        <h2>🎨 디스코드 텍스트 생성기</h2>
+        <iframe src="./ansi.html"
+          width="100%"
+          height="780"
+          style="border:none; border-radius:10px; background:#0b1220;">
+        </iframe>
       </section>
 
       <!-- 🐾 초기치 시뮬레이터 -->
@@ -91,6 +95,7 @@ SPDX-License-Identifier: MIT
       <!-- 🪄 강화 시뮬레이터 -->
       <section id="enhanceTab" class="tab-content">
         <h2>🪄 강화 시뮬레이터</h2>
+
         <div class="equip-group">
           <button class="equip selected" data-type="weapon">⚔️ 무기</button>
           <button class="equip" data-type="armor">🛡️ 방어구</button>
@@ -140,12 +145,11 @@ SPDX-License-Identifier: MIT
         <button id="growthRun">성장률 조회</button>
         <div id="growthResult" class="growth-table"></div>
       </section>
-
     </main>
   </div>
 
   <footer>
-    © 2025 <strong>storazi, discord : 지원(sup_bot)</strong>. All rights reserved.<br>
+    © 2025 <strong>storazi</strong>. All rights reserved.<br>
     Licensed under the <a href="https://opensource.org/licenses/MIT" target="_blank">MIT License</a>.
   </footer>
 
