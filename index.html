@@ -17,6 +17,7 @@ SPDX-License-Identifier: MIT
     <!-- 📂 왼쪽 탭 -->
     <nav class="sidebar">
       <button id="tabHome" class="active">🏠 홈</button>
+      <button id="tabAnsi">🎨 디스코드 텍스트</button>
       <button id="tabSim">🐾 초기치 시뮬레이터</button>
       <button id="tabExp">📘 경험치 계산기</button>
       <button id="tabEnhance">🪄 강화 시뮬레이터</button>
@@ -40,12 +41,19 @@ SPDX-License-Identifier: MIT
           <li>📘 <b>경험치 계산기</b> – 레벨별 필요 경험치 및 예상 시간 계산</li>
           <li>🪄 <b>강화 시뮬레이터</b> – 무기/방어구 강화 확률 및 비용 시뮬레이션</li>
           <li>📊 <b>성장률 계산기</b> – 실제 성장률과 S급 기준 비교</li>
+          <li>🎨 <b>디스코드 ANSI 텍스트</b> – 컬러 텍스트 생성기 (새 기능)</li>
         </ul>
 
         <p style="margin-top:20px; font-size:14px; color:#9aa;">
           제작: <b>storazi</b> ｜ 
           <a href="https://github.com/atorazi" target="_blank" style="color:#ffd447;">GitHub 바로가기</a>
         </p>
+      </section>
+
+      <!-- 🎨 디스코드 ANSI 텍스트 생성기 -->
+      <section id="ansiTab" class="tab-content">
+        <h2>🎨 디스코드 ANSI 컬러 텍스트 생성기</h2>
+        <iframe src="./ansi.html" width="100%" height="850" style="border:none; border-radius:12px; background:#2F3136;"></iframe>
       </section>
 
       <!-- 🐾 초기치 시뮬레이터 -->
@@ -83,19 +91,15 @@ SPDX-License-Identifier: MIT
       <!-- 🪄 강화 시뮬레이터 -->
       <section id="enhanceTab" class="tab-content">
         <h2>🪄 강화 시뮬레이터</h2>
-
-        <!-- ⚔️ 장비 선택 -->
         <div class="equip-group">
           <button class="equip selected" data-type="weapon">⚔️ 무기</button>
           <button class="equip" data-type="armor">🛡️ 방어구</button>
         </div>
 
-        <!-- 💎 큐브 선택 -->
         <h3>🧊 큐브 선택</h3>
         <button class="cube selected" data-rate="0" data-mult="1" data-rare="false">일반 큐브 (+0%)</button>
         <button class="cube" data-rate="0.05" data-mult="2" data-rare="true">레어 큐브 (+5%)</button>
 
-        <!-- ✨ 보조제 선택 -->
         <h3 style="margin-top:20px;">💎 보조제 선택</h3>
         <div class="booster-line">
           <button class="booster selected" data-bonus="0">없음</button>
@@ -105,24 +109,20 @@ SPDX-License-Identifier: MIT
           <button class="booster" data-bonus="0.20">+20%</button>
         </div>
 
-        <!-- 💰 누적 비용 -->
         <h3 style="margin-top:20px;">💰 누적 소모 스톤</h3>
         <div id="totalCost">0 S</div>
 
-        <!-- ⚙️ 조작 버튼 -->
         <div style="margin-top:15px;">
           <button id="upgradeBtn">강화하기</button>
           <button id="resetBtn">초기화</button>
         </div>
 
-        <!-- 🪄 자동 강화 -->
         <div style="margin-top:10px;">
           <button id="sim6">+6까지</button>
           <button id="sim8">+8까지</button>
           <button id="sim10">+10까지</button>
         </div>
 
-        <!-- 📜 로그 및 상태 -->
         <p id="level">현재 강화 단계: +0</p>
         <div id="status"></div>
         <textarea id="enhanceOutput" rows="10" readonly></textarea>
@@ -144,17 +144,11 @@ SPDX-License-Identifier: MIT
     </main>
   </div>
 
-  <!-- ⚖️ 저작권 푸터 -->
   <footer>
-  © 2025 <strong>storazi, discord : 지원(sup_bot)</strong>. All rights reserved.<br>
-  Licensed under the <a href="https://opensource.org/licenses/MIT" target="_blank">MIT License</a>.
-</footer>
-
+    © 2025 <strong>storazi, discord : 지원(sup_bot)</strong>. All rights reserved.<br>
+    Licensed under the <a href="https://opensource.org/licenses/MIT" target="_blank">MIT License</a>.
+  </footer>
 
   <script src="./app.js"></script>
 </body>
 </html>
-
-
-
-

@@ -35,8 +35,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (selectedBtn) selectedBtn.classList.add("active");
   }
 
-  // 탭 버튼 이벤트 연결
-  ["Home","Sim","Exp","Enhance","Growth"].forEach(name => {
+  // 탭 버튼 이벤트 연결 (🎨 ANSI 탭 추가)
+  ["Home","Ansi","Sim","Exp","Enhance","Growth"].forEach(name => {
     const btn = document.getElementById("tab" + name);
     if (btn) {
       btn.addEventListener("click", () => showTab(name.toLowerCase() + "Tab"));
@@ -54,7 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
 /* =========================
    🐾 초기치 시뮬레이터
 ========================= */
-function initPetSimulator(){
+function initPetSimulator() {
   async function loadPetData() {
     const base = "./data/";
     try {
@@ -85,7 +85,7 @@ function initPetSimulator(){
     nameInput.onchange = updatePet;
   }
 
-  function updatePet(){
+  function updatePet() {
     const n = (nameInput?.value || "").trim().toLowerCase();
     if (!n) { sgradeBox.innerHTML = `<b style="color:#ff6b81">⚠️ 입력 필요</b>`; currentBase = null; return; }
     const s = (SPETS || []).find(x => safeName(x) === n);
@@ -95,7 +95,7 @@ function initPetSimulator(){
     sgradeBox.innerHTML = `<b>${currentBase.name} S급 기준</b><br>체력 <b>${currentBase.hp}</b> | 공격력 <b>${currentBase.atk}</b> | 방어력 <b>${currentBase.def}</b> | 순발력 <b>${currentBase.agi}</b>`;
   }
 
-  function rand(){ return Math.floor(Math.random() * 5) - 2; }
+  function rand() { return Math.floor(Math.random() * 5) - 2; }
   const fmt = (v,b) => {
     const d = v - b;
     if (d > 0) return `${v}<span class="plus"> (+${d})</span>`;
@@ -103,11 +103,11 @@ function initPetSimulator(){
     return `${v}<span class="zero"> (0)</span>`;
   };
 
-  function simulate(t = 1){
+  function simulate(t = 1) {
     if (!currentBase) { alert("펫 이름을 먼저 입력하세요."); return; }
     if (resultBox) resultBox.value = "";
     let o = `${currentBase.name} 시뮬레이션 결과\n────────────────────\n`;
-    for (let i = 1; i <= t; i++){
+    for (let i = 1; i <= t; i++) {
       const x = { HP: currentBase.hp + rand(), Atk: currentBase.atk + rand(), Def: currentBase.def + rand(), Agi: currentBase.agi + rand() };
       o += `${i}회차 → 체력 ${fmt(x.HP, currentBase.hp)} | 공격력 ${fmt(x.Atk, currentBase.atk)} | 방어력 ${fmt(x.Def, currentBase.def)} | 순발력 ${fmt(x.Agi, currentBase.agi)}\n`;
     }
