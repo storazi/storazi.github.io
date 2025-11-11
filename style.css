@@ -471,6 +471,14 @@ textarea {
 /* 강조 스타일 */
 #ansiTextarea .ansi-1 { font-weight: 700 !important; }
 #ansiTextarea .ansi-4 { text-decoration: underline !important; }
+/* === Team 카드 자동 확장 (스크롤 제거 버전) === */
+.team-column {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow: visible; /* ✅ 내부 내용 다 보이게 */
+  max-height: none;  /* ✅ 높이 제한 해제 */
+}
 
 
 /* =========================
@@ -501,4 +509,5 @@ footer a:hover {
   text-decoration: underline;
   color: #ffdf70;
 }
+
 
