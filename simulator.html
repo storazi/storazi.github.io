@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>🗿 StoneAge PvP 시뮬레이터 (10v10 랜덤기술 + 설정)</title>
+
+<style>
+:root {
+  --bg:#0b1426; --panel:#0f1e3a; --soft:#11234a;
+  --ring:#1e396e; --ink:#eaf2ff; --muted:#a9b5cc; --yellow:#ffd447;
+  --pet-bg:#122850; --char-bg:#0f1f3f;
+}
+body {
+  background:var(--bg); color:var(--ink);
+  font-family:"Pretendard",sans-serif;
+  margin:0; padding:20px; display:block; flex-direction:column; align-items:center;
+}
+h1 { color:var(--yellow); margin-bottom:6px; }
+p.sub { color:var(--muted); font-size:13px; margin:0 0 16px; }
+.card {
+  background:linear-gradient(180deg,var(--panel),var(--soft));
+  border:1px solid var(--ring); border-radius:14px;
+  padding:16px; width:100%; max-width: none;
+  margin-bottom:20px; box-shadow:0 6px 16px rgba(0,0,0,0.25);
+  box-sizing:border-box;
+}
+.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+.grid3 {  display: grid;  grid-template-columns: 200px 200px auto;   align-items: end;  gap: 12px;  width: 100%;}
+
+.mini{font-size:12px;color:var(--muted);margin-bottom:4px;}
+.hr{height:1px;background:linear-gradient(90deg,transparent,var(--ring),transparent);margin:10px 0;border:none;}
+input,select,button,textarea{
+  border-radius:8px;border:1px solid var(--ring);
+  background:#0a1732;color:var(--ink);padding:6px;font-size:13px;box-sizing:border-box;
+}
+button{cursor:pointer;font-weight:700;transition:all .15s;}
+button:hover{opacity:.9}
+.btn{background:var(--yellow);color:#1a1300;border:none;}
+.btn-ghost{background:transparent;color:var(--ink);border:1px solid var(--ring);}
+.tabs{display:flex;gap:8px;margin-bottom:12px;}
+.tab{flex:1;padding:10px;text-align:center;background:#0a1732;border:1px solid var(--ring);border-radius:10px;cursor:pointer;}
+.tab:hover{background:#152548;}
+.active{background:var(--yellow);color:#1a1300;font-weight:800;}
+.log{
+  height:220px;width:100%;font-family:monospace;line-height:1.25;
+  background:#09172b;border:1px solid var(--ring);border-radius:8px;
+  resize:none;overflow-y:auto;box-sizing:border-box;
+  white-space:pre-wrap;word-break:break-all;scroll-behavior:smooth;
+}
+.team-column{display:flex;flex-direction:column;gap:4px;max-height:400px;overflow-y:auto;}
+.unit-pair { position: relative; margin-bottom: 4px; }
+.unit-label {font-size:12px;color:var(--yellow);font-weight:700;margin:2px 0 3px 3px;}
+.unit-row {
+  display:grid;
+  grid-template-columns:70px 70px 70px 80px 60px 45px 60px 45px 90px;
+  gap:4px; align-items:center; border-radius:6px; padding:4px;
+}
+.unit-row {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr); /* 9칸을 균등 비율로 나눔 */
+  gap: 4px;
+  align-items: center;
+  border-radius: 6px;
+  padding: 4px;
+  width: 100%; /* 카드 내부 전체 폭을 꽉 채움 */
+  box-sizing: border-box;
+}
+
+.unit-row input,
+.unit-row select {
+  width: 100%; /* 각 상자도 자동으로 폭 확장 */
+  text-align: center;
+  padding: 4px;
+  box-sizing: border-box;
+}
+
+.unit-char { background:var(--char-bg); border-left:3px solid var(--yellow); }
+.unit-pet  { background:var(--pet-bg);  border-left:3px solid var(--yellow); }
+.pair-line {
+  position:absolute; left:0; width:2px; top:20px; bottom:-4px;
+  background:var(--yellow); border-radius:1px; margin-left:-1px; opacity:0.5;
+}
+/* === Team 카드 자동 확장 (스크롤 제거 버전) === */
+.team-column {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow: visible; /* ✅ 내부 내용 다 보이게 */
+  max-height: none;  /* ✅ 높이 제한 해제 */
+}
+
+
+</style>
+</head>
+
+<body>
+<h1>🗿 StoneAge PvP 시뮬레이터 (10v10 랜덤기술 + 설정)</h1>
+<p class="sub">캐릭터–페트 짝 기반 10v10 전투 / 랜덤 타겟 & 기술 자동 / 발동 확률 설정 가능</p>
+
+<section class="card">
+  <div class="slider-row"><label>공격 확률 (%)</label>
+    <input type="range" id="rateAttack" min="0" max="100" value="60" oninput="updateRateValue(this)">
+    <span id="val_rateAttack">60%</span>
+  </div>
+  <div class="slider-row"><label>방어 확률 (%)</label>
+    <input type="range" id="rateDef" min="0" max="100" value="15" oninput="updateRateValue(this)">
+    <span id="val_rateDef">15%</span>
+  </div>
+  <div class="slider-row"><label>가드브레이크 확률 (%)</label>
+    <input type="range" id="rateGB" min="0" max="100" value="10" oninput="updateRateValue(this)">
+    <span id="val_rateGB">10%</span>
+  </div>
+  <div class="slider-row"><label>배수의진2 확률 (%)</label>
+    <input type="range" id="rateFormation" min="0" max="100" value="10" oninput="updateRateValue(this)">
+    <span id="val_rateFormation">10%</span>
+  </div>
+  <div class="slider-row"><label>다굴 확률 (%)</label>
+    <input type="range" id="rateMulti" min="0" max="100" value="5" oninput="updateRateValue(this)">
+    <span id="val_rateMulti">5%</span>
+  </div>
+</section>
+
+<script>
+function updateRateValue(slider){
+  const span=document.getElementById("val_"+slider.id);
+  span.textContent=slider.value+"%";
+}
+</script>
+
+<style>
+.slider-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+.slider-row label { width:140px; }
+.slider-row input[type=range] {
+  flex:1;
+  accent-color: var(--yellow);
+  height:4px;
+  background:linear-gradient(to right, var(--yellow) 0%, var(--yellow) calc(var(--value)*1%), #0a1732 calc(var(--value)*1%), #0a1732 100%);
+}
+.slider-row span { width:50px; text-align:right; }
+</style>
+
+
+<section class="card">
+  <div class="grid2">
+    <div><div class="mini">A 승률</div><div id="kpiA" style="font-weight:900;font-size:22px">-</div></div>
+    <div><div class="mini">B 승률</div><div id="kpiB" style="font-weight:900;font-size:22px">-</div></div>
+  </div>
+  <div class="hr"></div>
+  <label>전투 로그</label>
+  <textarea id="log" class="log" readonly placeholder="전투 로그 출력 영역"></textarea>
+</section>
+
+<section class="card">
+  <div class="tabs">
+    <button class="tab active" id="tab5v5" onclick="showTab('pane5v5')">10vs10</button>
+    <button class="tab" id="tabElem" onclick="showTab('paneElem')">속성 상성표</button>
+  </div>
+
+<div id="pane5v5">
+  <div class="mini">⚔️ 시뮬레이션 옵션</div>
+  <div class="card" style="padding:10px;">
+    <div class="grid3">
+      <div>
+        <label>시뮬레이션 횟수</label>
+        <input id="simN_5v5" value="100">
+      </div>
+      <div>
+        <label>랜덤요소(%)</label>
+        <input id="rngVar5" value="20">
+      </div>
+      <!-- 버튼 세트 -->
+      <div style="
+  display:flex;
+  align-items:end;
+  justify-content:flex-end;
+  gap:8px;
+  width:100%;
+  margin-top:4px;
+">
+  <button class="btn-ghost" id="fillTeams">샘플 채우기</button>
+  <button class="btn" id="run5v5">🛡️ 전투 시작</button>
+  <button class="btn-ghost" id="resetResult" type="button" onclick="resetResult()">🧹 결과 초기화</button>
+</div>
+
+    </div>
+  </div>
+</div>
+
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="hr"></div>
+    <div class="mini" style="margin-top:10px;">⚔️ Team A</div>
+    <div class="card" style="padding:12px;"><div id="teamA" class="team-column"></div></div>
+
+    <div class="hr"></div>
+    <div class="mini" style="margin-top:10px;">🛡️ Team B</div>
+    <div class="card" style="padding:12px;"><div id="teamB" class="team-column"></div></div>
+
+    </div>
+  </div>
+
+  <div id="paneElem" style="display:none">
+    <div class="mini">속성 상성 배율 (1.2 = +20%)</div>
+    <table id="elemTable">
+      <thead><tr><th></th><th>지</th><th>수</th><th>화</th><th>풍</th></tr></thead>
+      <tbody>
+        <tr><th>지</th><td><input id="adv_지_지" value="1.0"></td><td><input id="adv_지_수" value="0.8"></td><td><input id="adv_지_화" value="1.2"></td><td><input id="adv_지_풍" value="1.0"></td></tr>
+        <tr><th>수</th><td><input id="adv_수_지" value="1.2"></td><td><input id="adv_수_수" value="1.0"></td><td><input id="adv_수_화" value="0.8"></td><td><input id="adv_수_풍" value="1.0"></td></tr>
+        <tr><th>화</th><td><input id="adv_화_지" value="1.0"></td><td><input id="adv_화_수" value="1.2"></td><td><input id="adv_화_화" value="1.0"></td><td><input id="adv_화_풍" value="0.8"></td></tr>
+        <tr><th>풍</th><td><input id="adv_풍_지" value="0.8"></td><td><input id="adv_풍_수" value="1.0"></td><td><input id="adv_풍_화" value="1.2"></td><td><input id="adv_풍_풍" value="1.0"></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<script>
+function showTab(id){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab'+id.replace('pane','')).classList.add('active');
+  document.querySelectorAll('#pane5v5,#paneElem').forEach(p=>p.style.display='none');
+  document.getElementById(id).style.display='block';
+}
+
+class Unit {
+  constructor(team,name,atk,def,spd,hp,elem){
+    this.team=team; this.name=name;
+    this.atk=atk; this.def=def; this.spd=spd;
+    this.hp=hp; this.max_hp=hp; this.elem=elem;
+    this.alive=true; this.isGuarding=false; this.guardBreak=false; this.formation="일반";
+  }
+  isAlive(){return this.hp>0;}
+  takeDamage(dmg){this.hp=Math.max(0,this.hp-dmg); if(this.hp<=0) this.alive=false;}
+}
+
+function readElementAdv(){
+  const attrs=['지','수','화','풍']; const adv={};
+  attrs.forEach(a=>{adv[a]={}; attrs.forEach(b=>{
+    adv[a][b]=parseFloat(document.getElementById(`adv_${a}_${b}`)?.value)||1.0;
+  })});
+  return adv;
+}
+
+function blendedRatio(att,def,adv){
+  const atkSum=Object.values(att).reduce((a,b)=>a+b,0)||1;
+  const defSum=Object.values(def).reduce((a,b)=>a+b,0)||1;
+  let total=0;
+  for(const [ae,av] of Object.entries(att))
+    for(const [de,dv] of Object.entries(def))
+      total+=(adv[ae]?.[de]||1.0)*(av/atkSum)*(dv/defSum);
+  return total;
+}
+
+function resetResult(){
+  const log = document.getElementById("log");
+  const kA  = document.getElementById("kpiA");
+  const kB  = document.getElementById("kpiB");
+  if (log) log.value = "";
+  if (kA)  kA.innerText = "-";
+  if (kB)  kB.innerText = "-";
+  // 선택: 로그 스크롤도 원점으로
+  if (log) log.scrollTop = 0;
+}
+
+
+function getRandomAction(){
+  const r = Math.random()*100;
+  const a = parseFloat(document.getElementById("rateAttack").value)||0;
+  const d = parseFloat(document.getElementById("rateDef").value)||0;
+  const gb= parseFloat(document.getElementById("rateGB").value)||0;
+  const fo= parseFloat(document.getElementById("rateFormation").value)||0;
+  // 다굴 확률은 남은
+  const mu = parseFloat(document.getElementById("rateMulti").value)||0;
+
+  if(r < a) return "공격";
+  if(r < a + d) return "방어";
+  if(r < a + d + gb) return "가드브레이크";
+  if(r < a + d + gb + fo) return "배수의진2";
+  return "다굴";
+}
+
+function simulate5vs5(){
+  const adv = readElementAdv();
+  const rng = parseFloat(document.getElementById("rngVar5").value)/100;
+  const n   = parseInt(document.getElementById("simN_5v5").value);
+  function readTeam(pref,team){
+    const arr=[];
+    for(let i=0;i<10;i++){
+      const atk = parseInt(document.getElementById(`${pref}_atk_${i}`).value)||0;
+      const def = parseInt(document.getElementById(`${pref}_def_${i}`).value)||0;
+      const spd = parseInt(document.getElementById(`${pref}_spd_${i}`).value)||0;
+      const hp  = parseInt(document.getElementById(`${pref}_hp_${i}`).value)||0;
+      const e1  = document.getElementById(`${pref}_e1_${i}`).value;
+      const e1v= parseFloat(document.getElementById(`${pref}_e1v_${i}`).value)||0;
+      const e2  = document.getElementById(`${pref}_e2_${i}`).value;
+      const e2v= parseFloat(document.getElementById(`${pref}_e2v_${i}`).value)||0;
+      const elem={}; if(e1v>0) elem[e1]=e1v; if(e2v>0) elem[e2]=e2v;
+      arr.push(new Unit(team,`${team}${i+1}`,atk,def,spd,hp,elem));
+    }
+    return arr;
+  }
+
+  const teamA = readTeam("A","A"), teamB = readTeam("B","B");
+  let aWin=0, bWin=0, log=[];
+
+  for(let sim=0; sim<n; sim++){
+    const A = teamA.map(u=> new Unit(u.team,u.name,u.atk,u.def,u.spd,u.max_hp,structuredClone(u.elem)));
+    const B = teamB.map(u=> new Unit(u.team,u.name,u.atk,u.def,u.spd,u.max_hp,structuredClone(u.elem)));
+    let turn=1;
+    while(A.some(u=>u.isAlive()) && B.some(u=>u.isAlive())){
+      log.push(`--- 턴 ${turn} 시작 ---`);
+      const all = [...A,...B].filter(u=>u.isAlive()).sort((x,y)=>y.spd - x.spd);
+      for(const u of all){
+        if(!u.isAlive()) continue;
+        const enemies = (u.team==="A"?B:A).filter(e=>e.isAlive());
+        if(!enemies.length) break;
+
+        const action = getRandomAction();
+        let target = enemies[Math.floor(Math.random()*enemies.length)];
+        if(action==="다굴" && log.length && target && target.isAlive()){
+          // 다굴 시 직전 타깃 유지
+        }
+        let atk=u.atk, def=target.def;
+        let ratio = blendedRatio(u.elem, target.elem, adv);
+        let dmg=0;
+
+        if(action==="방어"){
+          u.isGuarding=true;
+          log.push(`[턴${turn}] ${u.name} ▶ 방어 자세`);
+          continue;
+        }
+        if(action==="가드브레이크"){
+          u.guardBreak=true;
+          log.push(`[턴${turn}] ${u.name} ▶ 가드브레이크 발동`);
+        }
+        if(action==="배수의진2"){
+          atk *= 1.5;
+          u.def *= 0.5;
+          log.push(`[턴${turn}] ${u.name} ▶ 배수의진2 발동`);
+        }
+
+        dmg = Math.max(1, Math.floor((atk - def) * ratio * (1 + (Math.random()*2 -1)*rng)));
+        if(target.isGuarding && !u.guardBreak) dmg *= 0.5;
+        target.takeDamage(dmg);
+        log.push(`[턴${turn}] ${u.name}(${action}) → ${target.name} ${dmg} 데미지 (HP ${target.hp})`);
+
+        u.isGuarding=false;
+        u.guardBreak=false;
+      }
+      turn++;
+      // 턴 끝 → 체크 반복
+      if(turn>200) break; // 안전망
+    }
+
+    const aliveA = A.filter(u=>u.isAlive()).length;
+    const aliveB = B.filter(u=>u.isAlive()).length;
+    if(aliveA>aliveB) aWin++;
+    else if(aliveB>aliveA) bWin++;
+    else {
+      const sumA = A.reduce((acc,u)=>acc+u.hp,0);
+      const sumB = B.reduce((acc,u)=>acc+u.hp,0);
+      if(sumA>=sumB) aWin++; else bWin++;
+    }
+  }
+
+  const aRate=(aWin/n*100).toFixed(1);
+  const bRate=(bWin/n*100).toFixed(1);
+  document.getElementById("kpiA").innerText=aRate+"%";
+  document.getElementById("kpiB").innerText=bRate+"%";
+  document.getElementById("log").value = log.slice(-300).join("\n") + `\n\n결과: A ${aRate}% | B ${bRate}%`;
+}
+
+function buildTeams(){
+  const attrs=['지','수','화','풍'];
+  const makeRow=(team,i,type)=>`
+    <div class='unit-row ${type==="캐릭터"?"unit-char":"unit-pet"}'>
+      <input id='${team}_atk_${i}' placeholder='공'>
+      <input id='${team}_def_${i}' placeholder='방'>
+      <input id='${team}_spd_${i}' placeholder='순'>
+      <input id='${team}_hp_${i}' placeholder='체'>
+      <select id='${team}_e1_${i}'>${attrs.map(a=>`<option>${a}</option>`).join('')}</select>
+      <input id='${team}_e1v_${i}' placeholder='속성1값'>
+      <select id='${team}_e2_${i}'>${attrs.map(a=>`<option>${a}</option>`).join('')}</select>
+      <input id='${team}_e2v_${i}' placeholder='속성2값'>
+      <select><option>${type}</option></select>
+    </div>`;
+  ["A","B"].forEach(prefix=>{
+    const container = document.getElementById(prefix==="A"?"teamA":"teamB");
+    container.innerHTML="";
+    for(let p=0;p<5;p++){
+      const iC = p*2, iP = p*2 + 1;
+      container.insertAdjacentHTML("beforeend", `
+        <div class='unit-pair'>
+          <div class='unit-label'>${p+1}️⃣ 캐릭터 — 🐾 페트</div>
+          <div class='pair-line'></div>
+          ${makeRow(prefix,iC,"캐릭터")}
+          ${makeRow(prefix,iP,"페트")}
+        </div>`);
+    }
+  });
+}
+
+function fillSampleValues(){
+  const set=(id,v)=>{ const el=document.getElementById(id); if(el) el.value=v; };
+  for(let t of ["A","B"]){
+    for(let i=0;i<10;i++){
+      const isChar = i%2===0;
+      set(`${t}_atk_${i}`, isChar ? 150 : 120);
+      set(`${t}_def_${i}`, isChar ? 120 : 160);
+      set(`${t}_spd_${i}`, isChar ? 180 : 130);
+      set(`${t}_hp_${i}`,  isChar ? 800 : 1000);
+      set(`${t}_e1v_${i}`, 6);
+      set(`${t}_e2v_${i}`, 4);
+    }
+  }
+}
+
+document.addEventListener("DOMContentLoaded",()=>{
+  buildTeams();
+  document.getElementById("run5v5").onclick=simulate5vs5;
+  document.getElementById("fillTeams").onclick=fillSampleValues;
+  document.getElementById("resetResult").onclick=resetResult;
+});
+</script>
+</body>
+</html>
