@@ -279,7 +279,8 @@ document.getElementById("runBtn").onclick=()=>{
     const n=50;let aWin=0,bWin=0;
     const baseUnits=readUnits();
     for(let i=0;i<n;i++){
-      state.units=structuredClone(baseUnits);
+      state.units = baseUnits.map(u => new Unit(u.team, u.type, u.no, u.atk, u.def, u.spd, u.hp, u.elem));
+
       state.turn=1;
       let ended=false,guard=0;
       while(!ended&&guard<100){ended=runTurn("sim");guard++;}
@@ -295,3 +296,4 @@ document.getElementById("nextBtn").onclick=()=>runTurn("manual");
 <footer>© 2025 storazi ｜ MIT License</footer>
 </body>
 </html>
+
