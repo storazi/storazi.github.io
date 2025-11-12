@@ -132,8 +132,52 @@ footer{text-align:center;color:var(--muted);font-size:13px;margin-top:20px}
 </section>
 
 <script>
-const logEl=document.getElementById("log");
-function log(t){logEl.value+=t+"\\n";logEl.scrollTop=logEl.scrollHeight}
+// 🎨 시각형 전투 로그
+const logEl = document.getElementById("log");
+
+function logClear() {
+  logEl.innerHTML = "";
+}
+
+function logLine(html) {
+  logEl.insertAdjacentHTML("beforeend", html + "<br>");
+  logEl.scrollTop = logEl.scrollHeight;
+}
+
+// 턴 시작
+function logTurn(turn, mode="auto") {
+  logLine(`<div class="turnBlock"><div class="turn">🌀 --- 턴 ${turn} (${mode}) ---</div>`);
+}
+
+// 행동 로그 (공격자, 대상, 기술, 데미지, HP)
+function logAction(attacker, target, skill, dmg, hp) {
+  const atkCls = attacker.team === "A" ? "unitA" : "unitB";
+  const tgtCls = target.team === "A" ? "unitA" : "unitB";
+  const skillIcon =
+    skill === "방어"
+      ? "🛡️"
+      : skill === "가드브레이크"
+      ? "💥"
+      : skill === "배수의진2"
+      ? "🔥"
+      : skill === "다굴"
+      ? "⚔️"
+      : "⚔️";
+
+  logLine(`
+    <span class="${atkCls}">${attacker.name}</span> ▶ 
+    <span class="skill">${skillIcon} ${skill}</span> → 
+    <span class="${tgtCls}">${target.name}</span> 
+    <span class="hit">${dmg ? dmg + " 데미지" : ""}</span> 
+    <span class="hp">(HP:${hp})</span>
+  `);
+}
+
+// 턴 종료 표시
+function logEndTurn(a,b){
+  logLine(`<div class="hp">잔존: <span class="unitA">A=${a}</span> / <span class="unitB">B=${b}</span></div><hr></div>`);
+}
+
 
 const elems=["지","수","화","풍"];
 const skills=["공격","방어","가드브레이크","배수의진2","다굴"];
@@ -387,4 +431,5 @@ document.getElementById("nextBtn").onclick=()=>runTurn("manual");
 <footer>© 2025 storazi ｜ MIT License</footer>
 </body>
 </html>
+
 
