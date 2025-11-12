@@ -130,23 +130,32 @@ function buildTeamHTML(team){
   const host=document.getElementById("team"+team);
   host.innerHTML="";
   for(let i=1;i<=5;i++){
-    for(const type of["캐릭터","페트"]){
-      const row=document.createElement("div");
-      row.className="unit-row"+(type==="페트"?" pet":"");
-      row.innerHTML=`
-        <input id="${team}_${type}_${i}_atk" placeholder="공">
-        <input id="${team}_${type}_${i}_def" placeholder="방">
-        <input id="${team}_${type}_${i}_spd" placeholder="순">
-        <input id="${team}_${type}_${i}_hp" placeholder="체">
-        <select id="${team}_${type}_${i}_elem1">${elems.map(e=>`<option>${e}</option>`).join("")}</select>
-        <input id="${team}_${type}_${i}_elem1v" type="number" placeholder="값1" min="0" value="0">
-        <select id="${team}_${type}_${i}_elem2">${elems.map(e=>`<option>${e}</option>`).join("")}</select>
-        <input id="${team}_${type}_${i}_elem2v" type="number" placeholder="값2" min="0" value="0">
-        <select><option>${type}</option></select>`;
-      host.appendChild(row);
-    }
+    const row=document.createElement("div");
+    row.className="unit-row";
+
+    row.innerHTML=`
+      <input id="${team}_unit_${i}_atk" placeholder="공">
+      <input id="${team}_unit_${i}_def" placeholder="방">
+      <input id="${team}_unit_${i}_spd" placeholder="순">
+      <input id="${team}_unit_${i}_hp" placeholder="체">
+      <select id="${team}_unit_${i}_elem1">${elems.map(e=>`<option>${e}</option>`).join("")}</select>
+      <input id="${team}_unit_${i}_elem1v" type="number" placeholder="값1" min="0" value="0">
+      <select id="${team}_unit_${i}_elem2">${elems.map(e=>`<option>${e}</option>`).join("")}</select>
+      <input id="${team}_unit_${i}_elem2v" type="number" placeholder="값2" min="0" value="0">
+      <select id="${team}_unit_${i}_role">
+        <option value="캐릭터">캐릭터</option>
+        <option value="페트">페트</option>
+      </select>`;
+      
+    host.appendChild(row);
+
+    // 선택 시 배경색 변경
+    row.querySelector(`#${team}_unit_${i}_role`).addEventListener("change", e=>{
+      row.classList.toggle("pet", e.target.value==="페트");
+    });
   }
 }
+
 buildTeamHTML("A");
 buildTeamHTML("B");
 
@@ -338,4 +347,5 @@ document.getElementById("clearBtn").onclick=logClear;
 </script>
 </body>
 </html>
+
 
