@@ -162,18 +162,33 @@ buildTeamHTML("B");
 // ----------------- 임의 스탯 생성 -----------------
 function randStat(team){
   for(let i=1;i<=5;i++){
-    for(const type of["캐릭터","페트"]){
-      document.getElementById(`${team}_${type}_${i}_atk`).value = Math.floor(100+Math.random()*100);
-      document.getElementById(`${team}_${type}_${i}_def`).value = Math.floor(80+Math.random()*80);
-      document.getElementById(`${team}_${type}_${i}_spd`).value = Math.floor(80+Math.random()*100);
-      document.getElementById(`${team}_${type}_${i}_hp`).value  = Math.floor(700+Math.random()*500);
-      document.getElementById(`${team}_${type}_${i}_elem1`).value = elems[Math.floor(Math.random()*elems.length)];
-      document.getElementById(`${team}_${type}_${i}_elem1v`).value = Math.floor(Math.random()*5);
-      document.getElementById(`${team}_${type}_${i}_elem2`).value = elems[Math.floor(Math.random()*elems.length)];
-      document.getElementById(`${team}_${type}_${i}_elem2v`).value = Math.floor(Math.random()*5);
-    }
+    const atk = Math.floor(100 + Math.random()*100);
+    const def = Math.floor(80 + Math.random()*80);
+    const spd = Math.floor(80 + Math.random()*100);
+    const hp  = Math.floor(700 + Math.random()*500);
+    const e1  = elems[Math.floor(Math.random()*elems.length)];
+    const e2  = elems[Math.floor(Math.random()*elems.length)];
+
+    document.getElementById(`${team}_unit_${i}_atk`).value = atk;
+    document.getElementById(`${team}_unit_${i}_def`).value = def;
+    document.getElementById(`${team}_unit_${i}_spd`).value = spd;
+    document.getElementById(`${team}_unit_${i}_hp`).value  = hp;
+
+    document.getElementById(`${team}_unit_${i}_elem1`).value = e1;
+    document.getElementById(`${team}_unit_${i}_elem1v`).value = Math.floor(Math.random()*5);
+    document.getElementById(`${team}_unit_${i}_elem2`).value = e2;
+    document.getElementById(`${team}_unit_${i}_elem2v`).value = Math.floor(Math.random()*5);
+
+    // 랜덤으로 캐릭터/페트 선택
+    const role = Math.random() < 0.5 ? "캐릭터" : "페트";
+    const roleSel = document.getElementById(`${team}_unit_${i}_role`);
+    roleSel.value = role;
+    const row = roleSel.closest(".unit-row");
+    row.classList.toggle("pet", role==="페트");
   }
   logLine(`⚙️ ${team}팀 스탯이 임의로 생성되었습니다.`);
+}
+
 }
 document.getElementById("randA").onclick=()=>randStat("A");
 document.getElementById("randB").onclick=()=>randStat("B");
@@ -347,5 +362,6 @@ document.getElementById("clearBtn").onclick=logClear;
 </script>
 </body>
 </html>
+
 
 
