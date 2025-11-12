@@ -26,9 +26,7 @@ button:hover{opacity:.9}
 .btn{background:var(--yellow);color:#1a1300;border:none}
 
 /* 팀 A/B를 양옆 배치 */
-.team{
-  display:flex; gap:20px; justify-content:space-between;
-}
+.team{display:flex; gap:20px; justify-content:space-between;}
 .unit-col{flex:1}
 .unit-row{
   display:grid;
@@ -279,8 +277,7 @@ function runTurn(mode){
     if(mode==="auto"){ 
       skill=autoSkill(); 
       target=pickEnemy(u); 
-    }
-    else{
+    } else {
       const row=document.getElementById(`skill_${u.name}`);
       if(row){
         skill=row.value;
@@ -309,24 +306,12 @@ function runTurn(mode){
     return true;
   }
 
-  // ✅ 수동 모드에서도 자동으로 다음 턴 대기 후 진행
+  // ✅ 수동 모드에서도 자동으로 다음 턴 대기 후 진행(원하면 시간 조절)
   state.turn++;
   if(mode==="manual"){
-    // 0.5초 후 다음 턴 자동 시작
     setTimeout(()=>runTurn("manual"), 500);
   }
   return false;
-}
-
-
-  // 수동 모드: 리더 사망 시 페트 오더 비활성
-  if(mode==="manual") disablePetOrdersIfLeaderDead();
-
-  const a=state.units.filter(x=>x.team==="A"&&x.isAlive()).length;
-  const b=state.units.filter(x=>x.team==="B"&&x.isAlive()).length;
-  logEndTurn(a,b);
-  if(a===0||b===0){logLine(`🏁 종료: ${a>b?"A":"B"}팀 승리!`);return true;}
-  state.turn++;return false;
 }
 
 /* =============== 오더 테이블 =============== */
@@ -391,4 +376,3 @@ document.addEventListener("DOMContentLoaded",()=>{
 <footer>© 2025 storazi ｜ MIT License</footer>
 </body>
 </html>
-
