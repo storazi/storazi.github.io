@@ -11,48 +11,92 @@
   --pet-bg:#122850;--char-bg:#0f1f3f;
 }
 body {
-  background:var(--bg);color:var(--ink);
-  font-family:"Pretendard",sans-serif;margin:0;padding:20px;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:"Pretendard",sans-serif;
+  margin:0;
+  padding:20px;
 }
-h1{color:var(--yellow);margin-bottom:6px;cursor:pointer}
-.card{
+h1 {
+  color:var(--yellow);
+  margin-bottom:6px;
+  cursor:pointer;
+}
+.card {
   background:linear-gradient(180deg,var(--panel),var(--soft));
-  border:1px solid var(--ring);border-radius:14px;
-  padding:16px;margin-bottom:16px;
+  border:1px solid var(--ring);
+  border-radius:14px;
+  padding:16px;
+  margin-bottom:16px;
   box-shadow:0 6px 16px rgba(0,0,0,0.25);
 }
-input,select,button{
-  border-radius:8px;border:1px solid var(--ring);
-  background:#0a1732;color:var(--ink);
-  padding:6px;font-size:13px;box-sizing:border-box;
+input,select,button {
+  border-radius:8px;
+  border:1px solid var(--ring);
+  background:#0a1732;
+  color:var(--ink);
+  padding:6px;
+  font-size:13px;
+  box-sizing:border-box;
 }
-button{cursor:pointer;font-weight:700;transition:.15s}
-button:hover{opacity:.9}
-.btn{background:var(--yellow);color:#1a1300;border:none}
-.team{display:flex;gap:20px;justify-content:space-between;}
-.unit-col{flex:1}
-.unit-row{
+button {
+  cursor:pointer;
+  font-weight:700;
+  transition:.15s;
+}
+button:hover { opacity:.9; }
+.btn {
+  background:var(--yellow);
+  color:#1a1300;
+  border:none;
+}
+.team {
+  display:flex;
+  gap:20px;
+  justify-content:space-between;
+}
+.unit-col { flex:1; }
+.unit-row {
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(70px,1fr));
-  gap:6px;margin-bottom:6px;
-  padding:6px;background:var(--char-bg);border-radius:8px;
+  gap:6px;
+  margin-bottom:6px;
+  padding:6px;
+  background:var(--char-bg);
+  border-radius:8px;
 }
-.unit-row.pet{background:var(--pet-bg)}
-#log{
-  width:100%;height:340px;background:#0a1225;
-  border:1px solid var(--ring);border-radius:8px;
+.unit-row.pet { background:var(--pet-bg); }
+#log {
+  width:100%;
+  height:340px;
+  background:#0a1225;
+  border:1px solid var(--ring);
+  border-radius:8px;
   font-family:"JetBrains Mono",monospace;
-  font-size:13px;line-height:1.45;overflow-y:auto;
-  white-space:pre-wrap;word-break:break-all;padding:10px;
+  font-size:13px;
+  line-height:1.45;
+  overflow-y:auto;
+  white-space:pre-wrap;
+  word-break:break-all;
+  padding:10px;
 }
-#log .turn{color:var(--yellow);font-weight:700;margin-top:6px;}
-#log .unitA{color:#68c3ff;font-weight:600;}
-#log .unitB{color:#ff7f7f;font-weight:600;}
-#log .skill{color:#ffd447;font-weight:600;}
-#log .hit{color:#7df58a;}
-#log .hp{color:#a9b5cc;}
-.turnBlock{border-top:1px solid var(--ring);margin-top:8px;padding-top:4px;}
-footer{text-align:center;color:var(--muted);font-size:13px;margin-top:20px}
+#log .turn { color:var(--yellow); font-weight:700; margin-top:6px; }
+#log .unitA { color:#68c3ff; font-weight:600; }
+#log .unitB { color:#ff7f7f; font-weight:600; }
+#log .skill { color:#ffd447; font-weight:600; }
+#log .hit { color:#7df58a; }
+#log .hp { color:#a9b5cc; }
+.turnBlock {
+  border-top:1px solid var(--ring);
+  margin-top:8px;
+  padding-top:4px;
+}
+footer {
+  text-align:center;
+  color:var(--muted);
+  font-size:13px;
+  margin-top:20px;
+}
 </style>
 </head>
 <body>
@@ -102,12 +146,12 @@ footer{text-align:center;color:var(--muted);font-size:13px;margin-top:20px}
 <script>
 document.addEventListener("DOMContentLoaded",()=>{
 
-// 홈 및 클리어 버튼
+// 버튼
 document.getElementById("title").addEventListener("click",()=>location.href="index.html");
 document.getElementById("homeBtn").addEventListener("click",()=>location.href="index.html");
 document.getElementById("clearBtn").addEventListener("click",()=>{logClear();logLine("🧹 로그가 초기화되었습니다.");});
 
-// 로그 처리
+// 로그
 const logEl=document.getElementById("log");
 function logClear(){logEl.innerHTML="";}
 function logLine(html){logEl.insertAdjacentHTML("beforeend",html+"<br>");logEl.scrollTop=logEl.scrollHeight;}
@@ -120,14 +164,17 @@ function logAction(a,t,s,d,h){
 }
 function logEndTurn(a,b){logLine(`<div class="hp">잔존: <span class="unitA">A=${a}</span> / <span class="unitB">B=${b}</span></div><hr></div>`);}
 
-// 데이터 및 로직
+// 데이터
 const elems=["지","수","화","풍"];
 const skills=["공격","방어","가드브레이크","배수의진2","다굴"];
 
 class Unit{
   constructor(t,ty,n,a,d,s,h,e){
-    this.team=t;this.type=ty;this.no=n;this.name=`${t}${ty[0]}${n}`;
-    this.atk=+a;this.def=+d;this.spd=+s;this.hp=+h;this.max_hp=h;this.elem=e;this.alive=true;
+    this.team=t;this.type=ty;this.no=n;
+    this.name=`${t}${ty[0]}${n}`;
+    this.atk=+a;this.def=+d;this.spd=+s;
+    this.hp=+h;this.max_hp=h;
+    this.elem=e;this.alive=true;
   }
   isAlive(){return this.alive&&this.hp>0;}
   take(d){
@@ -153,19 +200,23 @@ function elemAdv(a,b){
   return 1;
 }
 
+// 입력 UI
 function buildTeamHTML(team){
-  const host=document.getElementById("team"+team);host.innerHTML="";
-  for(let i=1;i<=5;i++)for(const type of["캐릭터","페트"]){
-    const row=document.createElement("div");
-    row.className="unit-row"+(type==="페트"?" pet":"");
-    row.innerHTML=`
-      <input id="${team}_${type}_${i}_atk" placeholder="공">
-      <input id="${team}_${type}_${i}_def" placeholder="방">
-      <input id="${team}_${type}_${i}_spd" placeholder="순">
-      <input id="${team}_${type}_${i}_hp" placeholder="체">
-      <select id="${team}_${type}_${i}_elem">${elems.map(e=>`<option>${e}</option>`).join("")}</select>
-      <select disabled><option>${type}</option></select>`;
-    host.appendChild(row);
+  const host=document.getElementById("team"+team);
+  host.innerHTML="";
+  for(let i=1;i<=5;i++){
+    for(const type of["캐릭터","페트"]){
+      const row=document.createElement("div");
+      row.className="unit-row"+(type==="페트"?" pet":"");
+      row.innerHTML=`
+        <input id="${team}_${type}_${i}_atk" placeholder="공">
+        <input id="${team}_${type}_${i}_def" placeholder="방">
+        <input id="${team}_${type}_${i}_spd" placeholder="순">
+        <input id="${team}_${type}_${i}_hp" placeholder="체">
+        <select id="${team}_${type}_${i}_elem">${elems.map(e=>`<option>${e}</option>`).join("")}</select>
+        <select disabled><option>${type}</option></select>`;
+      host.appendChild(row);
+    }
   }
 }
 
@@ -178,7 +229,8 @@ function readUnits(){
     const hp=+document.getElementById(`${t}_${k}_${i}_hp`).value||800;
     const elem=document.getElementById(`${t}_${k}_${i}_elem`).value;
     arr.push(new Unit(t,k,i,atk,def,spd,hp,elem));
-  }return arr;
+  }
+  return arr;
 }
 
 function fillSample(){
@@ -188,10 +240,11 @@ function fillSample(){
     document.getElementById(`${T}_${K}_${i}_spd`).value=150+(K==="캐릭터"?10:-10);
     document.getElementById(`${T}_${K}_${i}_hp`).value=900+(K==="페트"?100:0);
     document.getElementById(`${T}_${K}_${i}_elem`).value=elems[(i-1)%4];
-  }logLine("✔ 샘플 스탯 채워짐");
+  }
+  logLine("✔ 샘플 스탯 채워짐");
 }
 
-// 전투 처리
+// 전투 로직
 function damageCalc(a,d,ratio=1){return Math.max(1,Math.floor((a-d/2)*ratio*(0.9+Math.random()*0.2)));}
 function pickEnemy(u){const list=state.units.filter(x=>x.team!==u.team&&x.isAlive());return list[Math.floor(Math.random()*list.length)]}
 function autoSkill(){return skills[Math.floor(Math.random()*skills.length)]}
@@ -210,22 +263,51 @@ function doAction(u,t,skill){
   }
   let ratio=1;if(skill==="가드브레이크")ratio=1.2;if(skill==="배수의진2")ratio=1.5;
   const dmg=damageCalc(u.atk,t.def,ratio*elemAdv(u.elem,t.elem));
-  t.take(dmg);logAction(u,t,skill,dmg,t.hp);
+  t.take(dmg);
+  logAction(u,t,skill,dmg,t.hp);
 }
 
-function runTurn(){
-  logTurn(state.turn,"auto");
+// 오더창
+function buildOrders(){
+  const bodyA=document.getElementById("orderBodyA"),bodyB=document.getElementById("orderBodyB");
+  bodyA.innerHTML="";bodyB.innerHTML="";
+  for(const u of state.units){
+    const html=`<tr><td>${u.name}</td>
+      <td><select id="skill_${u.name}">${skills.map(s=>`<option>${s}</option>`).join("")}</select></td>
+      <td><select id="target_${u.name}">${state.units.filter(x=>x.team!==u.team).map(x=>`<option>${x.name}</option>`).join("")}</select></td>
+      </tr>`;
+    (u.team==="A"?bodyA:bodyB).insertAdjacentHTML("beforeend",html);
+  }
+}
+
+// 턴 진행
+function runTurn(mode){
+  logTurn(state.turn,mode);
   const order=state.units.filter(u=>u.isAlive()).sort((a,b)=>b.spd-a.spd);
   for(const u of order){
-    const skill=autoSkill();
-    const target=pickEnemy(u);
+    let skill,target;
+    if(mode==="auto"){
+      skill=autoSkill();
+      target=pickEnemy(u);
+    }else{
+      skill=document.getElementById(`skill_${u.name}`).value;
+      const tname=document.getElementById(`target_${u.name}`).value;
+      target=state.units.find(x=>x.name===tname);
+    }
     if(target)doAction(u,target,skill);
   }
   const a=state.units.filter(x=>x.team==="A"&&x.isAlive()).length;
   const b=state.units.filter(x=>x.team==="B"&&x.isAlive()).length;
   logEndTurn(a,b);
-  if(a===0||b===0){logLine(`🏁 종료: ${a>b?"A":"B"}팀 승리!`);return true;}
-  state.turn++;return false;
+  if(a===0||b===0){
+    logLine(`🏁 종료: ${a>b?"A":"B"}팀 승리!`);
+    document.getElementById("nextBtn").style.display="none";
+    document.getElementById("orderPanel").style.display="none";
+    document.getElementById("runBtn").style.display="inline-block";
+    return true;
+  }
+  state.turn++;
+  return false;
 }
 
 // 실행
@@ -234,10 +316,24 @@ buildTeamHTML("A");
 buildTeamHTML("B");
 document.getElementById("fillBtn").onclick=fillSample;
 document.getElementById("runBtn").onclick=()=>{
-  logClear();state.turn=1;
+  const mode=document.querySelector('input[name="mode"]:checked').value;
+  logClear();
+  state.turn=1;
   state.units=readUnits();
-  logLine("▶ 전투 시작!");
-  for(let i=0;i<10&&!runTurn();i++);
+  if(mode==="manual"){
+    document.getElementById("orderPanel").style.display="block";
+    document.getElementById("nextBtn").style.display="inline-block";
+    document.getElementById("runBtn").style.display="none";
+    buildOrders();
+    logLine("▶ 수동모드 시작");
+  }else{
+    logLine("▶ 자동모드 시작");
+    for(let i=0;i<10&&!runTurn("auto");i++);
+  }
+};
+document.getElementById("nextBtn").onclick=()=>{
+  runTurn("manual");
+  buildOrders();
 };
 });
 </script>
