@@ -80,13 +80,51 @@ footer{text-align:center;color:var(--muted);font-size:13px;margin-top:20px}
   <div class="team"><div id="teamA"></div><div id="teamB"></div></div>
 </section>
 
+<!-- 오더 모드 -->
 <section class="card" id="orderPanel" style="display:none">
   <h3>🧠 오더 입력</h3>
-  <table>
-    <thead><tr><th>행동자</th><th>기술</th><th>대상</th></tr></thead>
-    <tbody id="orderBody"></tbody>
-  </table>
+  <div class="order-grid">
+    <div class="order-col" id="orderA">
+      <h4>⚔️ Team A</h4>
+      <table>
+        <thead><tr><th>행동자</th><th>기술</th><th>대상</th></tr></thead>
+        <tbody id="orderBodyA"></tbody>
+      </table>
+    </div>
+    <div class="order-col" id="orderB">
+      <h4>🛡️ Team B</h4>
+      <table>
+        <thead><tr><th>행동자</th><th>기술</th><th>대상</th></tr></thead>
+        <tbody id="orderBodyB"></tbody>
+      </table>
+    </div>
+  </div>
 </section>
+
+.order-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+.order-col table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.order-col th, .order-col td {
+  border-bottom: 1px solid var(--ring);
+  padding: 6px;
+  text-align: center;
+}
+.order-col h4 {
+  color: var(--yellow);
+  text-align: center;
+  margin-bottom: 8px;
+}
+@media (max-width: 900px) {
+  .order-grid {
+    grid-template-columns: 1fr;
+  }
+}
 
 <section class="card">
   <h3>📜 전투 로그</h3>
@@ -235,10 +273,13 @@ function runTurn(mode){
 
 /* 오더 입력 */
 function buildOrders(){
-  const body=document.getElementById("orderBody");
-  body.innerHTML="";
+  const bodyA=document.getElementById("orderBodyA");
+  const bodyB=document.getElementById("orderBodyB");
+  bodyA.innerHTML="";
+  bodyB.innerHTML="";
+
   for(const u of state.units){
-    body.insertAdjacentHTML("beforeend",`
+    const html=`
       <tr>
         <td>${u.name}</td>
         <td><select id="skill_${u.name}">${skills.map(s=>`<option>${s}</option>`).join("")}</select></td>
@@ -247,8 +288,11 @@ function buildOrders(){
           <select id="t_type_${u.name}"><option>캐릭터</option><option>페트</option></select>
           <select id="t_no_${u.name}">${[1,2,3,4,5].map(n=>`<option>${n}</option>`).join("")}</select>
         </td>
-      </tr>`);
+      </tr>`;
+    if(u.team==="A") bodyA.insertAdjacentHTML("beforeend",html);
+    else bodyB.insertAdjacentHTML("beforeend",html);
   }
+}
 }
 
 /* 실행 로직 */
@@ -274,3 +318,4 @@ document.addEventListener("DOMContentLoaded",()=>{
 <footer>© 2025 storazi ｜ MIT License</footer>
 </body>
 </html>
+
