@@ -269,6 +269,21 @@ function runTurn(mode){
   logEndTurn(a,b);
   if(a===0||b===0){logLine(`🏁 종료: ${a>b?"A":"B"}팀 승리!`);return true;}
   state.turn++;return false;
+  // runTurn 마지막 부분쯤에 추가
+// 캐릭터 사망 시 해당 페트도 무력화 처리
+for (const u of state.units) {
+  if (u.type === "캐릭터" && !u.isAlive()) {
+    const pet = state.units.find(
+      x => x.team === u.team && x.type === "페트" && x.no === u.no
+    );
+    if (pet && pet.isAlive()) {
+      pet.alive = false;
+      pet.hp = 0;
+      logLine(`<span class="unit${u.team}">${u.name}</span> 사망으로 <span class="unit${u.team}">${pet.name}</span>이(가) 무력화되었습니다 🌀`);
+    }
+  }
+}
+
 }
 
 /* 오더 입력 */
@@ -318,4 +333,5 @@ document.addEventListener("DOMContentLoaded",()=>{
 <footer>© 2025 storazi ｜ MIT License</footer>
 </body>
 </html>
+
 
