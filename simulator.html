@@ -10,93 +10,44 @@
   --ink:#eaf2ff;--muted:#a9b5cc;--yellow:#ffd447;
   --pet-bg:#122850;--char-bg:#0f1f3f;
 }
-body {
-  background:var(--bg);
-  color:var(--ink);
-  font-family:"Pretendard",sans-serif;
-  margin:0;
-  padding:20px;
-}
-h1 {
-  color:var(--yellow);
-  margin-bottom:6px;
-  cursor:pointer;
-}
-.card {
+body{background:var(--bg);color:var(--ink);font-family:"Pretendard",sans-serif;margin:0;padding:20px}
+h1{color:var(--yellow);margin-bottom:6px;cursor:pointer}
+.card{
   background:linear-gradient(180deg,var(--panel),var(--soft));
-  border:1px solid var(--ring);
-  border-radius:14px;
-  padding:16px;
-  margin-bottom:16px;
-  box-shadow:0 6px 16px rgba(0,0,0,0.25);
+  border:1px solid var(--ring);border-radius:14px;
+  padding:16px;margin-bottom:16px;box-shadow:0 6px 16px rgba(0,0,0,0.25)
 }
-input,select,button {
-  border-radius:8px;
-  border:1px solid var(--ring);
-  background:#0a1732;
-  color:var(--ink);
-  padding:6px;
-  font-size:13px;
-  box-sizing:border-box;
+input,select,button{
+  border-radius:8px;border:1px solid var(--ring);
+  background:#0a1732;color:var(--ink);
+  padding:6px;font-size:13px;box-sizing:border-box
 }
-button {
-  cursor:pointer;
-  font-weight:700;
-  transition:.15s;
-}
-button:hover { opacity:.9; }
-.btn {
-  background:var(--yellow);
-  color:#1a1300;
-  border:none;
-}
-.team {
-  display:flex;
-  gap:20px;
-  justify-content:space-between;
-}
-.unit-col { flex:1; }
-.unit-row {
+button{cursor:pointer;font-weight:700;transition:.15s}
+button:hover{opacity:.9}
+.btn{background:var(--yellow);color:#1a1300;border:none}
+.team{display:flex; gap:20px; justify-content:space-between;}
+.unit-col{flex:1}
+.unit-row{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(70px,1fr));
-  gap:6px;
-  margin-bottom:6px;
-  padding:6px;
-  background:var(--char-bg);
-  border-radius:8px;
+  gap:6px;margin-bottom:6px;
+  padding:6px;background:var(--char-bg);border-radius:8px;
 }
-.unit-row.pet { background:var(--pet-bg); }
-#log {
-  width:100%;
-  height:340px;
-  background:#0a1225;
-  border:1px solid var(--ring);
-  border-radius:8px;
-  font-family:"JetBrains Mono",monospace;
-  font-size:13px;
-  line-height:1.45;
-  overflow-y:auto;
-  white-space:pre-wrap;
-  word-break:break-all;
-  padding:10px;
+.unit-row.pet{background:var(--pet-bg)}
+#log{
+  width:100%;height:340px;background:#0a1225;border:1px solid var(--ring);
+  border-radius:8px;font-family:"JetBrains Mono",monospace;
+  font-size:13px;line-height:1.45;overflow-y:auto;white-space:pre-wrap;
+  word-break:break-all;padding:10px;
 }
-#log .turn { color:var(--yellow); font-weight:700; margin-top:6px; }
-#log .unitA { color:#68c3ff; font-weight:600; }
-#log .unitB { color:#ff7f7f; font-weight:600; }
-#log .skill { color:#ffd447; font-weight:600; }
-#log .hit { color:#7df58a; }
-#log .hp { color:#a9b5cc; }
-.turnBlock {
-  border-top:1px solid var(--ring);
-  margin-top:8px;
-  padding-top:4px;
-}
-footer {
-  text-align:center;
-  color:var(--muted);
-  font-size:13px;
-  margin-top:20px;
-}
+#log .turn {color:var(--yellow);font-weight:700;margin-top:6px;}
+#log .unitA {color:#68c3ff;font-weight:600;}
+#log .unitB {color:#ff7f7f;font-weight:600;}
+#log .skill {color:#ffd447;font-weight:600;}
+#log .hit {color:#7df58a;}
+#log .hp {color:#a9b5cc;}
+.turnBlock {border-top:1px solid var(--ring);margin-top:8px;padding-top:4px;}
+footer{text-align:center;color:var(--muted);font-size:13px;margin-top:20px}
 </style>
 </head>
 <body>
@@ -146,12 +97,12 @@ footer {
 <script>
 document.addEventListener("DOMContentLoaded",()=>{
 
-// 버튼
+// ===== 버튼 =====
 document.getElementById("title").addEventListener("click",()=>location.href="index.html");
 document.getElementById("homeBtn").addEventListener("click",()=>location.href="index.html");
 document.getElementById("clearBtn").addEventListener("click",()=>{logClear();logLine("🧹 로그가 초기화되었습니다.");});
 
-// 로그
+// ===== 로그 =====
 const logEl=document.getElementById("log");
 function logClear(){logEl.innerHTML="";}
 function logLine(html){logEl.insertAdjacentHTML("beforeend",html+"<br>");logEl.scrollTop=logEl.scrollHeight;}
@@ -164,7 +115,7 @@ function logAction(a,t,s,d,h){
 }
 function logEndTurn(a,b){logLine(`<div class="hp">잔존: <span class="unitA">A=${a}</span> / <span class="unitB">B=${b}</span></div><hr></div>`);}
 
-// 데이터
+// ===== 데이터 =====
 const elems=["지","수","화","풍"];
 const skills=["공격","방어","가드브레이크","배수의진2","다굴"];
 
@@ -182,14 +133,43 @@ class Unit{
     if(this.hp<=0&&this.alive){
       this.alive=false;
       const cls=this.team==='A'?'unitA':'unitB';
+      const idPrefix=`${this.team}_${this.type}_${this.no}`;
       if(this.hp<=-this.max_hp*0.5){
         logLine(`<span class="${cls}">${this.name}</span> 💀 전투이탈!`);
+        disableInputs(idPrefix,"💀 전투이탈");
       }else{
         logLine(`<span class="${cls}">${this.name}</span> ❌ 전투불능!`);
+        disableInputs(idPrefix,"⚰️ 사망");
       }
       this.hp=Math.max(0,this.hp);
+
+      // 캐릭터 죽으면 페트 동반처리
+      if(this.type==="캐릭터"){
+        const pet=state.units.find(x=>x.team===this.team&&x.type==="페트"&&x.no===this.no);
+        if(pet&&pet.isAlive()){
+          const petPrefix=`${pet.team}_${pet.type}_${pet.no}`;
+          if(this.hp<=-this.max_hp*0.5){
+            pet.alive=false;
+            logLine(`<span class="${cls}">${pet.name}</span> 💀 (${this.name}과 함께 전투이탈)`);
+            disableInputs(petPrefix,"💀 동반이탈");
+          }else{
+            pet.alive=false;
+            logLine(`<span class="${cls}">${pet.name}</span> ⚫ (${this.name} 사망으로 무력화)`);
+            disableInputs(petPrefix,"⚫ 무력화");
+          }
+        }
+      }
     }
   }
+}
+
+// ===== 보조함수 =====
+function disableInputs(prefix,text){
+  ["atk","def","spd","hp","elem"].forEach(id=>{
+    const el=document.getElementById(`${prefix}_${id}`);
+    if(el){el.disabled=true;el.style.opacity="0.5";el.style.background="#1a1a1a";el.style.color="#777";
+      if(id==="hp")el.value=text;}
+  });
 }
 
 function elemAdv(a,b){
@@ -200,7 +180,6 @@ function elemAdv(a,b){
   return 1;
 }
 
-// 입력 UI
 function buildTeamHTML(team){
   const host=document.getElementById("team"+team);
   host.innerHTML="";
@@ -244,12 +223,12 @@ function fillSample(){
   logLine("✔ 샘플 스탯 채워짐");
 }
 
-// 전투 로직
+// ===== 전투 =====
 function damageCalc(a,d,ratio=1){return Math.max(1,Math.floor((a-d/2)*ratio*(0.9+Math.random()*0.2)));}
 function pickEnemy(u){const list=state.units.filter(x=>x.team!==u.team&&x.isAlive());return list[Math.floor(Math.random()*list.length)]}
 function autoSkill(){return skills[Math.floor(Math.random()*skills.length)]}
 function doAction(u,t,skill){
-  if(!u.isAlive()||!t)return;
+  if(!u.isAlive()||!t||!t.isAlive())return;
   if(skill==="방어"){logAction(u,t,skill,0,u.hp);return;}
   if(skill==="다굴"){
     const allies=state.units.filter(x=>x.team===u.team&&x!==u&&x.isAlive()).slice(0,2);
@@ -267,31 +246,33 @@ function doAction(u,t,skill){
   logAction(u,t,skill,dmg,t.hp);
 }
 
-// 오더창
+// ===== 오더 =====
 function buildOrders(){
   const bodyA=document.getElementById("orderBodyA"),bodyB=document.getElementById("orderBodyB");
   bodyA.innerHTML="";bodyB.innerHTML="";
   for(const u of state.units){
-    const html=`<tr><td>${u.name}</td>
-      <td><select id="skill_${u.name}">${skills.map(s=>`<option>${s}</option>`).join("")}</select></td>
-      <td><select id="target_${u.name}">${state.units.filter(x=>x.team!==u.team).map(x=>`<option>${x.name}</option>`).join("")}</select></td>
-      </tr>`;
+    const disabled=u.isAlive()?"":"disabled";
+    const html=`<tr>
+      <td>${u.name}</td>
+      <td><select id="skill_${u.name}" ${disabled}>${skills.map(s=>`<option>${s}</option>`).join("")}</select></td>
+      <td><select id="target_${u.name}" ${disabled}>${state.units.filter(x=>x.team!==u.team&&x.isAlive()).map(x=>`<option>${x.name}</option>`).join("")}</select></td>
+    </tr>`;
     (u.team==="A"?bodyA:bodyB).insertAdjacentHTML("beforeend",html);
   }
 }
 
-// 턴 진행
+// ===== 턴 =====
 function runTurn(mode){
   logTurn(state.turn,mode);
   const order=state.units.filter(u=>u.isAlive()).sort((a,b)=>b.spd-a.spd);
   for(const u of order){
     let skill,target;
-    if(mode==="auto"){
-      skill=autoSkill();
-      target=pickEnemy(u);
-    }else{
-      skill=document.getElementById(`skill_${u.name}`).value;
-      const tname=document.getElementById(`target_${u.name}`).value;
+    if(mode==="auto"){skill=autoSkill();target=pickEnemy(u);}
+    else{
+      const sEl=document.getElementById(`skill_${u.name}`);
+      const tEl=document.getElementById(`target_${u.name}`);
+      if(!sEl||!tEl||sEl.disabled)continue;
+      skill=sEl.value;const tname=tEl.value;
       target=state.units.find(x=>x.name===tname);
     }
     if(target)doAction(u,target,skill);
@@ -310,7 +291,7 @@ function runTurn(mode){
   return false;
 }
 
-// 실행
+// ===== 실행 =====
 const state={turn:1,units:[]};
 buildTeamHTML("A");
 buildTeamHTML("B");
