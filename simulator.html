@@ -52,6 +52,45 @@ button:hover{opacity:.9}
 #orderPanel table{width:100%;border-collapse:collapse}
 #orderPanel th,#orderPanel td{border-bottom:1px solid var(--ring);padding:6px;text-align:center}
 footer{text-align:center;color:var(--muted);font-size:13px;margin-top:20px}
+
+
+
+/* ───────────────
+   📜 전투 로그 스타일 개선
+──────────────── */
+.log {
+  width:100%;height:300px;background:#0a1225;
+  border:1px solid var(--ring);
+  border-radius:8px;
+  font-family:"JetBrains Mono",monospace;
+  font-size:13px;line-height:1.45;
+  overflow-y:auto;white-space:pre-wrap;word-break:break-all;
+  padding:8px 10px;
+}
+.log .turn {color:var(--yellow);font-weight:700;margin-top:4px;}
+.log .unitA {color:#6ac8ff;font-weight:600;}
+.log .unitB {color:#ff7f7f;font-weight:600;}
+.log .skill {color:#ffd447;font-weight:600;}
+.log .hit {color:#a3f3b3;}
+.log .hp {color:#a9b5cc;}
+.turnBlock {
+  border-top:1px solid var(--ring);
+  margin-top:6px;
+  padding-top:4px;
+}
+
+  .log .turn {color:var(--yellow);font-weight:700;margin-top:4px;}
+.log .unitA {color:#6ac8ff;font-weight:600;}
+.log .unitB {color:#ff7f7f;font-weight:600;}
+.log .skill {color:#ffd447;font-weight:600;}
+.log .hit {color:#a3f3b3;}
+.log .hp {color:#a9b5cc;}
+.turnBlock {
+  border-top:1px solid var(--ring);
+  margin-top:6px;
+  padding-top:4px;
+}
+
 </style>
 </head>
 <body>
@@ -118,7 +157,72 @@ function elemAdv(a,b){
   if(a==="풍"&&b==="지")return 1.2;
   if(b==="지"&&a==="수")return 0.8;
   if(b==="수"&&a==="화")return 0.8;
-  if(b==="화"&&a==="풍")return 0.8;
+  if(b==="화"&&a==="풍")return 0.8;// 📝 개선된 전투 로그 시스템
+const logEl = document.getElementById("log");
+
+// 일반 텍스트가 아니라 HTML 형식으로 누적 출력
+function logLine(html) {
+  logEl.insertAdjacentHTML("beforeend", html + "<br>");
+  logEl.scrollTop = logEl.scrollHeight;
+}
+
+// 턴 시작 로그
+function logTurn(turn) {
+  logLine(`<div class="turnBlock"><div class="turn">🌀 --- 턴 ${turn} ---</div>`);
+}
+
+// 행동 로그 (공격자, 대상, 기술, 데미지, 남은HP)
+function logAction(attacker, target, skill, dmg, hp) {
+  const atkCls = attacker.team === "A" ? "unitA" : "unitB";
+  const tgtCls = target.team === "A" ? "unitA" : "unitB";
+  const skillIcon =
+    skill === "방어"
+      ? "🛡️"
+      : skill === "가드브레이크"
+      ? "💥"
+      : skill === "배수의진2"
+      ? "🔥"
+      : skill === "다굴"
+      ? "⚔️"
+      : "⚔️";
+
+  logLine(
+    `<span class="${atkCls}">${attacker.name}</span> ▶ 
+     <span class="skill">${skillIcon} ${skill}</span> → 
+     <span class="${tgtCls}">${target.name}</span> 
+     <span class="hit">${dmg > 0 ? dmg + " 데미지" : ""}</span> 
+     <span class="hp">(HP:${hp})</span>`
+  );
+}
+
+const elems = ["지", "수", "화", "풍"];
+const skills = ["공격", "방어", "가드브레이크", "배수의진2", "다굴"];
+
+class Unit {
+  constructor(team, type, no, atk, def, spd, hp, elem) {
+    this.team = team;
+    this.type = type;
+    this.no = no;
+    this.name = `${team}${type[0]}${no}`;
+    this.atk = +atk;
+    this.def = +def;
+    this.spd = +spd;
+    this.hp = +hp;
+    this.max_hp = hp;
+    this.elem = elem;
+    this.alive = true;
+  }
+
+  isAlive() {
+    return this.alive && this.hp > 0;
+  }
+
+  take(d) {
+    this.hp = Math.max(0, this.hp - d);
+    if (this.hp <= 0) this.alive = false;
+  }
+}
+
   if(b==="풍"&&a==="지")return 0.8;
   return 1.0;
 }
@@ -155,7 +259,7 @@ function readUnits(){
         const atk=+document.getElementById(`${team}_${type}_${i}_atk`).value||150;
         const def=+document.getElementById(`${team}_${type}_${i}_def`).value||120;
         const spd=+document.getElementById(`${team}_${type}_${i}_spd`).value||150;
-        const hp=+document.getElementById(`${team}_${type}_${i}_hp`).value||800;
+                const hp=+document.getElementById(`${team}_${type}_${i}_hp`).value||800;
         const elem=document.getElementById(`${team}_${type}_${i}_elem`).value;
         arr.push(new Unit(team,type,i,atk,def,spd,hp,elem));
       }
@@ -283,3 +387,4 @@ document.getElementById("nextBtn").onclick=()=>runTurn("manual");
 <footer>© 2025 storazi ｜ MIT License</footer>
 </body>
 </html>
+
