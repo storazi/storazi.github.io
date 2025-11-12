@@ -142,7 +142,7 @@ function buildTeamHTML(team){
         <input id="${team}_${type}_${i}_elem1v" type="number" placeholder="값1" min="0" value="0">
         <select id="${team}_${type}_${i}_elem2">${elems.map(e=>`<option>${e}</option>`).join("")}</select>
         <input id="${team}_${type}_${i}_elem2v" type="number" placeholder="값2" min="0" value="0">
-        <select disabled><option>${type}</option></select>`;
+        <select><option>${type}</option></select>`;
       host.appendChild(row);
     }
   }
@@ -338,3 +338,4 @@ document.getElementById("clearBtn").onclick=logClear;
 </script>
 </body>
 </html>
+
