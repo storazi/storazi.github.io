@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>🗿 미궁 듀얼 시뮬레이터 (시각로그 통합판)</title>
+<title>🗿 미궁 듀얼 시뮬레이터</title>
 <style>
 :root {
   --bg:#0b1426;--panel:#0f1e3a;--soft:#11234a;--ring:#1e396e;
@@ -14,7 +14,6 @@ body{background:var(--bg);color:var(--ink);font-family:"Pretendard",sans-serif;m
 h1{color:var(--yellow);margin-bottom:6px}
 .card{background:linear-gradient(180deg,var(--panel),var(--soft));border:1px solid var(--ring);
   border-radius:14px;padding:16px;margin-bottom:16px;box-shadow:0 6px 16px rgba(0,0,0,0.25)}
-.hr{height:1px;background:linear-gradient(90deg,transparent,var(--ring),transparent);margin:12px 0;border:none}
 input,select,button{
   border-radius:8px;border:1px solid var(--ring);background:#0a1732;color:var(--ink);
   padding:6px;font-size:13px;box-sizing:border-box
@@ -43,7 +42,7 @@ button:hover{opacity:.9}
   body{padding:10px}
 }
 
-/* 📜 전투 로그 스타일 */
+/* 로그 */
 #log{
   width:100%;height:340px;background:#0a1225;border:1px solid var(--ring);
   border-radius:8px;font-family:"JetBrains Mono",monospace;
@@ -66,12 +65,11 @@ footer{text-align:center;color:var(--muted);font-size:13px;margin-top:20px}
 </head>
 <body>
 <h1>🗿 미궁 듀얼 시뮬레이터</h1>
-<p class="sub">10vs10 ｜ 오더/자동/시뮬 ｜ 반응형 ｜ 지>수>화>풍>지</p>
+<p class="sub">10vs10 ｜ 자동 / 수동 ｜ 지>수>화>풍>지</p>
 
 <div class="card">
   <label><input type="radio" name="mode" value="auto" checked> 자동</label>
-  <label><input type="radio" name="mode" value="manual"> 오더</label>
-  <label><input type="radio" name="mode" value="sim"> 시뮬</label>
+  <label><input type="radio" name="mode" value="manual"> 수동</label>
   <button class="btn" id="fillBtn" style="float:right;margin-left:8px;">샘플 채우기</button>
   <button class="btn" id="runBtn" style="float:right;">▶ 실행</button>
   <button class="btn" id="nextBtn" style="display:none;float:right;">⏭ 다음 턴</button>
@@ -96,13 +94,11 @@ footer{text-align:center;color:var(--muted);font-size:13px;margin-top:20px}
 </section>
 
 <script>
-/* ==========================
-   📜 시각형 로그 함수
-========================== */
+/* 로그 함수 */
 const logEl=document.getElementById("log");
 function logClear(){logEl.innerHTML="";}
 function logLine(html){logEl.insertAdjacentHTML("beforeend",html+"<br>");logEl.scrollTop=logEl.scrollHeight;}
-function logTurn(turn,mode="auto"){logLine(`<div class="turnBlock"><div class="turn">🌀 --- 턴 ${turn} (${mode}) ---</div>`);}
+function logTurn(turn,mode){logLine(`<div class="turnBlock"><div class="turn">🌀 --- 턴 ${turn} (${mode}) ---</div>`);}
 function logAction(attacker,target,skill,dmg,hp){
   const atkCls=attacker.team==="A"?"unitA":"unitB";
   const tgtCls=target.team==="A"?"unitA":"unitB";
@@ -111,9 +107,7 @@ function logAction(attacker,target,skill,dmg,hp){
 }
 function logEndTurn(a,b){logLine(`<div class="hp">잔존: <span class="unitA">A=${a}</span> / <span class="unitB">B=${b}</span></div><hr></div>`);}
 
-/* ==========================
-   ⚙️ 유닛 / 기본설정
-========================== */
+/* 유닛 구조 */
 const elems=["지","수","화","풍"];
 const skills=["공격","방어","가드브레이크","배수의진2","다굴"];
 class Unit{
@@ -127,7 +121,7 @@ class Unit{
   take(d){this.hp=Math.max(0,this.hp-d);if(this.hp<=0)this.alive=false;}
 }
 function elemAdv(a,b){
-  if(a===b)return 1.0;
+  if(a===b)return 1;
   if(a==="지"&&b==="수")return 1.2;
   if(a==="수"&&b==="화")return 1.2;
   if(a==="화"&&b==="풍")return 1.2;
@@ -136,12 +130,10 @@ function elemAdv(a,b){
   if(b==="수"&&a==="화")return 0.8;
   if(b==="화"&&a==="풍")return 0.8;
   if(b==="풍"&&a==="지")return 0.8;
-  return 1.0;
+  return 1;
 }
 
-/* ==========================
-   📋 팀 구성 / 입력 처리
-========================== */
+/* 팀 입력 */
 function buildTeamHTML(team){
   const host=document.getElementById("team"+team);
   host.innerHTML="";
@@ -162,6 +154,7 @@ function buildTeamHTML(team){
   }
 }
 
+/* 스탯 불러오기 */
 function readUnits(){
   const arr=[];
   for(const team of ["A","B"])
@@ -190,23 +183,22 @@ function fillSample(){
   logLine("✔ 샘플 스탯 채워짐");
 }
 
-/* ==========================
-   ⚔️ 전투 로직
-========================== */
+/* 전투 */
 function damageCalc(a,d,ratio=1){return Math.max(1,Math.floor((a-d/2)*ratio*(0.9+Math.random()*0.2)))}
+function pickEnemy(u){const list=state.units.filter(x=>x.team!==u.team&&x.isAlive());return list[Math.floor(Math.random()*list.length)]}
+function autoSkill(){return skills[Math.floor(Math.random()*skills.length)]}
+
 function doAction(u,t,skill){
-  if(!u.isAlive())return;
+  if(!u.isAlive()||!t)return;
   if(skill==="방어"){logAction(u,t,skill,0,u.hp);return;}
   if(skill==="다굴"){
     const allies=state.units.filter(x=>x.team===u.team&&x!==u&&x.isAlive()).slice(0,2);
     for(const a of [u,...allies]){
-      if(!t || !t.isAlive()) break;
       const dmg=damageCalc(a.atk,t.def,1.0);
       t.take(dmg);logAction(a,t,"다굴",dmg,t.hp);
       if(!t.isAlive())return;
     }return;
   }
-  if(!t || !t.isAlive()) return;
   let ratio=1;
   if(skill==="가드브레이크")ratio=1.2;
   if(skill==="배수의진2")ratio=1.5;
@@ -216,19 +208,12 @@ function doAction(u,t,skill){
   logAction(u,t,skill,dmg,t.hp);
 }
 
-function pickEnemy(u){
-  const list=state.units.filter(x=>x.team!==u.team&&x.isAlive());
-  if(list.length===0) return null;
-  return list[Math.floor(Math.random()*list.length)];
-}
-function autoSkill(){return skills[Math.floor(Math.random()*skills.length)]}
-
 function runTurn(mode){
   logTurn(state.turn,mode);
   const order=state.units.filter(u=>u.isAlive()).sort((a,b)=>b.spd-a.spd);
   for(const u of order){
     let skill="공격",target=null;
-    if(mode==="auto"||mode==="sim"){skill=autoSkill();target=pickEnemy(u);}
+    if(mode==="auto"){skill=autoSkill();target=pickEnemy(u);}
     else{
       const row=document.getElementById(`skill_${u.name}`);
       if(row){
@@ -237,12 +222,9 @@ function runTurn(mode){
         const ty=document.getElementById(`t_type_${u.name}`).value;
         const tn=document.getElementById(`t_no_${u.name}`).value;
         target=state.units.find(x=>x.team===tt&&x.type===ty&&x.no==tn&&x.isAlive());
-        if(!target) target = pickEnemy(u);
-      }else{
-        target = pickEnemy(u);
       }
     }
-    if(target) doAction(u,target,skill);
+    if(target)doAction(u,target,skill);
   }
   const a=state.units.filter(x=>x.team==="A"&&x.isAlive()).length;
   const b=state.units.filter(x=>x.team==="B"&&x.isAlive()).length;
@@ -251,6 +233,7 @@ function runTurn(mode){
   state.turn++;return false;
 }
 
+/* 오더 입력 */
 function buildOrders(){
   const body=document.getElementById("orderBody");
   body.innerHTML="";
@@ -268,53 +251,26 @@ function buildOrders(){
   }
 }
 
-/* ==========================
-   🎮 실행 로직 (순서 보장)
-========================== */
+/* 실행 로직 */
 const state={turn:1,units:[]};
-
-document.addEventListener("DOMContentLoaded", () => {
-  // 입력칸 먼저 만들기
-  buildTeamHTML("A");
-  buildTeamHTML("B");
-
-  // 샘플 채우기
+document.addEventListener("DOMContentLoaded",()=>{
+  buildTeamHTML("A");buildTeamHTML("B");
   document.getElementById("fillBtn").onclick=fillSample;
-
-  // 실행
   document.getElementById("runBtn").onclick=()=>{
     const mode=document.querySelector('input[name="mode"]:checked').value;
     logClear();state.turn=1;state.units=readUnits();
-
     if(mode==="manual"){
       document.getElementById("orderPanel").style.display="block";
       document.getElementById("nextBtn").style.display="inline-block";
       document.getElementById("runBtn").style.display="none";
       buildOrders();logLine("▶ 오더 모드 시작");
-    }else if(mode==="auto"){
-      for(let i=0;i<5&&!runTurn("auto");i++); // 5턴 자동 실행
     }else{
-      const n=50;let aWin=0,bWin=0;
-      const baseUnits=readUnits();
-      for(let i=0;i<n;i++){
-        // Unit 재생성으로 메서드 유지
-        state.units = baseUnits.map(u => new Unit(u.team, u.type, u.no, u.atk, u.def, u.spd, u.hp, u.elem));
-        state.turn=1;
-        let ended=false,guard=0;
-        while(!ended&&guard<100){ended=runTurn("sim");guard++;}
-        const a=state.units.filter(x=>x.team==="A"&&x.isAlive()).length;
-        const b=state.units.filter(x=>x.team==="B"&&x.isAlive()).length;
-        if(a>b)aWin++;else bWin++;
-      }
-      logLine(`📊 시뮬 ${n}회 결과: A ${(aWin/n*100).toFixed(1)}% / B ${(bWin/n*100).toFixed(1)}%`);
+      for(let i=0;i<5&&!runTurn("auto");i++);
     }
   };
-
-  // 오더 모드: 다음 턴
   document.getElementById("nextBtn").onclick=()=>runTurn("manual");
 });
 </script>
-
 <footer>© 2025 storazi ｜ MIT License</footer>
 </body>
 </html>
