@@ -239,27 +239,68 @@ function fillSample(){
 }
 
 // ===== 전투 =====
-function damageCalc(a,d,ratio=1){return Math.max(1,Math.floor((a-d/2)*ratio*(0.9+Math.random()*0.2)));}
-function pickEnemy(u){const list=state.units.filter(x=>x.team!==u.team&&x.isAlive());return list[Math.floor(Math.random()*list.length)]}
-function autoSkill(){return skills[Math.floor(Math.random()*skills.length)]}
-function doAction(u,t,skill){
-  if(!u.isAlive()||!t||!t.isAlive())return;
-  if(skill==="방어"){logAction(u,t,skill,0,u.hp);return;}
-  if(skill==="다굴"){
-    const allies=state.units.filter(x=>x.team===u.team&&x!==u&&x.isAlive()).slice(0,2);
-    for(const a of[u,...allies]){
-      const dmg=damageCalc(a.atk,t.def,1.0);
+function damageCalc(a,d,ratio=1){
+  return Math.max(1, Math.floor((a - d/2) * ratio * (0.9 + Math.random()*0.2)));
+}
+
+function pickEnemy(u){
+  const list = state.units.filter(x=>x.team!==u.team && x.isAlive());
+  return list[Math.floor(Math.random() * list.length)];
+}
+
+// ✅ autoSkill은 여기 (doAction 밖)에 있어야 함
+function autoSkill(){
+  const r = Math.random() * 100;
+  const rateDagu = +document.getElementById("rateDagu").value;
+  if(r < rateDagu) return "다굴";
+  return skills[Math.floor(Math.random() * (skills.length - 1))]; // 나머지 스킬 랜덤
+}
+
+function doAction(u, t, skill){
+  if(!u.isAlive() || !t || !t.isAlive()) return;
+
+  // 💨 회피 판정
+  const rateEvade = +document.getElementById("rateEvade").value;
+  if(Math.random() * 100 < rateEvade){
+    logLine(`<span class="${t.team==='A'?'unitA':'unitB'}">${t.name}</span> 💨 회피 성공!`);
+    return;
+  }
+
+  // 🛡️ 방어
+  if(skill === "방어"){
+    logAction(u, t, skill, 0, u.hp);
+    return;
+  }
+
+  // ⚔️ 다굴
+  if(skill === "다굴"){
+    const allies = state.units.filter(x=>x.team===u.team && x!==u && x.isAlive()).slice(0,2);
+    for(const a of [u, ...allies]){
+      const dmg = damageCalc(a.atk, t.def, 1.0);
       t.take(dmg);
-      logAction(a,t,"다굴",dmg,t.hp);
-      if(!t.isAlive())return;
+      logAction(a, t, "다굴", dmg, t.hp);
+      if(!t.isAlive()) return;
     }
     return;
   }
-  let ratio=1;if(skill==="가드브레이크")ratio=1.2;if(skill==="배수의진2")ratio=1.5;
-  const dmg=damageCalc(u.atk,t.def,ratio*elemAdv(u.elem,t.elem));
+
+  // 일반 공격
+  let ratio = 1;
+  if(skill === "가드브레이크") ratio = 1.2;
+  if(skill === "배수의진2") ratio = 1.5;
+  const dmg = damageCalc(u.atk, t.def, ratio * elemAdv(u.elem, t.elem));
   t.take(dmg);
-  logAction(u,t,skill,dmg,t.hp);
+  logAction(u, t, skill, dmg, t.hp);
+
+  // ⚡ 카운터 판정
+  const rateCounter = +document.getElementById("rateCounter").value;
+  if(t.isAlive() && Math.random() * 100 < rateCounter){
+    const counterDmg = damageCalc(t.atk, u.def, 0.8);
+    u.take(counterDmg);
+    logLine(`<span class="${t.team==='A'?'unitA':'unitB'}">${t.name}</span> ⚡ 카운터! → <span class="${u.team==='A'?'unitA':'unitB'}">${u.name}</span> <span class="hit">${counterDmg}</span> (HP:${u.hp})`);
+  }
 }
+
 
 // ===== 오더 =====
 function buildOrders(){
@@ -335,4 +376,5 @@ document.getElementById("nextBtn").onclick=()=>{
 </script>
 </body>
 </html>
+
 
