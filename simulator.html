@@ -12,8 +12,11 @@
 }
 body{background:var(--bg);color:var(--ink);font-family:"Pretendard",sans-serif;margin:0;padding:20px}
 h1{color:var(--yellow);margin-bottom:6px}
-.card{background:linear-gradient(180deg,var(--panel),var(--soft));border:1px solid var(--ring);
-  border-radius:14px;padding:16px;margin-bottom:16px;box-shadow:0 6px 16px rgba(0,0,0,0.25)}
+.card{
+  background:linear-gradient(180deg,var(--panel),var(--soft));
+  border:1px solid var(--ring);border-radius:14px;
+  padding:16px;margin-bottom:16px;box-shadow:0 6px 16px rgba(0,0,0,0.25)
+}
 input,select,button{
   border-radius:8px;border:1px solid var(--ring);background:#0a1732;color:var(--ink);
   padding:6px;font-size:13px;box-sizing:border-box
@@ -22,7 +25,7 @@ button{cursor:pointer;font-weight:700;transition:.15s}
 button:hover{opacity:.9}
 .btn{background:var(--yellow);color:#1a1300;border:none}
 
-/* 반응형 */
+/* 유닛 입력 - 반응형 */
 .team{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(480px,1fr));
@@ -32,9 +35,7 @@ button:hover{opacity:.9}
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(70px,1fr));
   gap:6px;margin-bottom:6px;
-  padding:6px;
-  background:var(--char-bg);
-  border-radius:8px;
+  padding:6px;background:var(--char-bg);border-radius:8px;
 }
 .unit-row.pet{background:var(--pet-bg)}
 @media (max-width:1000px){
@@ -42,7 +43,7 @@ button:hover{opacity:.9}
   body{padding:10px}
 }
 
-/* 로그 */
+/* 전투 로그 */
 #log{
   width:100%;height:340px;background:#0a1225;border:1px solid var(--ring);
   border-radius:8px;font-family:"JetBrains Mono",monospace;
@@ -55,12 +56,19 @@ button:hover{opacity:.9}
 #log .skill {color:#ffd447;font-weight:600;}
 #log .hit {color:#7df58a;}
 #log .hp {color:#a9b5cc;}
-.turnBlock {
-  border-top:1px solid var(--ring);
-  margin-top:8px;
-  padding-top:4px;
-}
+.turnBlock {border-top:1px solid var(--ring);margin-top:8px;padding-top:4px;}
 footer{text-align:center;color:var(--muted);font-size:13px;margin-top:20px}
+
+/* 오더 패널: A/B 좌우 분할 */
+.order-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:20px;
+}
+.order-col table{width:100%;border-collapse:collapse}
+.order-col th,.order-col td{border-bottom:1px solid var(--ring);padding:6px;text-align:center}
+.order-col h4{color:var(--yellow);text-align:center;margin-bottom:8px}
+@media (max-width:900px){ .order-grid{grid-template-columns:1fr} }
 </style>
 </head>
 <body>
@@ -80,7 +88,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;margin-top:20px}
   <div class="team"><div id="teamA"></div><div id="teamB"></div></div>
 </section>
 
-<!-- 오더 모드 -->
+<!-- 오더 모드 (A/B 좌우 분할) -->
 <section class="card" id="orderPanel" style="display:none">
   <h3>🧠 오더 입력</h3>
   <div class="order-grid">
@@ -101,38 +109,13 @@ footer{text-align:center;color:var(--muted);font-size:13px;margin-top:20px}
   </div>
 </section>
 
-.order-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-}
-.order-col table {
-  width: 100%;
-  border-collapse: collapse;
-}
-.order-col th, .order-col td {
-  border-bottom: 1px solid var(--ring);
-  padding: 6px;
-  text-align: center;
-}
-.order-col h4 {
-  color: var(--yellow);
-  text-align: center;
-  margin-bottom: 8px;
-}
-@media (max-width: 900px) {
-  .order-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
 <section class="card">
   <h3>📜 전투 로그</h3>
   <div id="log"></div>
 </section>
 
 <script>
-/* 로그 함수 */
+/* ===== 로그 유틸 ===== */
 const logEl=document.getElementById("log");
 function logClear(){logEl.innerHTML="";}
 function logLine(html){logEl.insertAdjacentHTML("beforeend",html+"<br>");logEl.scrollTop=logEl.scrollHeight;}
@@ -145,9 +128,10 @@ function logAction(attacker,target,skill,dmg,hp){
 }
 function logEndTurn(a,b){logLine(`<div class="hp">잔존: <span class="unitA">A=${a}</span> / <span class="unitB">B=${b}</span></div><hr></div>`);}
 
-/* 유닛 구조 */
+/* ===== 데이터 구조 ===== */
 const elems=["지","수","화","풍"];
 const skills=["공격","방어","가드브레이크","배수의진2","다굴"];
+
 class Unit{
   constructor(team,type,no,atk,def,spd,hp,elem){
     this.team=team;this.type=type;this.no=no;
@@ -158,6 +142,7 @@ class Unit{
   isAlive(){return this.alive&&this.hp>0;}
   take(d){this.hp=Math.max(0,this.hp-d);if(this.hp<=0)this.alive=false;}
 }
+
 function elemAdv(a,b){
   if(a===b)return 1;
   if(a==="지"&&b==="수")return 1.2;
@@ -171,7 +156,7 @@ function elemAdv(a,b){
   return 1;
 }
 
-/* 팀 입력 */
+/* ===== 팀 입력 UI ===== */
 function buildTeamHTML(team){
   const host=document.getElementById("team"+team);
   host.innerHTML="";
@@ -183,8 +168,10 @@ function buildTeamHTML(team){
         <input id="${team}_${type}_${i}_atk" placeholder="공">
         <input id="${team}_${type}_${i}_def" placeholder="방">
         <input id="${team}_${type}_${i}_spd" placeholder="순">
-        <input id="${team}_${type}_${i}_hp" placeholder="체">
-        <select id="${team}_${type}_${i}_elem">${elems.map(e=>`<option value="${e}">${e}</option>`).join("")}</select>
+        <input id="${team}_${type}_${i}_hp"  placeholder="체">
+        <select id="${team}_${type}_${i}_elem">
+          ${elems.map(e=>`<option value="${e}">${e}</option>`).join("")}
+        </select>
         <select disabled><option>${type}</option></select>
       `;
       host.appendChild(row);
@@ -192,7 +179,6 @@ function buildTeamHTML(team){
   }
 }
 
-/* 스탯 불러오기 */
 function readUnits(){
   const arr=[];
   for(const team of ["A","B"])
@@ -221,10 +207,30 @@ function fillSample(){
   logLine("✔ 샘플 스탯 채워짐");
 }
 
-/* 전투 */
-function damageCalc(a,d,ratio=1){return Math.max(1,Math.floor((a-d/2)*ratio*(0.9+Math.random()*0.2)))}
-function pickEnemy(u){const list=state.units.filter(x=>x.team!==u.team&&x.isAlive());return list[Math.floor(Math.random()*list.length)]}
-function autoSkill(){return skills[Math.floor(Math.random()*skills.length)]}
+/* ===== 전투 로직 ===== */
+function damageCalc(a,d,ratio=1){
+  return Math.max(1,Math.floor((a - d/2) * ratio * (0.9 + Math.random()*0.2)));
+}
+function pickEnemy(u){
+  const list=state.units.filter(x=>x.team!==u.team&&x.isAlive());
+  return list[Math.floor(Math.random()*list.length)];
+}
+function autoSkill(){
+  return skills[Math.floor(Math.random()*skills.length)];
+}
+
+/* 캐릭터 사망 → 동일 번호의 페트 무력화 */
+function applyPetDisableByLeaderDeath(){
+  for(const u of state.units){
+    if(u.type==="캐릭터" && !u.isAlive()){
+      const pet = state.units.find(x=>x.team===u.team && x.type==="페트" && x.no===u.no && x.isAlive());
+      if(pet){
+        pet.alive=false; pet.hp=0;
+        logLine(`<span class="${u.team==='A'?'unitA':'unitB'}">${u.name}</span> 사망으로 <span class="${u.team==='A'?'unitA':'unitB'}">${pet.name}</span>이(가) 무력화되었습니다 🌀`);
+      }
+    }
+  }
+}
 
 function doAction(u,t,skill){
   if(!u.isAlive()||!t)return;
@@ -235,7 +241,8 @@ function doAction(u,t,skill){
       const dmg=damageCalc(a.atk,t.def,1.0);
       t.take(dmg);logAction(a,t,"다굴",dmg,t.hp);
       if(!t.isAlive())return;
-    }return;
+    }
+    return;
   }
   let ratio=1;
   if(skill==="가드브레이크")ratio=1.2;
@@ -249,10 +256,13 @@ function doAction(u,t,skill){
 function runTurn(mode){
   logTurn(state.turn,mode);
   const order=state.units.filter(u=>u.isAlive()).sort((a,b)=>b.spd-a.spd);
+
   for(const u of order){
-    let skill="공격",target=null;
-    if(mode==="auto"){skill=autoSkill();target=pickEnemy(u);}
-    else{
+    let skill="공격", target=null;
+    if(mode==="auto"){
+      skill=autoSkill();
+      target=pickEnemy(u);
+    }else{ // manual
       const row=document.getElementById(`skill_${u.name}`);
       if(row){
         skill=row.value;
@@ -262,76 +272,69 @@ function runTurn(mode){
         target=state.units.find(x=>x.team===tt&&x.type===ty&&x.no==tn&&x.isAlive());
       }
     }
-    if(target)doAction(u,target,skill);
+    if(target) doAction(u,target,skill);
   }
+
+  /* 캐릭터 사망 → 페트 무력화 규칙 적용 */
+  applyPetDisableByLeaderDeath();
+
   const a=state.units.filter(x=>x.team==="A"&&x.isAlive()).length;
   const b=state.units.filter(x=>x.team==="B"&&x.isAlive()).length;
   logEndTurn(a,b);
   if(a===0||b===0){logLine(`🏁 종료: ${a>b?"A":"B"}팀 승리!`);return true;}
   state.turn++;return false;
-  // runTurn 마지막 부분쯤에 추가
-// 캐릭터 사망 시 해당 페트도 무력화 처리
-for (const u of state.units) {
-  if (u.type === "캐릭터" && !u.isAlive()) {
-    const pet = state.units.find(
-      x => x.team === u.team && x.type === "페트" && x.no === u.no
-    );
-    if (pet && pet.isAlive()) {
-      pet.alive = false;
-      pet.hp = 0;
-      logLine(`<span class="unit${u.team}">${u.name}</span> 사망으로 <span class="unit${u.team}">${pet.name}</span>이(가) 무력화되었습니다 🌀`);
-    }
-  }
 }
 
-}
-
-/* 오더 입력 */
+/* ===== 오더 테이블 구성(A/B 분리) ===== */
 function buildOrders(){
   const bodyA=document.getElementById("orderBodyA");
   const bodyB=document.getElementById("orderBodyB");
-  bodyA.innerHTML="";
-  bodyB.innerHTML="";
+  bodyA.innerHTML=""; bodyB.innerHTML="";
 
   for(const u of state.units){
     const html=`
       <tr>
         <td>${u.name}</td>
-        <td><select id="skill_${u.name}">${skills.map(s=>`<option>${s}</option>`).join("")}</select></td>
+        <td>
+          <select id="skill_${u.name}">
+            ${skills.map(s=>`<option>${s}</option>`).join("")}
+          </select>
+        </td>
         <td>
           <select id="t_team_${u.name}"><option>A</option><option>B</option></select>
           <select id="t_type_${u.name}"><option>캐릭터</option><option>페트</option></select>
           <select id="t_no_${u.name}">${[1,2,3,4,5].map(n=>`<option>${n}</option>`).join("")}</select>
         </td>
       </tr>`;
-    if(u.team==="A") bodyA.insertAdjacentHTML("beforeend",html);
-    else bodyB.insertAdjacentHTML("beforeend",html);
+    (u.team==="A" ? bodyA : bodyB).insertAdjacentHTML("beforeend",html);
   }
 }
-}
 
-/* 실행 로직 */
+/* ===== 실행 ===== */
 const state={turn:1,units:[]};
+
 document.addEventListener("DOMContentLoaded",()=>{
-  buildTeamHTML("A");buildTeamHTML("B");
+  buildTeamHTML("A"); buildTeamHTML("B");
+
   document.getElementById("fillBtn").onclick=fillSample;
+
   document.getElementById("runBtn").onclick=()=>{
     const mode=document.querySelector('input[name="mode"]:checked').value;
-    logClear();state.turn=1;state.units=readUnits();
+    logClear(); state.turn=1; state.units=readUnits();
     if(mode==="manual"){
       document.getElementById("orderPanel").style.display="block";
       document.getElementById("nextBtn").style.display="inline-block";
       document.getElementById("runBtn").style.display="none";
-      buildOrders();logLine("▶ 오더 모드 시작");
+      buildOrders(); logLine("▶ 오더 모드 시작");
     }else{
-      for(let i=0;i<5&&!runTurn("auto");i++);
+      for(let i=0;i<5&&!runTurn("auto");i++); // 자동 5턴
     }
   };
+
   document.getElementById("nextBtn").onclick=()=>runTurn("manual");
 });
 </script>
+
 <footer>© 2025 storazi ｜ MIT License</footer>
 </body>
 </html>
-
-
