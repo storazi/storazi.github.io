@@ -276,7 +276,10 @@ function runTurn(mode){
 
   for(const u of order){
     let skill="공격",target=null;
-    if(mode==="auto"){ skill=autoSkill(); target=pickEnemy(u); }
+    if(mode==="auto"){ 
+      skill=autoSkill(); 
+      target=pickEnemy(u); 
+    }
     else{
       const row=document.getElementById(`skill_${u.name}`);
       if(row){
@@ -289,6 +292,32 @@ function runTurn(mode){
     }
     if(target) doAction(u,target,skill);
   }
+
+  // 수동 모드: 리더 사망 시 페트 오더 비활성
+  if(mode==="manual") disablePetOrdersIfLeaderDead();
+
+  const a=state.units.filter(x=>x.team==="A"&&x.isAlive()).length;
+  const b=state.units.filter(x=>x.team==="B"&&x.isAlive()).length;
+  logEndTurn(a,b);
+
+  // 전투 종료 조건
+  if(a===0||b===0){
+    logLine(`🏁 종료: ${a>b?"A":"B"}팀 승리!`);
+    document.getElementById("nextBtn").style.display="none";
+    document.getElementById("orderPanel").style.display="none";
+    document.getElementById("runBtn").style.display="inline-block";
+    return true;
+  }
+
+  // ✅ 수동 모드에서도 자동으로 다음 턴 대기 후 진행
+  state.turn++;
+  if(mode==="manual"){
+    // 0.5초 후 다음 턴 자동 시작
+    setTimeout(()=>runTurn("manual"), 500);
+  }
+  return false;
+}
+
 
   // 수동 모드: 리더 사망 시 페트 오더 비활성
   if(mode==="manual") disablePetOrdersIfLeaderDead();
@@ -362,3 +391,4 @@ document.addEventListener("DOMContentLoaded",()=>{
 <footer>© 2025 storazi ｜ MIT License</footer>
 </body>
 </html>
+
