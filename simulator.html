@@ -53,8 +53,23 @@ footer{text-align:center;color:var(--muted);font-size:13px;margin-top:20px}
 <body>
 
 <h1 id="title">🗿 미궁 듀얼 시뮬레이터</h1>
-<p class="sub">10vs10 ｜ 자동 / 수동 ｜ 지>수>화>풍>지</p>
+<p class="sub">원작자의 허락 없는 공유는 법적 절차로 대응하겠습니다.</p>
 
+<!-- 🎲 확률 슬라이드 -->
+<section class="card">
+  <h3>🎲 확률 조정</h3>
+  <label>다굴 확률: <span id="rateDaguVal">20%</span>
+    <input type="range" id="rateDagu" min="0" max="100" value="20">
+  </label><br>
+  <label>회피 확률: <span id="rateEvadeVal">10%</span>
+    <input type="range" id="rateEvade" min="0" max="100" value="10">
+  </label><br>
+  <label>카운터 확률: <span id="rateCounterVal">5%</span>
+    <input type="range" id="rateCounter" min="0" max="100" value="5">
+  </label>
+</section>
+  
+  
 <div class="card">
   <button class="btn" id="homeBtn">🏠 홈</button>
   <button class="btn" id="clearBtn">🧹 로그 클리어</button>
@@ -320,3 +335,4 @@ document.getElementById("nextBtn").onclick=()=>{
 </script>
 </body>
 </html>
+
