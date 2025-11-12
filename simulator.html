@@ -10,84 +10,95 @@
   --ink:#eaf2ff;--muted:#a9b5cc;--yellow:#ffd447;
   --pet-bg:#122850;--char-bg:#0f1f3f;
 }
-body{background:var(--bg);color:var(--ink);font-family:"Pretendard",sans-serif;margin:0;padding:20px}
-h1{color:var(--yellow);margin-bottom:6px;cursor:pointer}
-.card{
+body {
+  background:var(--bg);color:var(--ink);
+  font-family:"Pretendard",sans-serif;margin:0;padding:20px;
+}
+h1 {color:var(--yellow);margin-bottom:10px;cursor:pointer;text-align:center;}
+.card {
   background:linear-gradient(180deg,var(--panel),var(--soft));
   border:1px solid var(--ring);border-radius:14px;
-  padding:16px;margin-bottom:16px;box-shadow:0 6px 16px rgba(0,0,0,0.25)
+  padding:16px;margin-bottom:16px;box-shadow:0 6px 16px rgba(0,0,0,0.25);
 }
+details.card summary {
+  cursor:pointer;font-weight:600;color:var(--yellow);
+  outline:none;user-select:none;
+}
+details.card[open] summary{color:var(--ink);}
 input,select,button{
   border-radius:8px;border:1px solid var(--ring);
   background:#0a1732;color:var(--ink);
-  padding:6px;font-size:13px;box-sizing:border-box
+  padding:6px;font-size:13px;box-sizing:border-box;
 }
 button{cursor:pointer;font-weight:700;transition:.15s}
 button:hover{opacity:.9}
 .btn{background:var(--yellow);color:#1a1300;border:none}
-.team{display:flex; gap:20px; justify-content:space-between;}
-.unit-col{flex:1}
-.unit-row{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(70px,1fr));
-  gap:6px;margin-bottom:6px;
-  padding:6px;background:var(--char-bg);border-radius:8px;
+.team{
+  display:flex;flex-wrap:wrap;gap:20px;
+  justify-content:space-between;align-items:flex-start;
 }
-.unit-row.pet{background:var(--pet-bg)}
+.unit-col{flex:1;min-width:360px}
+.unit-row{
+  display:grid;grid-template-columns:repeat(8,minmax(60px,1fr));
+  gap:6px;margin-bottom:6px;padding:6px;
+  background:var(--char-bg);border-radius:8px;
+}
+.unit-row.pet{background:var(--pet-bg);}
 #log{
   width:100%;height:340px;background:#0a1225;border:1px solid var(--ring);
   border-radius:8px;font-family:"JetBrains Mono",monospace;
-  font-size:13px;line-height:1.45;overflow-y:auto;white-space:pre-wrap;
-  word-break:break-all;padding:10px;
+  font-size:13px;line-height:1.45;overflow-y:auto;
+  white-space:pre-wrap;word-break:break-all;padding:10px;
 }
-#log .turn {color:var(--yellow);font-weight:700;margin-top:6px;}
-#log .unitA {color:#68c3ff;font-weight:600;}
-#log .unitB {color:#ff7f7f;font-weight:600;}
-#log .skill {color:#ffd447;font-weight:600;}
-#log .hit {color:#7df58a;}
-#log .hp {color:#a9b5cc;}
-.turnBlock {border-top:1px solid var(--ring);margin-top:8px;padding-top:4px;}
+#log .turn{color:var(--yellow);font-weight:700;margin-top:6px;}
+#log .unitA{color:#68c3ff;font-weight:600;}
+#log .unitB{color:#ff7f7f;font-weight:600;}
+#log .hit{color:#7df58a;}
+#log .hp{color:#a9b5cc;}
+.order-dead{opacity:0.5;background:#1a1a2a !important;}
 footer{text-align:center;color:var(--muted);font-size:13px;margin-top:20px}
 </style>
 </head>
 <body>
 
-<h1 id="title">🗿 미궁 듀얼 시뮬레이터</h1>
-<p class="sub">원작자의 허락 없는 공유는 법적 절차로 대응하겠습니다.</p>
+<h1>🗿 미궁 듀얼 시뮬레이터</h1>
 
-<!-- 🎲 확률 슬라이드 -->
-<section class="card">
-  <h3>🎲 확률 조정</h3>
-  <label>다굴 확률: <span id="rateDaguVal">20%</span>
-    <input type="range" id="rateDagu" min="0" max="100" value="20">
-  </label><br>
-  <label>회피 확률: <span id="rateEvadeVal">10%</span>
-    <input type="range" id="rateEvade" min="0" max="100" value="10">
-  </label><br>
-  <label>카운터 확률: <span id="rateCounterVal">5%</span>
-    <input type="range" id="rateCounter" min="0" max="100" value="5">
-  </label>
-</section>
-  
-  
-<div class="card">
-  <button class="btn" id="homeBtn">🏠 홈</button>
-  <button class="btn" id="clearBtn">🧹 로그 클리어</button>
-  <label><input type="radio" name="mode" value="auto" checked> 자동</label>
-  <label><input type="radio" name="mode" value="manual"> 수동</label>
-  <button class="btn" id="fillBtn" style="float:right;margin-left:8px;">샘플 채우기</button>
-  <button class="btn" id="runBtn" style="float:right;">▶ 실행</button>
-  <button class="btn" id="nextBtn" style="display:none;float:right;">⏭ 다음 턴</button>
+<!-- 🎮 모드 및 버튼 -->
+<div class="card" style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+  <div style="display:flex;align-items:center;gap:10px;">
+    <label><input type="radio" name="mode" value="auto" checked> 자동</label>
+    <label><input type="radio" name="mode" value="manual"> 수동</label>
+  </div>
+  <div style="display:flex;align-items:center;justify-content:center;gap:14px;">
+    <button class="btn" id="startBtn" style="background:#36d17b;color:#000;">▶ 시작</button>
+    <button class="btn" id="nextBtn" style="display:none;background:#3ba4f7;">⏭ 다음 턴</button>
+    <button class="btn" id="restartBtn" style="display:none;background:#9b5de0;">🔄 새로 시작</button>
+    <button class="btn" id="clearBtn" style="background:#ffd447;color:#1a1300;">🧹 로그 클리어</button>
+  </div>
 </div>
 
+<!-- 📜 전투 로그 -->
 <section class="card">
-  <h3>⚔️ Team A / 🛡️ Team B</h3>
-  <div class="team">
-    <div class="unit-col" id="teamA"></div>
-    <div class="unit-col" id="teamB"></div>
-  </div>
+  <h3>📜 전투 로그</h3>
+  <div id="log"></div>
 </section>
 
+<!-- ⚔️ 팀 스탯 -->
+<details class="card" open>
+  <summary>⚔️ Team A / 🛡️ Team B (스탯 입력)</summary>
+  <div class="team">
+    <div class="unit-col">
+      <h4>⚔️ Team A <button class="btn" id="randA" style="padding:3px 8px;font-size:12px;">⚙️ 임의 스탯 생성</button></h4>
+      <div id="teamA"></div>
+    </div>
+    <div class="unit-col">
+      <h4>🛡️ Team B <button class="btn" id="randB" style="padding:3px 8px;font-size:12px;">⚙️ 임의 스탯 생성</button></h4>
+      <div id="teamB"></div>
+    </div>
+  </div>
+</details>
+
+<!-- 🧠 수동 오더 입력 -->
 <section class="card" id="orderPanel" style="display:none">
   <h3>🧠 오더 입력</h3>
   <div class="team">
@@ -102,99 +113,19 @@ footer{text-align:center;color:var(--muted);font-size:13px;margin-top:20px}
   </div>
 </section>
 
-<section class="card">
-  <h3>📜 전투 로그</h3>
-  <div id="log"></div>
-</section>
-
 <footer>© 2025 storazi ｜ MIT License</footer>
 
 <script>
 document.addEventListener("DOMContentLoaded",()=>{
 
-// ===== 버튼 =====
-document.getElementById("title").addEventListener("click",()=>location.href="index.html");
-document.getElementById("homeBtn").addEventListener("click",()=>location.href="index.html");
-document.getElementById("clearBtn").addEventListener("click",()=>{logClear();logLine("🧹 로그가 초기화되었습니다.");});
-
-// ===== 로그 =====
 const logEl=document.getElementById("log");
 function logClear(){logEl.innerHTML="";}
 function logLine(html){logEl.insertAdjacentHTML("beforeend",html+"<br>");logEl.scrollTop=logEl.scrollHeight;}
-function logTurn(turn,mode){logLine(`<div class="turnBlock"><div class="turn">🌀 --- 턴 ${turn} (${mode}) ---</div>`);}
-function logAction(a,t,s,d,h){
-  const atk=a.team==="A"?"unitA":"unitB";
-  const tgt=t.team==="A"?"unitA":"unitB";
-  const icon=s==="방어"?"🛡️":s==="가드브레이크"?"💥":s==="배수의진2"?"🔥":s==="다굴"?"⚔️":"⚔️";
-  logLine(`<span class="${atk}">${a.name}</span> ▶ <span class="skill">${icon} ${s}</span> → <span class="${tgt}">${t.name}</span> <span class="hit">${d?d+" 데미지":""}</span> <span class="hp">(HP:${h})</span>`);
-}
-function logEndTurn(a,b){logLine(`<div class="hp">잔존: <span class="unitA">A=${a}</span> / <span class="unitB">B=${b}</span></div><hr></div>`);}
 
-// ===== 데이터 =====
 const elems=["지","수","화","풍"];
 const skills=["공격","방어","가드브레이크","배수의진2","다굴"];
 
-class Unit{
-  constructor(t,ty,n,a,d,s,h,e){
-    this.team=t;this.type=ty;this.no=n;
-    this.name=`${t}${ty[0]}${n}`;
-    this.atk=+a;this.def=+d;this.spd=+s;
-    this.hp=+h;this.max_hp=h;
-    this.elem=e;this.alive=true;
-  }
-  isAlive(){return this.alive&&this.hp>0;}
-  take(d){
-    this.hp-=d;
-    if(this.hp<=0&&this.alive){
-      this.alive=false;
-      const cls=this.team==='A'?'unitA':'unitB';
-      const idPrefix=`${this.team}_${this.type}_${this.no}`;
-      if(this.hp<=-this.max_hp*0.5){
-        logLine(`<span class="${cls}">${this.name}</span> 💀 전투이탈!`);
-        disableInputs(idPrefix,"💀 전투이탈");
-      }else{
-        logLine(`<span class="${cls}">${this.name}</span> ❌ 전투불능!`);
-        disableInputs(idPrefix,"⚰️ 사망");
-      }
-      this.hp=Math.max(0,this.hp);
-
-      // 캐릭터 죽으면 페트 동반처리
-      if(this.type==="캐릭터"){
-        const pet=state.units.find(x=>x.team===this.team&&x.type==="페트"&&x.no===this.no);
-        if(pet&&pet.isAlive()){
-          const petPrefix=`${pet.team}_${pet.type}_${pet.no}`;
-          if(this.hp<=-this.max_hp*0.5){
-            pet.alive=false;
-            logLine(`<span class="${cls}">${pet.name}</span> 💀 (${this.name}과 함께 전투이탈)`);
-            disableInputs(petPrefix,"💀 동반이탈");
-          }else{
-            pet.alive=false;
-            logLine(`<span class="${cls}">${pet.name}</span> ⚫ (${this.name} 사망으로 무력화)`);
-            disableInputs(petPrefix,"⚫ 무력화");
-          }
-        }
-      }
-    }
-  }
-}
-
-// ===== 보조함수 =====
-function disableInputs(prefix,text){
-  ["atk","def","spd","hp","elem"].forEach(id=>{
-    const el=document.getElementById(`${prefix}_${id}`);
-    if(el){el.disabled=true;el.style.opacity="0.5";el.style.background="#1a1a1a";el.style.color="#777";
-      if(id==="hp")el.value=text;}
-  });
-}
-
-function elemAdv(a,b){
-  const adv={지:"수",수:"화",화:"풍",풍:"지"};
-  if(a===b)return 1;
-  if(adv[a]===b)return 1.2;
-  if(adv[b]===a)return 0.8;
-  return 1;
-}
-
+// ----------------- 스탯 입력 생성 -----------------
 function buildTeamHTML(team){
   const host=document.getElementById("team"+team);
   host.innerHTML="";
@@ -207,174 +138,203 @@ function buildTeamHTML(team){
         <input id="${team}_${type}_${i}_def" placeholder="방">
         <input id="${team}_${type}_${i}_spd" placeholder="순">
         <input id="${team}_${type}_${i}_hp" placeholder="체">
-        <select id="${team}_${type}_${i}_elem">${elems.map(e=>`<option>${e}</option>`).join("")}</select>
+        <select id="${team}_${type}_${i}_elem1">${elems.map(e=>`<option>${e}</option>`).join("")}</select>
+        <input id="${team}_${type}_${i}_elem1v" type="number" placeholder="값1" min="0" value="0">
+        <select id="${team}_${type}_${i}_elem2">${elems.map(e=>`<option>${e}</option>`).join("")}</select>
+        <input id="${team}_${type}_${i}_elem2v" type="number" placeholder="값2" min="0" value="0">
         <select disabled><option>${type}</option></select>`;
       host.appendChild(row);
     }
   }
 }
+buildTeamHTML("A");
+buildTeamHTML("B");
 
+// ----------------- 임의 스탯 생성 -----------------
+function randStat(team){
+  for(let i=1;i<=5;i++){
+    for(const type of["캐릭터","페트"]){
+      document.getElementById(`${team}_${type}_${i}_atk`).value = Math.floor(100+Math.random()*100);
+      document.getElementById(`${team}_${type}_${i}_def`).value = Math.floor(80+Math.random()*80);
+      document.getElementById(`${team}_${type}_${i}_spd`).value = Math.floor(80+Math.random()*100);
+      document.getElementById(`${team}_${type}_${i}_hp`).value  = Math.floor(700+Math.random()*500);
+      document.getElementById(`${team}_${type}_${i}_elem1`).value = elems[Math.floor(Math.random()*elems.length)];
+      document.getElementById(`${team}_${type}_${i}_elem1v`).value = Math.floor(Math.random()*5);
+      document.getElementById(`${team}_${type}_${i}_elem2`).value = elems[Math.floor(Math.random()*elems.length)];
+      document.getElementById(`${team}_${type}_${i}_elem2v`).value = Math.floor(Math.random()*5);
+    }
+  }
+  logLine(`⚙️ ${team}팀 스탯이 임의로 생성되었습니다.`);
+}
+document.getElementById("randA").onclick=()=>randStat("A");
+document.getElementById("randB").onclick=()=>randStat("B");
+
+// ----------------- 전투 관련 로직 -----------------
 function readUnits(){
   const arr=[];
-  for(const t of["A","B"])for(let i=1;i<=5;i++)for(const k of["캐릭터","페트"]){
-    const atk=+document.getElementById(`${t}_${k}_${i}_atk`).value||150;
-    const def=+document.getElementById(`${t}_${k}_${i}_def`).value||120;
-    const spd=+document.getElementById(`${t}_${k}_${i}_spd`).value||150;
-    const hp=+document.getElementById(`${t}_${k}_${i}_hp`).value||800;
-    const elem=document.getElementById(`${t}_${k}_${i}_elem`).value;
-    arr.push(new Unit(t,k,i,atk,def,spd,hp,elem));
-  }
+  for(const t of["A","B"])
+    for(let i=1;i<=5;i++)
+      for(const k of["캐릭터","페트"]){
+        const atk=+document.getElementById(`${t}_${k}_${i}_atk`).value||150;
+        const def=+document.getElementById(`${t}_${k}_${i}_def`).value||120;
+        const spd=+document.getElementById(`${t}_${k}_${i}_spd`).value||150;
+        const hp =+document.getElementById(`${t}_${k}_${i}_hp`).value||800;
+        const e1=document.getElementById(`${t}_${k}_${i}_elem1`).value;
+        const e1v=+document.getElementById(`${t}_${k}_${i}_elem1v`).value||0;
+        const e2=document.getElementById(`${t}_${k}_${i}_elem2`).value;
+        const e2v=+document.getElementById(`${t}_${k}_${i}_elem2v`).value||0;
+        const elem={};
+        if(e1v>0)elem[e1]=e1v;
+        if(e2v>0)elem[e2]=(elem[e2]||0)+e2v;
+        arr.push({team:t,type:k,no:i,name:`${t}${k[0]}${i}`,atk,def,spd,hp,max_hp:hp,elem,alive:true});
+      }
   return arr;
 }
 
-function fillSample(){
-  for(const T of["A","B"])for(let i=1;i<=5;i++)for(const K of["캐릭터","페트"]){
-    document.getElementById(`${T}_${K}_${i}_atk`).value=140+(K==="캐릭터"?20:0);
-    document.getElementById(`${T}_${K}_${i}_def`).value=120+(K==="페트"?20:0);
-    document.getElementById(`${T}_${K}_${i}_spd`).value=150+(K==="캐릭터"?10:-10);
-    document.getElementById(`${T}_${K}_${i}_hp`).value=900+(K==="페트"?100:0);
-    document.getElementById(`${T}_${K}_${i}_elem`).value=elems[(i-1)%4];
+function elemAdv(a,b){
+  const adv={지:"수",수:"화",화:"풍",풍:"지"};
+  const sumA=Object.values(a).reduce((x,y)=>x+y,0)||1;
+  const sumB=Object.values(b).reduce((x,y)=>x+y,0)||1;
+  let ratio=0;
+  for(const [ae,av] of Object.entries(a)){
+    for(const [be,bv] of Object.entries(b)){
+      let r=1;
+      if(ae===be)r=1;
+      else if(adv[ae]===be)r=1.2;
+      else if(adv[be]===ae)r=0.8;
+      ratio+=r*(av/sumA)*(bv/sumB);
+    }
   }
-  logLine("✔ 샘플 스탯 채워짐");
+  return ratio||1;
 }
 
-// ===== 전투 =====
 function damageCalc(a,d,ratio=1){
   return Math.max(1, Math.floor((a - d/2) * ratio * (0.9 + Math.random()*0.2)));
 }
 
 function pickEnemy(u){
-  const list = state.units.filter(x=>x.team!==u.team && x.isAlive());
+  const list = state.units.filter(x=>x.team!==u.team && x.alive);
   return list[Math.floor(Math.random() * list.length)];
 }
 
-// ✅ autoSkill은 여기 (doAction 밖)에 있어야 함
 function autoSkill(){
   const r = Math.random() * 100;
-  const rateDagu = +document.getElementById("rateDagu").value;
-  if(r < rateDagu) return "다굴";
-  return skills[Math.floor(Math.random() * (skills.length - 1))]; // 나머지 스킬 랜덤
+  return r < 20 ? "다굴" : skills[Math.floor(Math.random() * (skills.length - 1))];
 }
 
-function doAction(u, t, skill){
-  if(!u.isAlive() || !t || !t.isAlive()) return;
-
-  // 💨 회피 판정
-  const rateEvade = +document.getElementById("rateEvade").value;
-  if(Math.random() * 100 < rateEvade){
-    logLine(`<span class="${t.team==='A'?'unitA':'unitB'}">${t.name}</span> 💨 회피 성공!`);
+function doAction(u,t,skill){
+  if(!u.alive || !t || !t.alive) return;
+  if(skill==="방어"){
+    logLine(`<span class="${u.team==='A'?'unitA':'unitB'}">${u.name}</span> 🛡️ 방어!`);
     return;
   }
-
-  // 🛡️ 방어
-  if(skill === "방어"){
-    logAction(u, t, skill, 0, u.hp);
-    return;
-  }
-
-  // ⚔️ 다굴
-  if(skill === "다굴"){
-    const allies = state.units.filter(x=>x.team===u.team && x!==u && x.isAlive()).slice(0,2);
-    for(const a of [u, ...allies]){
-      const dmg = damageCalc(a.atk, t.def, 1.0);
-      t.take(dmg);
-      logAction(a, t, "다굴", dmg, t.hp);
-      if(!t.isAlive()) return;
+  if(skill==="다굴"){
+    const allies=state.units.filter(x=>x.team===u.team && x!==u && x.alive).slice(0,2);
+    for(const a of [u,...allies]){
+      const dmg=damageCalc(a.atk,t.def,elemAdv(a.elem,t.elem));
+      t.hp-=dmg;if(t.hp<=0)t.alive=false;
+      logLine(`<span class="${a.team==='A'?'unitA':'unitB'}">${a.name}</span> ⚔️ 다굴 → <span class="${t.team==='A'?'unitA':'unitB'}">${t.name}</span> <span class="hit">${dmg}</span>`);
+      if(!t.alive)return;
     }
     return;
   }
-
-  // 일반 공격
-  let ratio = 1;
-  if(skill === "가드브레이크") ratio = 1.2;
-  if(skill === "배수의진2") ratio = 1.5;
-  const dmg = damageCalc(u.atk, t.def, ratio * elemAdv(u.elem, t.elem));
-  t.take(dmg);
-  logAction(u, t, skill, dmg, t.hp);
-
-  // ⚡ 카운터 판정
-  const rateCounter = +document.getElementById("rateCounter").value;
-  if(t.isAlive() && Math.random() * 100 < rateCounter){
-    const counterDmg = damageCalc(t.atk, u.def, 0.8);
-    u.take(counterDmg);
-    logLine(`<span class="${t.team==='A'?'unitA':'unitB'}">${t.name}</span> ⚡ 카운터! → <span class="${u.team==='A'?'unitA':'unitB'}">${u.name}</span> <span class="hit">${counterDmg}</span> (HP:${u.hp})`);
-  }
+  let ratio=1;if(skill==="가드브레이크")ratio=1.2;if(skill==="배수의진2")ratio=1.5;
+  const dmg=damageCalc(u.atk,t.def,ratio*elemAdv(u.elem,t.elem));
+  t.hp-=dmg;if(t.hp<=0)t.alive=false;
+  logLine(`<span class="${u.team==='A'?'unitA':'unitB'}">${u.name}</span> ▶ ${skill} → <span class="${t.team==='A'?'unitA':'unitB'}">${t.name}</span> <span class="hit">${dmg}</span> (HP:${Math.max(t.hp,0)})`);
 }
 
-
-// ===== 오더 =====
 function buildOrders(){
   const bodyA=document.getElementById("orderBodyA"),bodyB=document.getElementById("orderBodyB");
   bodyA.innerHTML="";bodyB.innerHTML="";
   for(const u of state.units){
-    const disabled=u.isAlive()?"":"disabled";
-    const html=`<tr>
-      <td>${u.name}</td>
-      <td><select id="skill_${u.name}" ${disabled}>${skills.map(s=>`<option>${s}</option>`).join("")}</select></td>
-      <td><select id="target_${u.name}" ${disabled}>${state.units.filter(x=>x.team!==u.team&&x.isAlive()).map(x=>`<option>${x.name}</option>`).join("")}</select></td>
+    const dis=u.alive?"":"disabled";
+    const row=`<tr class="${u.alive?"":"order-dead"}">
+      <td>${u.name}${u.alive?"":" 💀"}</td>
+      <td><select id="skill_${u.name}" ${dis}>${skills.map(s=>`<option>${s}</option>`).join("")}</select></td>
+      <td><select id="target_${u.name}" ${dis}>${state.units.filter(x=>x.team!==u.team&&x.alive).map(x=>`<option>${x.name}</option>`).join("")}</select></td>
     </tr>`;
-    (u.team==="A"?bodyA:bodyB).insertAdjacentHTML("beforeend",html);
+    (u.team==="A"?bodyA:bodyB).insertAdjacentHTML("beforeend",row);
   }
 }
 
-// ===== 턴 =====
 function runTurn(mode){
-  logTurn(state.turn,mode);
-  const order=state.units.filter(u=>u.isAlive()).sort((a,b)=>b.spd-a.spd);
+  logLine(`<div class="turn">🌀 --- 턴 ${state.turn} (${mode}) ---</div>`);
+  const order=state.units.filter(u=>u.alive).sort((a,b)=>b.spd-a.spd);
   for(const u of order){
     let skill,target;
     if(mode==="auto"){skill=autoSkill();target=pickEnemy(u);}
     else{
-      const sEl=document.getElementById(`skill_${u.name}`);
-      const tEl=document.getElementById(`target_${u.name}`);
-      if(!sEl||!tEl||sEl.disabled)continue;
-      skill=sEl.value;const tname=tEl.value;
-      target=state.units.find(x=>x.name===tname);
+      const s=document.getElementById(`skill_${u.name}`);
+      const t=document.getElementById(`target_${u.name}`);
+      if(!s||!t||s.disabled)continue;
+      skill=s.value;target=state.units.find(x=>x.name===t.value);
     }
     if(target)doAction(u,target,skill);
   }
-  const a=state.units.filter(x=>x.team==="A"&&x.isAlive()).length;
-  const b=state.units.filter(x=>x.team==="B"&&x.isAlive()).length;
-  logEndTurn(a,b);
+  const a=state.units.filter(x=>x.team==="A"&&x.alive).length;
+  const b=state.units.filter(x=>x.team==="B"&&x.alive).length;
+  logLine(`<div class="hp">잔존: <span class="unitA">A=${a}</span> / <span class="unitB">B=${b}</span></div><hr>`);
   if(a===0||b===0){
     logLine(`🏁 종료: ${a>b?"A":"B"}팀 승리!`);
-    document.getElementById("nextBtn").style.display="none";
-    document.getElementById("orderPanel").style.display="none";
-    document.getElementById("runBtn").style.display="inline-block";
+    showRestart();
     return true;
   }
-  state.turn++;
-  return false;
+  state.turn++;return false;
 }
 
-// ===== 실행 =====
-const state={turn:1,units:[]};
-buildTeamHTML("A");
-buildTeamHTML("B");
-document.getElementById("fillBtn").onclick=fillSample;
-document.getElementById("runBtn").onclick=()=>{
-  const mode=document.querySelector('input[name="mode"]:checked').value;
+// ----------------- UI 제어 -----------------
+function showRestart(){
+  document.getElementById("restartBtn").style.display="inline-block";
+  document.getElementById("nextBtn").style.display="none";
+  document.getElementById("startBtn").disabled=false;
+  clearInterval(state.timer);
+}
+
+function resetGame(){
   logClear();
-  state.turn=1;
-  state.units=readUnits();
+  state.turn=1;state.units=[];
+  clearInterval(state.timer);
+  document.getElementById("restartBtn").style.display="none";
+  document.getElementById("orderPanel").style.display="none";
+  document.getElementById("nextBtn").style.display="none";
+  document.getElementById("startBtn").style.display="inline-block";
+  logLine("🔄 새 게임을 준비하세요!");
+}
+
+// ----------------- 실행 -----------------
+const state={turn:1,units:[],timer:null};
+
+document.getElementById("startBtn").onclick=()=>{
+  const mode=document.querySelector('input[name="mode"]:checked')?.value||"auto";
+  logClear();state.turn=1;state.units=readUnits();
+  document.getElementById("restartBtn").style.display="none";
+
   if(mode==="manual"){
     document.getElementById("orderPanel").style.display="block";
     document.getElementById("nextBtn").style.display="inline-block";
-    document.getElementById("runBtn").style.display="none";
-    buildOrders();
-    logLine("▶ 수동모드 시작");
+    document.getElementById("startBtn").style.display="none";
+    buildOrders();logLine("▶ 수동모드 시작");
   }else{
     logLine("▶ 자동모드 시작");
-    for(let i=0;i<10&&!runTurn("auto");i++);
+    document.getElementById("startBtn").disabled=true;
+    state.timer=setInterval(()=>{
+      const end=runTurn("auto");
+      if(end) showRestart();
+    },800);
   }
 };
+
 document.getElementById("nextBtn").onclick=()=>{
-  runTurn("manual");
+  const end=runTurn("manual");
   buildOrders();
+  if(end){document.getElementById("nextBtn").disabled=true;}
 };
+
+document.getElementById("restartBtn").onclick=resetGame;
+document.getElementById("clearBtn").onclick=logClear;
+
 });
 </script>
 </body>
 </html>
-
-
