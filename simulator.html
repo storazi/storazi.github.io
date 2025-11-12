@@ -194,25 +194,36 @@ document.getElementById("randB").onclick=()=>randStat("B");
 
 // ----------------- 전투 관련 로직 -----------------
 function readUnits(){
-  const arr=[];
-  for(const t of["A","B"])
-    for(let i=1;i<=5;i++)
-      for(const k of["캐릭터","페트"]){
-        const atk=+document.getElementById(`${t}_${k}_${i}_atk`).value||150;
-        const def=+document.getElementById(`${t}_${k}_${i}_def`).value||120;
-        const spd=+document.getElementById(`${t}_${k}_${i}_spd`).value||150;
-        const hp =+document.getElementById(`${t}_${k}_${i}_hp`).value||800;
-        const e1=document.getElementById(`${t}_${k}_${i}_elem1`).value;
-        const e1v=+document.getElementById(`${t}_${k}_${i}_elem1v`).value||0;
-        const e2=document.getElementById(`${t}_${k}_${i}_elem2`).value;
-        const e2v=+document.getElementById(`${t}_${k}_${i}_elem2v`).value||0;
-        const elem={};
-        if(e1v>0)elem[e1]=e1v;
-        if(e2v>0)elem[e2]=(elem[e2]||0)+e2v;
-        arr.push({team:t,type:k,no:i,name:`${t}${k[0]}${i}`,atk,def,spd,hp,max_hp:hp,elem,alive:true});
-      }
+  const arr = [];
+  for(const t of ["A","B"]){
+    for(let i=1;i<=5;i++){
+      const atk = +document.getElementById(`${t}_unit_${i}_atk`).value || 150;
+      const def = +document.getElementById(`${t}_unit_${i}_def`).value || 120;
+      const spd = +document.getElementById(`${t}_unit_${i}_spd`).value || 150;
+      const hp  = +document.getElementById(`${t}_unit_${i}_hp`).value  || 800;
+      const e1  = document.getElementById(`${t}_unit_${i}_elem1`).value;
+      const e1v = +document.getElementById(`${t}_unit_${i}_elem1v`).value || 0;
+      const e2  = document.getElementById(`${t}_unit_${i}_elem2`).value;
+      const e2v = +document.getElementById(`${t}_unit_${i}_elem2v`).value || 0;
+      const role = document.getElementById(`${t}_unit_${i}_role`).value || "캐릭터";
+
+      const elem = {};
+      if(e1v>0) elem[e1] = e1v;
+      if(e2v>0) elem[e2] = (elem[e2]||0) + e2v;
+
+      arr.push({
+        team: t,
+        type: role,
+        no: i,
+        name: `${t}${role[0]}${i}`,
+        atk, def, spd, hp, max_hp: hp,
+        elem, alive: true
+      });
+    }
+  }
   return arr;
 }
+
 
 function elemAdv(a,b){
   const adv={지:"수",수:"화",화:"풍",풍:"지"};
@@ -361,6 +372,7 @@ document.getElementById("clearBtn").onclick=logClear;
 </script>
 </body>
 </html>
+
 
 
 
