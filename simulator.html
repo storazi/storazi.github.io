@@ -25,12 +25,11 @@ button{cursor:pointer;font-weight:700;transition:.15s}
 button:hover{opacity:.9}
 .btn{background:var(--yellow);color:#1a1300;border:none}
 
-/* 유닛 입력 - 반응형 */
+/* 팀 A/B를 양옆 배치 */
 .team{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(480px,1fr));
-  gap:12px;
+  display:flex; gap:20px; justify-content:space-between;
 }
+.unit-col{flex:1}
 .unit-row{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(70px,1fr));
@@ -38,12 +37,9 @@ button:hover{opacity:.9}
   padding:6px;background:var(--char-bg);border-radius:8px;
 }
 .unit-row.pet{background:var(--pet-bg)}
-@media (max-width:1000px){
-  .team{grid-template-columns:1fr}
-  body{padding:10px}
-}
+@media (max-width:900px){ .team{flex-direction:column} }
 
-/* 전투 로그 */
+/* 로그 */
 #log{
   width:100%;height:340px;background:#0a1225;border:1px solid var(--ring);
   border-radius:8px;font-family:"JetBrains Mono",monospace;
@@ -58,17 +54,6 @@ button:hover{opacity:.9}
 #log .hp {color:#a9b5cc;}
 .turnBlock {border-top:1px solid var(--ring);margin-top:8px;padding-top:4px;}
 footer{text-align:center;color:var(--muted);font-size:13px;margin-top:20px}
-
-/* 오더 패널: A/B 좌우 분할 */
-.order-grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:20px;
-}
-.order-col table{width:100%;border-collapse:collapse}
-.order-col th,.order-col td{border-bottom:1px solid var(--ring);padding:6px;text-align:center}
-.order-col h4{color:var(--yellow);text-align:center;margin-bottom:8px}
-@media (max-width:900px){ .order-grid{grid-template-columns:1fr} }
 </style>
 </head>
 <body>
@@ -85,21 +70,24 @@ footer{text-align:center;color:var(--muted);font-size:13px;margin-top:20px}
 
 <section class="card">
   <h3>⚔️ Team A / 🛡️ Team B</h3>
-  <div class="team"><div id="teamA"></div><div id="teamB"></div></div>
+  <div class="team">
+    <div class="unit-col" id="teamA"></div>
+    <div class="unit-col" id="teamB"></div>
+  </div>
 </section>
 
-<!-- 오더 모드 (A/B 좌우 분할) -->
+<!-- 오더(수동) 모드 -->
 <section class="card" id="orderPanel" style="display:none">
   <h3>🧠 오더 입력</h3>
-  <div class="order-grid">
-    <div class="order-col" id="orderA">
+  <div class="team">
+    <div class="unit-col">
       <h4>⚔️ Team A</h4>
       <table>
         <thead><tr><th>행동자</th><th>기술</th><th>대상</th></tr></thead>
         <tbody id="orderBodyA"></tbody>
       </table>
     </div>
-    <div class="order-col" id="orderB">
+    <div class="unit-col">
       <h4>🛡️ Team B</h4>
       <table>
         <thead><tr><th>행동자</th><th>기술</th><th>대상</th></tr></thead>
@@ -115,7 +103,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;margin-top:20px}
 </section>
 
 <script>
-/* ===== 로그 유틸 ===== */
+/* =============== 로그 =============== */
 const logEl=document.getElementById("log");
 function logClear(){logEl.innerHTML="";}
 function logLine(html){logEl.insertAdjacentHTML("beforeend",html+"<br>");logEl.scrollTop=logEl.scrollHeight;}
@@ -128,7 +116,7 @@ function logAction(attacker,target,skill,dmg,hp){
 }
 function logEndTurn(a,b){logLine(`<div class="hp">잔존: <span class="unitA">A=${a}</span> / <span class="unitB">B=${b}</span></div><hr></div>`);}
 
-/* ===== 데이터 구조 ===== */
+/* =============== 데이터 =============== */
 const elems=["지","수","화","풍"];
 const skills=["공격","방어","가드브레이크","배수의진2","다굴"];
 
@@ -140,7 +128,44 @@ class Unit{
     this.elem=elem;this.alive=true;
   }
   isAlive(){return this.alive&&this.hp>0;}
-  take(d){this.hp=Math.max(0,this.hp-d);if(this.hp<=0)this.alive=false;}
+  take(d){
+    this.hp -= d;
+    if(this.hp <= 0 && this.alive){
+      this.alive = false;
+      const cls = this.team==='A'?'unitA':'unitB';
+      const idPrefix = `${this.team}_${this.type}_${this.no}`;
+
+      // 💀 전투이탈(HP가 -max_hp*0.5 이하)
+      if(this.hp <= -this.max_hp * 0.5){
+        this.hp = -Math.abs(this.hp);
+        logLine(`<span class="${cls}">${this.name}</span> 💀 전투이탈!`);
+        disableUnitInputs(idPrefix,"💀 전투이탈");
+      } else {
+        // ❌ 전투불능
+        this.hp = 0;
+        logLine(`<span class="${cls}">${this.name}</span> ❌ 전투불능!`);
+        disableUnitInputs(idPrefix,"⚰️ 사망");
+      }
+
+      // 캐릭터 전투불능/이탈 ⇒ 같은 번호 페트 무력화/이탈
+      if(this.type==="캐릭터"){
+        const pet = state.units.find(x=>x.team===this.team && x.type==="페트" && x.no===this.no && x.isAlive());
+        if(pet){
+          const petPrefix = `${pet.team}_${pet.type}_${pet.no}`;
+          if(this.hp < -this.max_hp * 0.5){ // 전투이탈이면 동반 이탈
+            pet.alive=false;
+            pet.hp = -Math.abs(pet.max_hp*0.5);
+            logLine(`<span class="${cls}">${pet.name}</span> 💀 (${this.name}과 함께 전투이탈)`);
+            disableUnitInputs(petPrefix,"💀 동반이탈");
+          } else { // 전투불능이면 무력화
+            pet.alive=false; pet.hp=0;
+            logLine(`<span class="${cls}">${pet.name}</span> ⚫ (${this.name} 사망으로 무력화)`);
+            disableUnitInputs(petPrefix,"⚫ 무력화");
+          }
+        }
+      }
+    }
+  }
 }
 
 function elemAdv(a,b){
@@ -156,7 +181,21 @@ function elemAdv(a,b){
   return 1;
 }
 
-/* ===== 팀 입력 UI ===== */
+/* =============== UI =============== */
+function disableUnitInputs(prefix, statusText){
+  const ids=["atk","def","spd","hp","elem"];
+  for(const id of ids){
+    const el=document.getElementById(`${prefix}_${id}`);
+    if(el){
+      el.disabled=true;
+      el.style.opacity="0.5";
+      el.style.background="#1a1a1a";
+      el.style.color="#777";
+      if(id==="hp") el.value=statusText;
+    }
+  }
+}
+
 function buildTeamHTML(team){
   const host=document.getElementById("team"+team);
   host.innerHTML="";
@@ -168,10 +207,8 @@ function buildTeamHTML(team){
         <input id="${team}_${type}_${i}_atk" placeholder="공">
         <input id="${team}_${type}_${i}_def" placeholder="방">
         <input id="${team}_${type}_${i}_spd" placeholder="순">
-        <input id="${team}_${type}_${i}_hp"  placeholder="체">
-        <select id="${team}_${type}_${i}_elem">
-          ${elems.map(e=>`<option value="${e}">${e}</option>`).join("")}
-        </select>
+        <input id="${team}_${type}_${i}_hp" placeholder="체">
+        <select id="${team}_${type}_${i}_elem">${elems.map(e=>`<option value="${e}">${e}</option>`).join("")}</select>
         <select disabled><option>${type}</option></select>
       `;
       host.appendChild(row);
@@ -207,30 +244,10 @@ function fillSample(){
   logLine("✔ 샘플 스탯 채워짐");
 }
 
-/* ===== 전투 로직 ===== */
-function damageCalc(a,d,ratio=1){
-  return Math.max(1,Math.floor((a - d/2) * ratio * (0.9 + Math.random()*0.2)));
-}
-function pickEnemy(u){
-  const list=state.units.filter(x=>x.team!==u.team&&x.isAlive());
-  return list[Math.floor(Math.random()*list.length)];
-}
-function autoSkill(){
-  return skills[Math.floor(Math.random()*skills.length)];
-}
-
-/* 캐릭터 사망 → 동일 번호의 페트 무력화 */
-function applyPetDisableByLeaderDeath(){
-  for(const u of state.units){
-    if(u.type==="캐릭터" && !u.isAlive()){
-      const pet = state.units.find(x=>x.team===u.team && x.type==="페트" && x.no===u.no && x.isAlive());
-      if(pet){
-        pet.alive=false; pet.hp=0;
-        logLine(`<span class="${u.team==='A'?'unitA':'unitB'}">${u.name}</span> 사망으로 <span class="${u.team==='A'?'unitA':'unitB'}">${pet.name}</span>이(가) 무력화되었습니다 🌀`);
-      }
-    }
-  }
-}
+/* =============== 전투 =============== */
+function damageCalc(a,d,ratio=1){return Math.max(1,Math.floor((a-d/2)*ratio*(0.9+Math.random()*0.2)))}
+function pickEnemy(u){const list=state.units.filter(x=>x.team!==u.team&&x.isAlive());return list[Math.floor(Math.random()*list.length)]}
+function autoSkill(){return skills[Math.floor(Math.random()*skills.length)]}
 
 function doAction(u,t,skill){
   if(!u.isAlive()||!t)return;
@@ -241,8 +258,7 @@ function doAction(u,t,skill){
       const dmg=damageCalc(a.atk,t.def,1.0);
       t.take(dmg);logAction(a,t,"다굴",dmg,t.hp);
       if(!t.isAlive())return;
-    }
-    return;
+    }return;
   }
   let ratio=1;
   if(skill==="가드브레이크")ratio=1.2;
@@ -253,16 +269,15 @@ function doAction(u,t,skill){
   logAction(u,t,skill,dmg,t.hp);
 }
 
+/* =============== 턴 진행 =============== */
 function runTurn(mode){
   logTurn(state.turn,mode);
   const order=state.units.filter(u=>u.isAlive()).sort((a,b)=>b.spd-a.spd);
 
   for(const u of order){
-    let skill="공격", target=null;
-    if(mode==="auto"){
-      skill=autoSkill();
-      target=pickEnemy(u);
-    }else{ // manual
+    let skill="공격",target=null;
+    if(mode==="auto"){ skill=autoSkill(); target=pickEnemy(u); }
+    else{
       const row=document.getElementById(`skill_${u.name}`);
       if(row){
         skill=row.value;
@@ -275,8 +290,8 @@ function runTurn(mode){
     if(target) doAction(u,target,skill);
   }
 
-  /* 캐릭터 사망 → 페트 무력화 규칙 적용 */
-  applyPetDisableByLeaderDeath();
+  // 수동 모드: 리더 사망 시 페트 오더 비활성
+  if(mode==="manual") disablePetOrdersIfLeaderDead();
 
   const a=state.units.filter(x=>x.team==="A"&&x.isAlive()).length;
   const b=state.units.filter(x=>x.team==="B"&&x.isAlive()).length;
@@ -285,32 +300,41 @@ function runTurn(mode){
   state.turn++;return false;
 }
 
-/* ===== 오더 테이블 구성(A/B 분리) ===== */
+/* =============== 오더 테이블 =============== */
 function buildOrders(){
   const bodyA=document.getElementById("orderBodyA");
   const bodyB=document.getElementById("orderBodyB");
   bodyA.innerHTML=""; bodyB.innerHTML="";
-
   for(const u of state.units){
     const html=`
       <tr>
         <td>${u.name}</td>
-        <td>
-          <select id="skill_${u.name}">
-            ${skills.map(s=>`<option>${s}</option>`).join("")}
-          </select>
-        </td>
+        <td><select id="skill_${u.name}">${skills.map(s=>`<option>${s}</option>`).join("")}</select></td>
         <td>
           <select id="t_team_${u.name}"><option>A</option><option>B</option></select>
           <select id="t_type_${u.name}"><option>캐릭터</option><option>페트</option></select>
           <select id="t_no_${u.name}">${[1,2,3,4,5].map(n=>`<option>${n}</option>`).join("")}</select>
         </td>
       </tr>`;
-    (u.team==="A" ? bodyA : bodyB).insertAdjacentHTML("beforeend",html);
+    (u.team==="A"?bodyA:bodyB).insertAdjacentHTML("beforeend",html);
   }
 }
 
-/* ===== 실행 ===== */
+function disablePetOrdersIfLeaderDead(){
+  for(const u of state.units){
+    if(u.type==="캐릭터" && !u.isAlive()){
+      const pet=state.units.find(x=>x.team===u.team && x.type==="페트" && x.no===u.no);
+      if(pet){
+        ["skill","t_team","t_type","t_no"].forEach(id=>{
+          const el=document.getElementById(`${id}_${pet.name}`);
+          if(el) el.disabled = true;
+        });
+      }
+    }
+  }
+}
+
+/* =============== 부트스트랩 =============== */
 const state={turn:1,units:[]};
 
 document.addEventListener("DOMContentLoaded",()=>{
@@ -327,7 +351,7 @@ document.addEventListener("DOMContentLoaded",()=>{
       document.getElementById("runBtn").style.display="none";
       buildOrders(); logLine("▶ 오더 모드 시작");
     }else{
-      for(let i=0;i<5&&!runTurn("auto");i++); // 자동 5턴
+      for(let i=0;i<5 && !runTurn("auto"); i++); // 자동 5턴
     }
   };
 
