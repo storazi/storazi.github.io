@@ -3,231 +3,579 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>🗿 미궁 듀얼 시뮬레이터 (완전판)</title>
+<title>🗿 미궁 듀얼 시뮬레이터 (10vs10 완전판)</title>
+
 <style>
-:root {
-  --bg:#0b1426; --panel:#0f1e3a; --soft:#11234a;
-  --ring:#1e396e; --ink:#eaf2ff; --muted:#a9b5cc; --yellow:#ffd447;
+:root{
+  --bg:#0b1426; --panel:#0f1e3a; --soft:#11234a; --ring:#1e396e;
+  --ink:#eaf2ff; --muted:#a9b5cc; --yellow:#ffd447;
+  --pet-bg:#122850; --char-bg:#0f1f3f;
 }
-body { background:var(--bg); color:var(--ink); font-family:"Pretendard",sans-serif; margin:0; padding:20px; }
-h1 { color:var(--yellow); margin-bottom:6px; }
-.card {
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:"Pretendard",sans-serif;margin:0;padding:20px}
+h1{color:var(--yellow);margin:0 0 6px}
+p.sub{color:var(--muted);font-size:13px;margin:0 0 16px}
+
+.card{
   background:linear-gradient(180deg,var(--panel),var(--soft));
-  border:1px solid var(--ring); border-radius:14px;
-  padding:16px; margin-bottom:20px; box-shadow:0 6px 16px rgba(0,0,0,0.25);
+  border:1px solid var(--ring);border-radius:14px;padding:16px;margin-bottom:16px;
+  box-shadow:0 6px 16px rgba(0,0,0,0.25);
 }
-input,select,button {
-  border-radius:8px; border:1px solid var(--ring);
-  background:#0a1732; color:var(--ink); padding:6px; font-size:13px;
+.hr{height:1px;background:linear-gradient(90deg,transparent,var(--ring),transparent);margin:12px 0;border:none}
+input,select,button,textarea{
+  border-radius:8px;border:1px solid var(--ring);
+  background:#0a1732;color:var(--ink);padding:6px;font-size:13px
 }
-button{cursor:pointer;font-weight:700;transition:all .15s;}
-button:hover{opacity:.9}
-.btn{background:var(--yellow);color:#1a1300;border:none;}
+button{cursor:pointer;font-weight:700;transition:.15s}
+button:hover{opacity:.92}
+.btn{background:var(--yellow);color:#1a1300;border:none}
+.btn-ghost{background:transparent;border:1px solid var(--ring)}
+.grid2{display:grid;grid-template-columns:1fr 1fr; gap:12px}
+.grid3{display:grid;grid-template-columns:200px 200px auto;align-items:end;gap:12px}
+.mini{font-size:12px;color:var(--muted);margin-bottom:6px}
+
+.team-columns{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.team-col h3{margin:0 0 8px;color:var(--yellow);font-size:16px}
+.unit-pair{position:relative;margin-bottom:8px}
+.unit-label{font-size:12px;color:var(--yellow);font-weight:700;margin:0 0 4px 2px}
+.pair-line{position:absolute;left:0;width:2px;top:18px;bottom:-6px;background:var(--yellow);opacity:.5;border-radius:1px}
+.unit-row{
+  display:grid;grid-template-columns:repeat(9,1fr);gap:4px;align-items:center;border-radius:8px;padding:6px
+}
+.unit-row input,.unit-row select{text-align:center;padding:4px}
+.unit-char{background:var(--char-bg);border-left:3px solid var(--yellow)}
+.unit-pet {background:var(--pet-bg); border-left:3px solid var(--yellow)}
+
+.slider-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.slider-row label{width:160px}
+.slider-row input[type=range]{flex:1;accent-color:var(--yellow)}
+.slider-row span{width:50px;text-align:right}
+
+#orderPanel{display:none}
+#orderPanel table{width:100%;border-collapse:collapse}
+#orderPanel th,#orderPanel td{padding:6px;border-bottom:1px solid var(--ring);text-align:center}
+#orderPanel select,#orderPanel input{width:100%}
+
 .log{
-  width:100%;height:220px;background:#09172b;
-  border:1px solid var(--ring);border-radius:8px;
-  color:var(--ink);font-family:monospace;resize:none;overflow:auto;
+  height:240px;width:100%;font-family:monospace;line-height:1.25;
+  background:#09172b;border:1px solid var(--ring);border-radius:8px;resize:none;overflow-y:auto
 }
-#orderPanel { display:none; margin-top:10px; }
-#orderPanel input, #orderPanel select { margin:2px; }
-footer { text-align:center; color:var(--muted); margin-top:40px; }
+
+footer{position:relative;margin-top:18px;text-align:center;color:var(--muted);font-size:13px}
+footer a{color:var(--yellow);text-decoration:none}
+footer a:hover{text-decoration:underline}
 </style>
 </head>
 <body>
-<h1>🗿 미궁 듀얼 시뮬레이터 (완전판)</h1>
+<h1>🗿 미궁 듀얼 시뮬레이터</h1>
+<p class="sub">10vs10 · 자동/오더/시뮬레이션 통합 · 지&gt;수&gt;화&gt;풍&gt;지 상성</p>
 
-<div class="card">
-  <strong>🎮 전투 모드 선택</strong><br>
+<!-- 모드 선택 -->
+<section class="card">
+  <div><strong>🎮 전투 모드</strong></div>
   <label><input type="radio" name="mode" value="auto" checked> 자동 모드</label>
-  <label><input type="radio" name="mode" value="manual"> 수동 모드</label>
+  &nbsp;&nbsp;
+  <label><input type="radio" name="mode" value="manual"> 오더(수동) 모드</label>
+  &nbsp;&nbsp;
   <label><input type="radio" name="mode" value="sim"> 시뮬레이션 모드</label>
-</div>
+  <div class="hr"></div>
+  <div class="grid3">
+    <div><label>시뮬레이션 횟수</label><input id="simN" value="200"></div>
+    <div><label>랜덤변동(%)</label><input id="rngVar" value="20"></div>
+    <div style="display:flex;justify-content:flex-end;gap:8px">
+      <button class="btn-ghost" id="fillTeams">샘플 채우기</button>
+      <button class="btn-ghost" id="resetBtn">🧹 리셋</button>
+      <button class="btn" id="runBtn">▶ 실행</button>
+      <button class="btn" id="nextTurnBtn" style="display:none">⏭ 다음 턴</button>
+    </div>
+  </div>
+</section>
 
-<div class="card">
-  <button class="btn" id="runBtn">▶ 실행</button>
-  <button class="btn" id="nextTurnBtn" style="display:none;">⏭ 다음 턴</button>
-</div>
+<!-- 자동 모드 확률 슬라이더 -->
+<section class="card" id="autoPanel">
+  <div class="mini">자동 모드 기술 확률 (%)</div>
+  <div class="slider-row"><label>공격</label><input type="range" id="p_attack" min="0" max="100" value="55"><span id="pv_attack">55%</span></div>
+  <div class="slider-row"><label>방어</label><input type="range" id="p_guard"  min="0" max="100" value="15"><span id="pv_guard">15%</span></div>
+  <div class="slider-row"><label>가드브레이크</label><input type="range" id="p_gb" min="0" max="100" value="10"><span id="pv_gb">10%</span></div>
+  <div class="slider-row"><label>배수의진2</label><input type="range" id="p_bmul" min="0" max="100" value="10"><span id="pv_bmul">10%</span></div>
+  <div class="slider-row"><label>다굴</label><input type="range" id="p_multi" min="0" max="100" value="5"><span id="pv_multi">5%</span></div>
+  <div class="slider-row"><label>회복술</label><input type="range" id="p_heal" min="0" max="100" value="5"><span id="pv_heal">5%</span></div>
+  <div class="slider-row"><label>속성공격</label><input type="range" id="p_elem" min="0" max="100" value="0"><span id="pv_elem">0%</span></div>
+  <div class="mini">* 합이 100%가 아니어도 비례하여 가중치로 사용됨</div>
+</section>
 
-<div class="card" id="orderPanel">
-  <h3>🧠 수동 오더 입력</h3>
+<!-- 팀 입력 -->
+<section class="card">
+  <div class="team-columns">
+    <div class="team-col">
+      <h3>⚔️ Team A</h3>
+      <div id="teamA"></div>
+    </div>
+    <div class="team-col">
+      <h3>🛡️ Team B</h3>
+      <div id="teamB"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 오더(수동) 패널 -->
+<section class="card" id="orderPanel">
+  <h3>🧠 오더(수동) 입력 — 이번 턴 명령</h3>
   <table>
-    <thead><tr><th>유닛</th><th>기술</th><th>대상</th></tr></thead>
+    <thead>
+      <tr><th>유닛</th><th>기술</th><th>대상</th></tr>
+    </thead>
     <tbody id="orderBody"></tbody>
   </table>
-</div>
+  <p class="mini">• 대상은 기본적으로 적을 가리키며, <strong>회복술</strong> 선택 시 아군 대상이 적용됩니다.</p>
+</section>
 
-<div class="card">
-  <h3>📜 전투 로그</h3>
-  <textarea id="log" class="log" readonly></textarea>
-</div>
+<!-- 결과/로그 -->
+<section class="card">
+  <div class="grid2">
+    <div><div class="mini">A 승률(시뮬)</div><div id="kpiA" style="font-weight:900;font-size:22px">-</div></div>
+    <div><div class="mini">B 승률(시뮬)</div><div id="kpiB" style="font-weight:900;font-size:22px">-</div></div>
+  </div>
+  <div class="hr"></div>
+  <div class="mini">전투 로그</div>
+  <textarea id="log" class="log" readonly placeholder="전투 로그 출력 영역"></textarea>
+</section>
 
 <script>
-const baseUnits = [
-  {name:"A1",team:"A",atk:150,def:120,hp:500,spd:160,elem:"지"},
-  {name:"A펫",team:"A",atk:120,def:160,hp:600,spd:130,elem:"수"},
-  {name:"B1",team:"B",atk:150,def:120,hp:500,spd:150,elem:"화"},
-  {name:"B펫",team:"B",atk:120,def:160,hp:600,spd:140,elem:"풍"}
-];
-let units=[];
-let turn=1;
-const logEl=document.getElementById("log");
-const orderPanel=document.getElementById("orderPanel");
-const orderBody=document.getElementById("orderBody");
-const runBtn=document.getElementById("runBtn");
-const nextTurnBtn=document.getElementById("nextTurnBtn");
+/* ========== 유틸 ========== */
+const elems = ["지","수","화","풍"];
+function $(id){return document.getElementById(id)}
+function log(msg){ const el=$("log"); el.value += msg + "\\n"; el.scrollTop = el.scrollHeight; }
+function rndIn(v, rng){ return v * (1 + (Math.random()*2-1) * (rng||0)); }
 
-function log(msg){ logEl.value += msg + "\n"; logEl.scrollTop = logEl.scrollHeight; }
-
-function reset(){
-  logEl.value=""; turn=1;
-  units = baseUnits.map(u=>({...u,hp:u.hp+Math.random()*50,alive:true}));
+/* ========== 상성 ========== */
+function elemAdv(att, def){
+  // 지>수>화>풍>지 (유리 1.2 / 불리 0.8 / 동일 1.0)
+  if(att===def) return 1.0;
+  if(att==="지"&&def==="수") return 1.2;
+  if(att==="수"&&def==="화") return 1.2;
+  if(att==="화"&&def==="풍") return 1.2;
+  if(att==="풍"&&def==="지") return 1.2;
+  // 반대로 맞으면 0.8
+  if(def==="지"&&att==="수") return 0.8;
+  if(def==="수"&&att==="화") return 0.8;
+  if(def==="화"&&att==="풍") return 0.8;
+  if(def==="풍"&&att==="지") return 0.8;
+  return 1.0;
 }
 
-function getMode(){ return document.querySelector('input[name="mode"]:checked').value; }
-
-function randomAction(){
-  const acts=["공격","방어","가드브레이크","배수의진2","다굴","회복술","속성공격"];
-  return acts[Math.floor(Math.random()*acts.length)];
-}
-
-function getTarget(u){
-  const enemies=units.filter(x=>x.team!==u.team && x.alive);
-  return enemies[Math.floor(Math.random()*enemies.length)];
-}
-
-function elemAdv(a,b){
-  // 지>수>화>풍>지 순환
-  if(a==="지"&&b==="수")return 1.2;
-  if(a==="수"&&b==="화")return 1.2;
-  if(a==="화"&&b==="풍")return 1.2;
-  if(a==="풍"&&b==="지")return 1.2;
-  if(a===b)return 1.0;
-  return 0.8;
-}
-
-function damageCalc(atk,def,mul=1){return Math.max(1,Math.floor((atk-def/2)*mul + Math.random()*20));}
-
-function doAction(u,tgt,act){
-  if(!u.alive||!tgt)return;
-  let dmg=0;
-  if(act==="공격"){ dmg=damageCalc(u.atk,tgt.def); }
-  else if(act==="가드브레이크"){ dmg=damageCalc(u.atk*1.2,tgt.def,1.1); }
-  else if(act==="배수의진2"){ dmg=damageCalc(u.atk*1.5,tgt.def*0.7,1.0); }
-  else if(act==="속성공격"){ const mult=elemAdv(u.elem,tgt.elem); dmg=damageCalc(u.atk,tgt.def,mult); log(`속성 배율: ${mult.toFixed(1)}x`); }
-  else if(act==="다굴"){
-    const allies=units.filter(x=>x.team===u.team && x!==u && x.alive).slice(0,2);
-    [u,...allies].forEach(a=>{
-      const d=damageCalc(a.atk,tgt.def,0.9);
-      tgt.hp-=d; if(tgt.hp<=0){tgt.alive=false;tgt.hp=0;}
-      log(`[턴${turn}] ${a.name} ▶ ${tgt.name} 다굴 ${d} 데미지`);
-    });
-    return;
+/* ========== 유닛 클래스 ========== */
+class Unit{
+  constructor(team, idx, kind, atk, def, spd, hp, elem){
+    this.team = team;                 // "A" | "B"
+    this.idx = idx;                   // 1..10
+    this.kind = kind;                 // "캐릭터" | "페트"
+    this.name = `${team}${idx}${kind==="캐릭터"?"C":"P"}`;
+    this.base = { atk:+atk||0, def:+def||0, spd:+spd||0, hp:+hp||0 };
+    this.atk = +atk||0;
+    this.def = +def||0;
+    this.spd = +spd||0;
+    this.max_hp = +hp||0;
+    this.hp = +hp||0;
+    this.elem = elem||"지";
+    this.alive = this.hp>0;
+    this.guard = false;
+    this.gb = false;
   }
-  else if(act==="회복술"){
-    const ally=units.filter(x=>x.team===u.team && x.alive).sort(()=>Math.random()-0.5)[0];
-    const heal=80+Math.random()*40; ally.hp+=heal;
-    log(`[턴${turn}] ${u.name} ▶ ${ally.name} 회복 ${heal.toFixed(0)} HP`);
-    return;
+  isAlive(){ return this.alive && this.hp>0; }
+  takeDamage(d){ this.hp = Math.max(0, this.hp - d); if(this.hp<=0)this.alive=false; }
+  heal(v){ this.hp = Math.min(this.max_hp, this.hp + v); }
+  resetTurn(){ this.guard = false; this.gb = false; }
+}
+
+/* ========== 입력 UI 빌드 ========== */
+function makeUnitRow(team,i,kind){
+  return `
+   <div class="unit-row ${kind==="캐릭터"?"unit-char":"unit-pet"}">
+     <input id="${team}_atk_${i}_${kind}" placeholder="공">
+     <input id="${team}_def_${i}_${kind}" placeholder="방">
+     <input id="${team}_spd_${i}_${kind}" placeholder="순">
+     <input id="${team}_hp_${i}_${kind}"  placeholder="체">
+     <select id="${team}_elem_${i}_${kind}">
+       ${elems.map(e=>`<option value="${e}">${e}</option>`).join('')}
+     </select>
+     <select id="${team}_kind_${i}_${kind}" disabled>
+       <option>${kind}</option>
+     </select>
+     <input id="${team}_name_${i}_${kind}" placeholder="(선택)이름">
+     <select id="${team}_dummy_${i}_${kind}" disabled>
+       <option> </option>
+     </select>
+     <select id="${team}_dummy2_${i}_${kind}" disabled>
+       <option> </option>
+     </select>
+   </div>`;
+}
+
+function buildTeams(){
+  const buildCol = (team) => {
+    const host = team==="A" ? $("teamA") : $("teamB");
+    host.innerHTML = "";
+    for(let p=1;p<=5;p++){
+      host.insertAdjacentHTML("beforeend", `
+        <div class="unit-pair">
+          <div class="unit-label">${p}️⃣ 캐릭터 — 🐾 페트</div>
+          <div class="pair-line"></div>
+          ${makeUnitRow(team,p,"캐릭터")}
+          ${makeUnitRow(team,p,"페트")}
+        </div>`);
+    }
+  };
+  buildCol("A"); buildCol("B");
+}
+
+/* ========== 입력값 → 유닛 배열 ========== */
+function readTeam(team, rngVar){
+  const arr=[];
+  for(let p=1;p<=5;p++){
+    for(const kind of ["캐릭터","페트"]){
+      const atk = +$(`${team}_atk_${p}_${kind}`).value||0;
+      const def = +$(`${team}_def_${p}_${kind}`).value||0;
+      const spd = +$(`${team}_spd_${p}_${kind}`).value||0;
+      const hp  = +$(`${team}_hp_${p}_${kind}`).value||0;
+      const el  =  $(`${team}_elem_${p}_${kind}`).value || "지";
+      const u = new Unit(team, (p-1)*2 + (kind==="캐릭터"?1:2), kind,
+                         rndIn(atk, rngVar), rndIn(def, rngVar), rndIn(spd, rngVar), rndIn(hp, rngVar), el);
+      const nm  = $(`${team}_name_${p}_${kind}`).value.trim();
+      if(nm) u.name = nm;
+      arr.push(u);
+    }
   }
-  else if(act==="방어"){ log(`[턴${turn}] ${u.name} ▶ 방어`); return; }
-
-  tgt.hp-=dmg; if(tgt.hp<=0){tgt.alive=false;tgt.hp=0;}
-  log(`[턴${turn}] ${u.name}(${act}) → ${tgt.name} ${dmg} 데미지 (HP ${tgt.hp.toFixed(0)})`);
+  return arr;
 }
 
-function manualAction(u){
-  const actSel=document.getElementById(`${u.name}_act`);
-  const tgtSel=document.getElementById(`${u.name}_target`);
-  const act=actSel?actSel.value:"공격";
-  const tgtName=tgtSel?tgtSel.value.trim():"";
-  let target=units.find(x=>x.name===tgtName && x.alive);
-  if(!target) target=getTarget(u);
-  doAction(u,target,act);
-}
-
-function buildOrders(){
-  orderBody.innerHTML="";
-  units.filter(u=>u.alive).forEach(u=>{
-    const tr=document.createElement("tr");
-    tr.innerHTML=`
-      <td>${u.name}</td>
-      <td>
-        <select id="${u.name}_act">
-          <option>공격</option>
-          <option>방어</option>
-          <option>가드브레이크</option>
-          <option>배수의진2</option>
-          <option>다굴</option>
-          <option>회복술</option>
-          <option>속성공격</option>
-        </select>
-      </td>
-      <td><input id="${u.name}_target" placeholder="예: B1 or A펫"></td>
-    `;
-    orderBody.appendChild(tr);
+/* ========== 자동 모드 확률 ========== */
+function getAutoWeights(){
+  const w = {
+    공격: +$("p_attack").value||0,
+    방어: +$("p_guard").value||0,
+    가드브레이크: +$("p_gb").value||0,
+    배수의진2: +$("p_bmul").value||0,
+    다굴: +$("p_multi").value||0,
+    회복술: +$("p_heal").value||0,
+    속성공격: +$("p_elem").value||0
+  };
+  const sum = Object.values(w).reduce((a,b)=>a+b,0)||1;
+  const keys = Object.keys(w);
+  let acc=0;
+  const ranges = keys.map(k=>{
+    const r = acc + w[k]/sum;
+    const out = {key:k, from:acc, to:r};
+    acc = r; return out;
   });
+  return {ranges, keys};
+}
+function autoPickAction(){
+  const {ranges} = getAutoWeights();
+  const r = Math.random();
+  for(const seg of ranges){ if(r >= seg.from && r < seg.to) return seg.key; }
+  return "공격";
 }
 
-function runTurn(){
-  log(`\n🌀 --- 턴 ${turn} ---`);
-  const aliveUnits=units.filter(u=>u.alive).sort((a,b)=>b.spd-a.spd);
-  for(const u of aliveUnits){
-    if(!u.alive) continue;
-    const mode=getMode();
-    if(mode==="auto"){ doAction(u,getTarget(u),randomAction()); }
-    else manualAction(u);
+/* ========== 타겟 선택 ========== */
+function pickEnemy(units, me){
+  const list = units.filter(u=>u.team!==me.team && u.isAlive());
+  return list[Math.floor(Math.random()*list.length)]||null;
+}
+function pickAlly(units, me){
+  const list = units.filter(u=>u.team===me.team && u.isAlive());
+  return list[Math.floor(Math.random()*list.length)]||null;
+}
+
+/* ========== 대미지 계산 ========== */
+function calcDamage(attacker, defender, rngMul=0, atkMul=1, defMul=1, elemAttack=false){
+  const atk = attacker.atk * atkMul;
+  let def = defender.def * defMul;
+  let mult = 1.0;
+  if(elemAttack){
+    mult = elemAdv(attacker.elem, defender.elem);
+    log(`   ↳ 속성배율 ${attacker.elem}→${defender.elem} = ${mult.toFixed(1)}x`);
   }
-  const aAlive=units.filter(u=>u.team==="A"&&u.alive).length;
-  const bAlive=units.filter(u=>u.team==="B"&&u.alive).length;
-  log(`잔존: A=${aAlive} / B=${bAlive}`);
-  if(aAlive===0||bAlive===0){
-    log(`🏁 전투 종료: ${aAlive>bAlive?"A팀 승리":"B팀 승리"}!`);
-    nextTurnBtn.style.display="none";
-  } else turn++;
+  let dmg = Math.max(1, Math.floor((atk - def/2) * mult));
+  if(rngMul>0){ dmg = Math.floor(dmg * (1 + (Math.random()*2-1) * rngMul)); }
+  if(defender.guard) dmg = Math.floor(dmg * 0.5);
+  return Math.max(1, dmg);
 }
 
-function simulateMany(n=100){
-  let aWin=0,bWin=0;
+/* ========== 행동 실행 ========== */
+function doAction(units, me, target, act, rngMul){
+  if(!me?.isAlive()) return;
+  if(act==="방어"){ me.guard = true; log(`[턴${state.turn}] ${me.name} ▶ 방어`); return; }
+
+  if(act==="회복술"){
+    const ally = target && target.team===me.team ? target : pickAlly(units, me);
+    if(!ally) return;
+    const heal = Math.floor(80 + Math.random()*40);
+    ally.heal(heal);
+    log(`[턴${state.turn}] ${me.name} ▶ ${ally.name} 회복 ${heal}`);
+    return;
+  }
+
+  // 공격 계열은 타겟이 적이어야 함
+  const tgt = (target && target.team!==me.team) ? target : pickEnemy(units, me);
+  if(!tgt) return;
+
+  let dmg = 0;
+  if(act==="공격"){
+    dmg = calcDamage(me, tgt, rngMul);
+  }else if(act==="가드브레이크"){
+    dmg = calcDamage(me, tgt, rngMul, 1.2, 0.9, false); // 약간의 방무 성격
+  }else if(act==="배수의진2"){
+    dmg = calcDamage(me, tgt, rngMul, 1.5, 0.7, false);
+  }else if(act==="속성공격"){
+    dmg = calcDamage(me, tgt, rngMul, 1.0, 1.0, true);
+  }else if(act==="다굴"){
+    const allies = units.filter(u=>u.team===me.team && u!==me && u.isAlive())
+                        .sort((a,b)=>b.spd-a.spd).slice(0,2);
+    const attackers = [me, ...allies];
+    for(const a of attackers){
+      const d = calcDamage(a, tgt, rngMul, 0.95, 1.0, false);
+      tgt.takeDamage(d);
+      log(`[턴${state.turn}] ${a.name} ▶ ${tgt.name} 다굴 ${d} (HP ${tgt.hp})`);
+      if(!tgt.isAlive()) return;
+    }
+    return;
+  }else{
+    // 안전장치: 정의 안 된 행동은 기본 공격
+    dmg = calcDamage(me, tgt, rngMul);
+  }
+
+  tgt.takeDamage(dmg);
+  log(`[턴${state.turn}] ${me.name}(${act}) → ${tgt.name} ${dmg} (HP ${tgt.hp})`);
+}
+
+/* ========== 오더(수동) UI ========== */
+function buildOrderPanel(units){
+  const body = $("orderBody");
+  body.innerHTML = "";
+  const alive = units.filter(u=>u.isAlive()).sort((a,b)=>a.team.localeCompare(b.team)||a.idx-b.idx);
+  const enemyOptions = (team)=> units.filter(u=>u.team!==team && u.isAlive());
+  const allyOptions  = (team)=> units.filter(u=>u.team===team && u.isAlive());
+
+  for(const u of alive){
+    const enemies = enemyOptions(u.team).map(x=>`<option value="${x.name}">${x.name}</option>`).join('');
+    const allies  = allyOptions(u.team).map(x=>`<option value="${x.name}">${x.name}</option>`).join('');
+    const targetOptions = `
+      <optgroup label="적">
+        ${enemies || '<option disabled>없음</option>'}
+      </optgroup>
+      <optgroup label="아군(회복술)">
+        ${allies || '<option disabled>없음</option>'}
+      </optgroup>
+    `;
+    body.insertAdjacentHTML("beforeend", `
+      <tr>
+        <td style="text-align:left">${u.name}</td>
+        <td>
+          <select id="act_${u.name}">
+            <option>공격</option>
+            <option>방어</option>
+            <option>가드브레이크</option>
+            <option>배수의진2</option>
+            <option>다굴</option>
+            <option>회복술</option>
+            <option>속성공격</option>
+          </select>
+        </td>
+        <td>
+          <select id="tgt_${u.name}">
+            ${targetOptions}
+          </select>
+        </td>
+      </tr>
+    `);
+  }
+}
+
+/* ========== 상태 및 턴 진행 ========== */
+const state = {
+  turn: 1,
+  units: []
+};
+
+function readAllUnits(){
+  const rngVar = (+$("rngVar").value||0)/100;
+  const A = readTeam("A", rngVar);
+  const B = readTeam("B", rngVar);
+  return [...A, ...B];
+}
+
+function aliveCount(units, team){ return units.filter(u=>u.team===team && u.isAlive()).length; }
+
+function runOneTurn(units, mode){
+  log(`\\n🌀 --- 턴 ${state.turn} (${mode}) ---`);
+  const order = units.filter(u=>u.isAlive()).sort((a,b)=>b.spd-a.spd || (a.team==="A"?-1:1));
+  const rngMul = (+$("rngVar").value||0)/100;
+
+  for(const u of order){ u.resetTurn(); }
+
+  for(const me of order){
+    if(!me.isAlive()) continue;
+
+    let act="공격", target=null;
+
+    if(mode==="auto" || mode==="sim"){
+      act = autoPickAction();
+      if(act==="회복술") target = pickAlly(units, me);
+      else target = pickEnemy(units, me);
+    }else{ // manual
+      const selAct = $(`act_${me.name}`);
+      const selTgt = $(`tgt_${me.name}`);
+      act = selAct ? selAct.value : "공격";
+      const tgtName = selTgt ? selTgt.value : "";
+      target = units.find(x=>x.name===tgtName && x.isAlive()) || null;
+    }
+
+    doAction(units, me, target, act, rngMul);
+  }
+
+  const aAlive = aliveCount(units,"A");
+  const bAlive = aliveCount(units,"B");
+  log(`잔존: A=${aAlive} / B=${bAlive}`);
+
+  if(aAlive===0 || bAlive===0){
+    log(`\\n🏁 전투 종료: ${aAlive>bAlive?"A팀 승리":"B팀 승리"}!`);
+    return true; // ended
+  }
+
+  state.turn++;
+  return false;
+}
+
+/* ========== 시뮬레이션 ========== */
+function simulateMany(n){
+  let aWin=0, bWin=0;
   for(let i=0;i<n;i++){
-    units = baseUnits.map(u=>({...u,hp:u.hp+Math.random()*50,alive:true}));
-    while(units.some(u=>u.team==="A"&&u.alive)&&units.some(u=>u.team==="B"&&u.alive)){
-      const aliveUnits=units.filter(u=>u.alive).sort((a,b)=>b.spd-a.spd);
-      for(const u of aliveUnits){
-        if(!u.alive) continue;
-        doAction(u,getTarget(u),randomAction());
+    const units = readAllUnits();
+    state.turn = 1;
+    let ended=false, guard=0;
+    while(!ended && guard<200){
+      ended = runOneTurn(units, "sim");
+      guard++;
+    }
+    const aAlive = aliveCount(units,"A");
+    const bAlive = aliveCount(units,"B");
+    if(aAlive>bAlive) aWin++; else bWin++;
+  }
+  const aRate = (aWin/n*100).toFixed(1);
+  const bRate = (bWin/n*100).toFixed(1);
+  $("kpiA").innerText = aRate+"%";
+  $("kpiB").innerText = bRate+"%";
+  log(`\\n📊 ${n}회 결과 → A ${aRate}% / B ${bRate}%`);
+}
+
+/* ========== 샘플 채우기 ========== */
+function fillSample(){
+  const set=(id,v)=>{ const el=$(id); if(el) el.value=v; };
+  for(const T of ["A","B"]){
+    for(let p=1;p<=5;p++){
+      for(const K of ["캐릭터","페트"]){
+        const base = (T==="A"?1.0:1.0) * (K==="캐릭터"?1.0:0.95);
+        set(`${T}_atk_${p}_${K}`, Math.floor(140*base + (K==="캐릭터"?20:0)));
+        set(`${T}_def_${p}_${K}`, Math.floor(120*base + (K==="페트"?30:0)));
+        set(`${T}_spd_${p}_${K}`, Math.floor(150*base + (K==="캐릭터"?20:-10)));
+        set(`${T}_hp_${p}_${K}`,  Math.floor(900*base + (K==="페트"?150:0)));
+        set(`${T}_elem_${p}_${K}`, elems[(p-1)%4]);
+        set(`${T}_name_${p}_${K}`, `${T}${p}${K==="캐릭터"?"C":"P"}`);
       }
     }
-    const aAlive=units.filter(u=>u.team==="A"&&u.alive).length;
-    const bAlive=units.filter(u=>u.team==="B"&&u.alive).length;
-    if(aAlive>bAlive)aWin++;else bWin++;
   }
-  const aRate=(aWin/n*100).toFixed(1), bRate=(bWin/n*100).toFixed(1);
-  log(`\n📊 시뮬레이션 결과: A팀 ${aRate}% / B팀 ${bRate}%`);
+  log("✔ 샘플 능력치가 채워졌습니다.");
 }
 
+/* ========== 슬라이더 표시값 ========== */
+["attack","guard","gb","bmul","multi","heal","elem"].forEach(k=>{
+  const s = $(`p_${k}`), v = $(`pv_${k}`);
+  s.addEventListener("input", ()=> v.textContent = s.value + "%");
+  v.textContent = s.value + "%";
+});
+
+/* ========== 이벤트 ========== */
+$("runBtn").addEventListener("click", ()=>{
+  const mode = document.querySelector('input[name="mode"]:checked').value;
+  $("log").value="";
+  state.turn = 1;
+
+  if(mode==="sim"){
+    const n = parseInt($("simN").value)||100;
+    simulateMany(n);
+    return;
+  }
+
+  state.units = readAllUnits();
+
+  // 오더 모드 UI
+  if(mode==="manual"){
+    $("orderPanel").style.display="block";
+    $("nextTurnBtn").style.display="inline-block";
+    $("runBtn").style.display="none";
+    buildOrderPanel(state.units);
+    log("▶ 오더 모드 시작 — 명령 설정 후 [다음 턴]을 누르세요.");
+    return;
+  }
+
+  // 자동 모드: 5턴 진행 (중간 종료 가능)
+  $("orderPanel").style.display="none";
+  $("nextTurnBtn").style.display="none";
+  $("runBtn").style.display="inline-block";
+
+  let ended=false, guard=0;
+  while(!ended && guard<5){
+    ended = runOneTurn(state.units, "auto");
+    guard++;
+  }
+  if(!ended) log("🏁 자동 모드 5턴 종료");
+});
+
+$("nextTurnBtn").addEventListener("click", ()=>{
+  const ended = runOneTurn(state.units, "manual");
+  if(ended){
+    $("nextTurnBtn").style.display="none";
+    $("runBtn").style.display="inline-block";
+  }else{
+    buildOrderPanel(state.units);
+  }
+});
+
+$("resetBtn").addEventListener("click", ()=>{
+  $("log").value="";
+  $("kpiA").innerText="-"; $("kpiB").innerText="-";
+  state.turn = 1; state.units = [];
+  log("🧹 리셋 완료");
+});
+
+$("fillTeams").addEventListener("click", fillSample);
+
 document.querySelectorAll('input[name="mode"]').forEach(r=>{
-  r.addEventListener("change",()=>{
-    const mode=getMode();
-    if(mode==="manual"){ orderPanel.style.display="block"; buildOrders(); runBtn.style.display="none"; nextTurnBtn.style.display="inline-block"; }
-    else { orderPanel.style.display="none"; runBtn.style.display="inline-block"; nextTurnBtn.style.display="none"; }
+  r.addEventListener("change", ()=>{
+    const mode = document.querySelector('input[name="mode"]:checked').value;
+    if(mode==="manual"){
+      $("orderPanel").style.display="block";
+      $("nextTurnBtn").style.display="inline-block";
+      $("runBtn").style.display="none";
+      state.units = readAllUnits();
+      buildOrderPanel(state.units);
+    }else{
+      $("orderPanel").style.display="none";
+      $("nextTurnBtn").style.display="none";
+      $("runBtn").style.display="inline-block";
+    }
+    $("autoPanel").style.display = (mode==="auto"||mode==="sim") ? "block" : "block"; // 확률패널 항상 보여줘도 OK
   });
 });
 
-runBtn.onclick=()=>{
-  reset();
-  const mode=getMode();
-  if(mode==="sim"){ log("▶ 시뮬레이션 100회 실행"); simulateMany(100); }
-  else { log("▶ 자동 전투 시작!"); for(let i=0;i<5;i++) runTurn(); log("🏁 종료"); }
-};
-
-nextTurnBtn.onclick=()=>{
-  runTurn();
-  if(getMode()==="manual") buildOrders();
-};
+/* 초기 빌드 */
+buildTeams();
 </script>
 
 <footer>
-  © 2025 <strong>storazi</strong>. All rights reserved ｜ MIT License
+  © 2025 <strong>storazi</strong>. All rights reserved. |
+  Licensed under <a href="https://opensource.org/licenses/MIT" target="_blank">MIT</a>.
 </footer>
 </body>
 </html>
