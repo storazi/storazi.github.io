@@ -99,8 +99,6 @@ footer a:hover{text-decoration:underline}
   <div class="slider-row"><label>가드브레이크</label><input type="range" id="p_gb" min="0" max="100" value="10"><span id="pv_gb">10%</span></div>
   <div class="slider-row"><label>배수의진2</label><input type="range" id="p_bmul" min="0" max="100" value="10"><span id="pv_bmul">10%</span></div>
   <div class="slider-row"><label>다굴</label><input type="range" id="p_multi" min="0" max="100" value="5"><span id="pv_multi">5%</span></div>
-  <div class="slider-row"><label>회복술</label><input type="range" id="p_heal" min="0" max="100" value="5"><span id="pv_heal">5%</span></div>
-  <div class="slider-row"><label>속성공격</label><input type="range" id="p_elem" min="0" max="100" value="0"><span id="pv_elem">0%</span></div>
   <div class="mini">* 합이 100%가 아니어도 비례하여 가중치로 사용됨</div>
 </section>
 
@@ -127,7 +125,7 @@ footer a:hover{text-decoration:underline}
     </thead>
     <tbody id="orderBody"></tbody>
   </table>
-  <p class="mini">• 대상은 기본적으로 적을 가리키며, <strong>회복술</strong> 선택 시 아군 대상이 적용됩니다.</p>
+  <p class="mini">• 대상은 기본적으로 적을 가리킵니다.</p>
 </section>
 
 <!-- 결과/로그 -->
@@ -257,8 +255,7 @@ function getAutoWeights(){
     가드브레이크: +$("p_gb").value||0,
     배수의진2: +$("p_bmul").value||0,
     다굴: +$("p_multi").value||0,
-    회복술: +$("p_heal").value||0,
-    속성공격: +$("p_elem").value||0
+    
   };
   const sum = Object.values(w).reduce((a,b)=>a+b,0)||1;
   const keys = Object.keys(w);
@@ -307,14 +304,7 @@ function doAction(units, me, target, act, rngMul){
   if(!me?.isAlive()) return;
   if(act==="방어"){ me.guard = true; log(`[턴${state.turn}] ${me.name} ▶ 방어`); return; }
 
-  if(act==="회복술"){
-    const ally = target && target.team===me.team ? target : pickAlly(units, me);
-    if(!ally) return;
-    const heal = Math.floor(80 + Math.random()*40);
-    ally.heal(heal);
-    log(`[턴${state.turn}] ${me.name} ▶ ${ally.name} 회복 ${heal}`);
-    return;
-  }
+   }
 
   // 공격 계열은 타겟이 적이어야 함
   const tgt = (target && target.team!==me.team) ? target : pickEnemy(units, me);
@@ -327,9 +317,7 @@ function doAction(units, me, target, act, rngMul){
     dmg = calcDamage(me, tgt, rngMul, 1.2, 0.9, false); // 약간의 방무 성격
   }else if(act==="배수의진2"){
     dmg = calcDamage(me, tgt, rngMul, 1.5, 0.7, false);
-  }else if(act==="속성공격"){
-    dmg = calcDamage(me, tgt, rngMul, 1.0, 1.0, true);
-  }else if(act==="다굴"){
+    }else if(act==="다굴"){
     const allies = units.filter(u=>u.team===me.team && u!==me && u.isAlive())
                         .sort((a,b)=>b.spd-a.spd).slice(0,2);
     const attackers = [me, ...allies];
@@ -364,8 +352,7 @@ function buildOrderPanel(units){
       <optgroup label="적">
         ${enemies || '<option disabled>없음</option>'}
       </optgroup>
-      <optgroup label="아군(회복술)">
-        ${allies || '<option disabled>없음</option>'}
+      
       </optgroup>
     `;
     body.insertAdjacentHTML("beforeend", `
@@ -378,8 +365,7 @@ function buildOrderPanel(units){
             <option>가드브레이크</option>
             <option>배수의진2</option>
             <option>다굴</option>
-            <option>회복술</option>
-            <option>속성공격</option>
+            
           </select>
         </td>
         <td>
@@ -420,8 +406,7 @@ function runOneTurn(units, mode){
     let act="공격", target=null;
 
     if(mode==="auto" || mode==="sim"){
-      act = autoPickAction();
-      if(act==="회복술") target = pickAlly(units, me);
+      
       else target = pickEnemy(units, me);
     }else{ // manual
       const selAct = $(`act_${me.name}`);
@@ -579,3 +564,4 @@ buildTeams();
 </footer>
 </body>
 </html>
+
