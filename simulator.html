@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>🗿 미궁 듀얼 시뮬레이터</title>
+<title>🗿 미궁 듀얼 시뮬레이터 </title>
 <style>
 :root {
   --bg:#0b1426;--panel:#0f1e3a;--soft:#11234a;--ring:#1e396e;
@@ -54,7 +54,7 @@ button:hover{opacity:.9}
 #log .unitA{color:#68c3ff;font-weight:600;}
 #log .unitB{color:#ff7f7f;font-weight:600;}
 #log .hit{color:#7df58a;}
-#log .hp{color:#a9b5cc;}
+#log .hp{color:var(--muted);}
 .order-dead{opacity:0.5;background:#1a1a2a !important;}
 footer{text-align:center;color:var(--muted);font-size:13px;margin-top:20px}
 </style>
@@ -118,6 +118,8 @@ footer{text-align:center;color:var(--muted);font-size:13px;margin-top:20px}
 <script>
 document.addEventListener("DOMContentLoaded",()=>{
 
+const UNIT_COUNT = 10;   // 
+
 const logEl=document.getElementById("log");
 function logClear(){logEl.innerHTML="";}
 function logLine(html){logEl.insertAdjacentHTML("beforeend",html+"<br>");logEl.scrollTop=logEl.scrollHeight;}
@@ -125,11 +127,12 @@ function logLine(html){logEl.insertAdjacentHTML("beforeend",html+"<br>");logEl.s
 const elems=["지","수","화","풍"];
 const skills=["공격","방어","가드브레이크","배수의진2","다굴"];
 
+
 // ----------------- 스탯 입력 생성 -----------------
 function buildTeamHTML(team){
   const host=document.getElementById("team"+team);
   host.innerHTML="";
-  for(let i=1;i<=5;i++){
+  for(let i=1;i<=UNIT_COUNT;i++){
     const row=document.createElement("div");
     row.className="unit-row";
 
@@ -145,11 +148,12 @@ function buildTeamHTML(team){
       <select id="${team}_unit_${i}_role">
         <option value="캐릭터">캐릭터</option>
         <option value="페트">페트</option>
-      </select>`;
-      
+      </select>
+    `;
+
     host.appendChild(row);
 
-    // 선택 시 배경색 변경
+    // 페트 선택 시 배경 변경
     row.querySelector(`#${team}_unit_${i}_role`).addEventListener("change", e=>{
       row.classList.toggle("pet", e.target.value==="페트");
     });
@@ -161,51 +165,49 @@ buildTeamHTML("B");
 
 // ----------------- 임의 스탯 생성 -----------------
 function randStat(team){
-  for(let i=1;i<=5;i++){
+  for(let i=1;i<=UNIT_COUNT;i++){
     const atk = Math.floor(100 + Math.random()*100);
-    const def = Math.floor(80 + Math.random()*80);
-    const spd = Math.floor(80 + Math.random()*100);
+    const def = Math.floor(80  + Math.random()*80);
+    const spd = Math.floor(80  + Math.random()*100);
     const hp  = Math.floor(700 + Math.random()*500);
-    const e1  = elems[Math.floor(Math.random()*elems.length)];
-    const e2  = elems[Math.floor(Math.random()*elems.length)];
 
     document.getElementById(`${team}_unit_${i}_atk`).value = atk;
     document.getElementById(`${team}_unit_${i}_def`).value = def;
     document.getElementById(`${team}_unit_${i}_spd`).value = spd;
     document.getElementById(`${team}_unit_${i}_hp`).value  = hp;
 
-    document.getElementById(`${team}_unit_${i}_elem1`).value = e1;
+    document.getElementById(`${team}_unit_${i}_elem1`).value = elems[Math.floor(Math.random()*4)];
+    document.getElementById(`${team}_unit_${i}_elem2`).value = elems[Math.floor(Math.random()*4)];
     document.getElementById(`${team}_unit_${i}_elem1v`).value = Math.floor(Math.random()*5);
-    document.getElementById(`${team}_unit_${i}_elem2`).value = e2;
     document.getElementById(`${team}_unit_${i}_elem2v`).value = Math.floor(Math.random()*5);
 
-    // 랜덤으로 캐릭터/페트 선택
     const role = Math.random() < 0.5 ? "캐릭터" : "페트";
     const roleSel = document.getElementById(`${team}_unit_${i}_role`);
     roleSel.value = role;
-    const row = roleSel.closest(".unit-row");
-    row.classList.toggle("pet", role==="페트");
+    roleSel.closest(".unit-row").classList.toggle("pet", role==="페트");
   }
-  logLine(`⚙️ ${team}팀 스탯이 임의로 생성되었습니다.`);
+  logLine(`⚙️ ${team}팀 스탯이 임의 생성됨`);
 }
 
 document.getElementById("randA").onclick=()=>randStat("A");
 document.getElementById("randB").onclick=()=>randStat("B");
 
-// ----------------- 전투 관련 로직 -----------------
+// ----------------- 스탯 읽기 -----------------
 function readUnits(){
   const arr = [];
   for(const t of ["A","B"]){
-    for(let i=1;i<=5;i++){
+    for(let i=1;i<=UNIT_COUNT;i++){
       const atk = +document.getElementById(`${t}_unit_${i}_atk`).value || 150;
       const def = +document.getElementById(`${t}_unit_${i}_def`).value || 120;
       const spd = +document.getElementById(`${t}_unit_${i}_spd`).value || 150;
       const hp  = +document.getElementById(`${t}_unit_${i}_hp`).value  || 800;
+
       const e1  = document.getElementById(`${t}_unit_${i}_elem1`).value;
       const e1v = +document.getElementById(`${t}_unit_${i}_elem1v`).value || 0;
       const e2  = document.getElementById(`${t}_unit_${i}_elem2`).value;
       const e2v = +document.getElementById(`${t}_unit_${i}_elem2v`).value || 0;
-      const role = document.getElementById(`${t}_unit_${i}_role`).value || "캐릭터";
+
+      const role = document.getElementById(`${t}_unit_${i}_role`).value;
 
       const elem = {};
       if(e1v>0) elem[e1] = e1v;
@@ -224,22 +226,23 @@ function readUnits(){
   return arr;
 }
 
-
+// ----------------- 속성 상성 -----------------
 function elemAdv(a,b){
   const adv={지:"수",수:"화",화:"풍",풍:"지"};
   const sumA=Object.values(a).reduce((x,y)=>x+y,0)||1;
   const sumB=Object.values(b).reduce((x,y)=>x+y,0)||1;
+
   let ratio=0;
   for(const [ae,av] of Object.entries(a)){
     for(const [be,bv] of Object.entries(b)){
       let r=1;
-      if(ae===be)r=1;
-      else if(adv[ae]===be)r=1.2;
-      else if(adv[be]===ae)r=0.8;
-      ratio+=r*(av/sumA)*(bv/sumB);
+      if(ae===be) r=1;
+      else if(adv[ae]===be) r=1.2;
+      else if(adv[be]===ae) r=0.8;
+      ratio += r*(av/sumA)*(bv/sumB);
     }
   }
-  return ratio||1;
+  return ratio || 1;
 }
 
 function damageCalc(a,d,ratio=1){
@@ -256,65 +259,107 @@ function autoSkill(){
   return r < 20 ? "다굴" : skills[Math.floor(Math.random() * (skills.length - 1))];
 }
 
+// ----------------- 행동 처리 -----------------
 function doAction(u,t,skill){
   if(!u.alive || !t || !t.alive) return;
+
   if(skill==="방어"){
-    logLine(`<span class="${u.team==='A'?'unitA':'unitB'}">${u.name}</span> 🛡️ 방어!`);
+    logLine(`<span class="${u.team==='A'?'unitA':'unitB'}">${u.name}</span> 🛡️ 방어`);
     return;
   }
+
   if(skill==="다굴"){
     const allies=state.units.filter(x=>x.team===u.team && x!==u && x.alive).slice(0,2);
     for(const a of [u,...allies]){
       const dmg=damageCalc(a.atk,t.def,elemAdv(a.elem,t.elem));
-      t.hp-=dmg;if(t.hp<=0)t.alive=false;
-      logLine(`<span class="${a.team==='A'?'unitA':'unitB'}">${a.name}</span> ⚔️ 다굴 → <span class="${t.team==='A'?'unitA':'unitB'}">${t.name}</span> <span class="hit">${dmg}</span>`);
-      if(!t.alive)return;
+      t.hp -= dmg;
+      if(t.hp<=0) t.alive=false;
+
+      logLine(
+        `<span class="${a.team==='A'?'unitA':'unitB'}">${a.name}</span> ⚔️ 다굴 → 
+         <span class="${t.team==='A'?'unitA':'unitB'}">${t.name}</span> 
+         <span class="hit">${dmg}</span>`
+      );
+
+      if(!t.alive) return;
     }
     return;
   }
-  let ratio=1;if(skill==="가드브레이크")ratio=1.2;if(skill==="배수의진2")ratio=1.5;
-  const dmg=damageCalc(u.atk,t.def,ratio*elemAdv(u.elem,t.elem));
-  t.hp-=dmg;if(t.hp<=0)t.alive=false;
-  logLine(`<span class="${u.team==='A'?'unitA':'unitB'}">${u.name}</span> ▶ ${skill} → <span class="${t.team==='A'?'unitA':'unitB'}">${t.name}</span> <span class="hit">${dmg}</span> (HP:${Math.max(t.hp,0)})`);
+
+  let ratio=1;
+  if(skill==="가드브레이크") ratio=1.2;
+  if(skill==="배수의진2") ratio=1.5;
+
+  const dmg = damageCalc(u.atk,t.def,ratio * elemAdv(u.elem,t.elem));
+  t.hp -= dmg;
+  if(t.hp<=0) t.alive=false;
+
+  logLine(
+    `<span class="${u.team==='A'?'unitA':'unitB'}">${u.name}</span> ▶ ${skill} → 
+     <span class="${t.team==='A'?'unitA':'unitB'}">${t.name}</span>
+     <span class="hit">${dmg}</span> (HP: ${Math.max(t.hp,0)})`
+  );
 }
 
+// ----------------- 수동 오더 화면 -----------------
 function buildOrders(){
-  const bodyA=document.getElementById("orderBodyA"),bodyB=document.getElementById("orderBodyB");
-  bodyA.innerHTML="";bodyB.innerHTML="";
+  const bodyA=document.getElementById("orderBodyA");
+  const bodyB=document.getElementById("orderBodyB");
+  bodyA.innerHTML=""; bodyB.innerHTML="";
+
   for(const u of state.units){
-    const dis=u.alive?"":"disabled";
-    const row=`<tr class="${u.alive?"":"order-dead"}">
-      <td>${u.name}${u.alive?"":" 💀"}</td>
-      <td><select id="skill_${u.name}" ${dis}>${skills.map(s=>`<option>${s}</option>`).join("")}</select></td>
-      <td><select id="target_${u.name}" ${dis}>${state.units.filter(x=>x.team!==u.team&&x.alive).map(x=>`<option>${x.name}</option>`).join("")}</select></td>
-    </tr>`;
+    const dis = u.alive ? "" : "disabled";
+    const row = `
+      <tr class="${u.alive?"":"order-dead"}">
+        <td>${u.name}${u.alive?"":" 💀"}</td>
+        <td><select id="skill_${u.name}" ${dis}>
+              ${skills.map(s=>`<option>${s}</option>`).join("")}
+            </select></td>
+        <td><select id="target_${u.name}" ${dis}>
+              ${state.units.filter(x=>x.team!==u.team && x.alive)
+                .map(x=>`<option>${x.name}</option>`).join("")}
+            </select></td>
+      </tr>
+    `;
     (u.team==="A"?bodyA:bodyB).insertAdjacentHTML("beforeend",row);
   }
 }
 
+// ----------------- 턴 진행 -----------------
 function runTurn(mode){
   logLine(`<div class="turn">🌀 --- 턴 ${state.turn} (${mode}) ---</div>`);
-  const order=state.units.filter(u=>u.alive).sort((a,b)=>b.spd-a.spd);
+
+  const order = state.units.filter(u=>u.alive).sort((a,b)=>b.spd-a.spd);
+
   for(const u of order){
     let skill,target;
-    if(mode==="auto"){skill=autoSkill();target=pickEnemy(u);}
-    else{
+
+    if(mode==="auto"){
+      skill = autoSkill();
+      target = pickEnemy(u);
+    } else {
       const s=document.getElementById(`skill_${u.name}`);
       const t=document.getElementById(`target_${u.name}`);
-      if(!s||!t||s.disabled)continue;
-      skill=s.value;target=state.units.find(x=>x.name===t.value);
+      if(!s || !t || s.disabled) continue;
+      skill=s.value;
+      target=state.units.find(x=>x.name===t.value);
     }
-    if(target)doAction(u,target,skill);
+
+    if(target) doAction(u,target,skill);
   }
-  const a=state.units.filter(x=>x.team==="A"&&x.alive).length;
-  const b=state.units.filter(x=>x.team==="B"&&x.alive).length;
+
+  const a = state.units.filter(x=>x.team==="A"&&x.alive).length;
+  const b = state.units.filter(x=>x.team==="B"&&x.alive).length;
   logLine(`<div class="hp">잔존: <span class="unitA">A=${a}</span> / <span class="unitB">B=${b}</span></div><hr>`);
-  if(a===0||b===0){
+
+  if(a===0 || b===0){
     logLine(`🏁 종료: ${a>b?"A":"B"}팀 승리!`);
     showRestart();
     return true;
   }
-  state.turn++;return false;
+
+  state.turn++;
+  return false;
 }
 
 // ----------------- UI 제어 -----------------
@@ -327,12 +372,14 @@ function showRestart(){
 
 function resetGame(){
   logClear();
-  state.turn=1;state.units=[];
+  state.turn=1; state.units=[];
   clearInterval(state.timer);
+
   document.getElementById("restartBtn").style.display="none";
   document.getElementById("orderPanel").style.display="none";
   document.getElementById("nextBtn").style.display="none";
   document.getElementById("startBtn").style.display="inline-block";
+
   logLine("🔄 새 게임을 준비하세요!");
 }
 
@@ -341,17 +388,22 @@ const state={turn:1,units:[],timer:null};
 
 document.getElementById("startBtn").onclick=()=>{
   const mode=document.querySelector('input[name="mode"]:checked')?.value||"auto";
-  logClear();state.turn=1;state.units=readUnits();
+  logClear();
+  state.turn=1;
+  state.units=readUnits();
+
   document.getElementById("restartBtn").style.display="none";
 
   if(mode==="manual"){
     document.getElementById("orderPanel").style.display="block";
     document.getElementById("nextBtn").style.display="inline-block";
     document.getElementById("startBtn").style.display="none";
-    buildOrders();logLine("▶ 수동모드 시작");
+    buildOrders();
+    logLine("▶ 수동모드 시작");
   }else{
     logLine("▶ 자동모드 시작");
     document.getElementById("startBtn").disabled=true;
+
     state.timer=setInterval(()=>{
       const end=runTurn("auto");
       if(end) showRestart();
@@ -362,7 +414,7 @@ document.getElementById("startBtn").onclick=()=>{
 document.getElementById("nextBtn").onclick=()=>{
   const end=runTurn("manual");
   buildOrders();
-  if(end){document.getElementById("nextBtn").disabled=true;}
+  if(end) document.getElementById("nextBtn").disabled=true;
 };
 
 document.getElementById("restartBtn").onclick=resetGame;
@@ -372,8 +424,3 @@ document.getElementById("clearBtn").onclick=logClear;
 </script>
 </body>
 </html>
-
-
-
-
-
