@@ -260,44 +260,59 @@ function autoSkill(){
 }
 
 // ----------------- 행동 처리 -----------------
-function doAction(u,t,skill){
-  if(!u.alive || !t || !t.alive) return;
+function doAction(u, t, skill) {
+  if (!u.alive || !t || !t.alive) return;
 
-  if(skill==="방어"){
-    logLine(`<span class="${u.team==='A'?'unitA':'unitB'}">${u.name}</span> 🛡️ 방어`);
+  const uC = u.team === "A" ? "unitA" : "unitB";
+  const tC = t.team === "A" ? "unitA" : "unitB";
+
+  // 방어
+  if (skill === "방어") {
+    logLine(`<span class="${uC}">${u.name}</span> 🛡️ 방어`);
     return;
   }
 
-  if(skill==="다굴"){
-    const allies=state.units.filter(x=>x.team===u.team && x!==u && x.alive).slice(0,2);
-    for(const a of [u,...allies]){
-      const dmg=damageCalc(a.atk,t.def,elemAdv(a.elem,t.elem));
+  // 다굴
+  if (skill === "다굴") {
+    const allies = state.units
+      .filter(x => x.team === u.team && x !== u && x.alive)
+      .slice(0, 2);
+
+    for (const a of [u, ...allies]) {
+      const aC = a.team === "A" ? "unitA" : "unitB";
+      const dmg = damageCalc(a.atk, t.def, elemAdv(a.elem, t.elem));
       t.hp -= dmg;
-      if(t.hp<=0) t.alive=false;
+      if (t.hp <= 0) t.alive = false;
 
-      logLine(`<span class="${a.team==='A'?'unitA':'unitB'}">${a.name}</span> ⚔️ 다굴 → 
-         <span class="${t.team==='A'?'unitA':'unitB'}">${t.name}</span> 
-         <span class="hit">${dmg}</span>`);
+      
+      logLine(
+        `<span class="${aC}">${a.name}</span> ⚔️ 다굴 → ` +
+        `<span class="${tC}">${t.name}</span> ` +
+        `<span class="hit">${dmg}</span>`
+      );
 
-      if(!t.alive) return;
+      if (!t.alive) return;
     }
     return;
   }
 
-  let ratio=1;
-  if(skill==="가드브레이크") ratio=1.2;
-  if(skill==="배수의진2") ratio=1.5;
+  // 공격 / 가드브레이크 / 배수의진2
+  let ratio = 1;
+  if (skill === "가드브레이크") ratio = 1.2;
+  if (skill === "배수의진2") ratio = 1.5;
 
-  const dmg = damageCalc(u.atk,t.def,ratio * elemAdv(u.elem,t.elem));
+  const dmg = damageCalc(u.atk, t.def, ratio * elemAdv(u.elem, t.elem));
   t.hp -= dmg;
-  if(t.hp<=0) t.alive=false;
+  if (t.hp <= 0) t.alive = false;
 
   logLine(
-    `<span class="${u.team==='A'?'unitA':'unitB'}">${u.name}</span> ▶ ${skill} → 
-     <span class="${t.team==='A'?'unitA':'unitB'}">${t.name}</span>
-     <span class="hit">${dmg}</span> (HP: ${Math.max(t.hp,0)})`
+    `<span class="${uC}">${u.name}</span> ▶ ${skill} → ` +
+    `<span class="${tC}">${t.name}</span> ` +
+    `<span class="hit">${dmg}</span>` +
+    ` (HP: ${Math.max(t.hp, 0)})`
   );
 }
+
 
 // ----------------- 수동 오더 화면 -----------------
 function buildOrders(){
@@ -422,4 +437,5 @@ document.getElementById("clearBtn").onclick=logClear;
 </script>
 </body>
 </html>
+
 
