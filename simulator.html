@@ -275,11 +275,9 @@ function doAction(u,t,skill){
       t.hp -= dmg;
       if(t.hp<=0) t.alive=false;
 
-      logLine(
-        `<span class="${a.team==='A'?'unitA':'unitB'}">${a.name}</span> ⚔️ 다굴 → 
+      logLine(`<span class="${a.team==='A'?'unitA':'unitB'}">${a.name}</span> ⚔️ 다굴 → 
          <span class="${t.team==='A'?'unitA':'unitB'}">${t.name}</span> 
-         <span class="hit">${dmg}</span>`
-      );
+         <span class="hit">${dmg}</span>`);
 
       if(!t.alive) return;
     }
@@ -424,3 +422,4 @@ document.getElementById("clearBtn").onclick=logClear;
 </script>
 </body>
 </html>
+
